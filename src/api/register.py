@@ -1,7 +1,12 @@
+import re
 import bcrypt
 from flask import jsonify
 from utils.db import get_db
 from utils.auth import make_token
+
+def check_pw_strong(pw):
+    return (len(pw) >= 12 and re.search(r'[A-Z]', pw) and re.search(r'[a-z]', pw)
+            and re.search(r'\d', pw) and re.search(r'[^A-Za-z0-9]', pw))
 
 def handle(request):
     if request.method != 'POST':
@@ -13,8 +18,8 @@ def handle(request):
     invite_code = (data.get('invite_code') or '').strip()
     if not email or not password or not name or not invite_code:
         return {"code": 400, "message": "请把信息填完整"}
-    if len(password) < 6:
-        return {"code": 400, "message": "密码至少6位"}
+    if not check_pw_strong(password):
+        return {"code": 400, "message": "密码不符合要求: 至少 12 位, 含大小写字母、数字和符号"}
     db = get_db()
     try:
         with db.cursor() as cur:

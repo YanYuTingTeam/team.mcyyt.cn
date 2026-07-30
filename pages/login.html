@@ -79,8 +79,8 @@ body {
     overflow-y: auto;
 }
 .login-box { width: 100%; max-width: 360px; }
-.login-title { font-size: 26px; text-align: center; font-weight: bold; }
-.login-sub { text-align: center; color: #999; margin: 12px 0 26px; font-size: 14px; }
+.login-title { font-size: 28px; text-align: center; font-weight: bold; }
+.login-sub { text-align: center; color: #999; margin: 14px 0 28px; font-size: 16px; }
 .tip-box {
     border: 1px solid #4a3a1e;
     background: #1c150a;
@@ -92,8 +92,8 @@ body {
     line-height: 1.6;
 }
 .tip-box b { display: block; color: #f0cf8e; margin-bottom: 4px; }
-.field-box { margin-bottom: 16px; }
-.field-top { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 13px; }
+.field-box { margin-bottom: 22px; }
+.field-top { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
 .field-top label::before { content: '* '; color: #ef5777; }
 .field-top a { color: #ef5777; text-decoration: none; font-size: 12px; }
 .field-box input {
@@ -101,7 +101,7 @@ body {
     background: #060607;
     border: 1px solid #2b2b2e;
     border-radius: 8px;
-    padding: 11px 12px;
+    padding: 13px 14px;
     color: #eee;
     font-size: 14px;
     font-family: inherit;
@@ -109,6 +109,8 @@ body {
     transition: border .2s;
 }
 .field-box input:focus { border-color: #ef5777; }
+.field-box input[type=date] { color-scheme: dark; }
+.pw-hint { font-size: 12px; color: #a89468; line-height: 1.7; margin-top: 8px; }
 .pw-wrap { position: relative; }
 .pw-wrap .eye {
     position: absolute;
@@ -129,7 +131,7 @@ body {
     background: linear-gradient(90deg, #d9436b, #ef5777);
     border: none;
     border-radius: 8px;
-    padding: 12px;
+    padding: 13px;
     color: #fff;
     font-size: 15px;
     font-family: inherit;
@@ -139,20 +141,22 @@ body {
 .login-btn:hover { opacity: .88; }
 .login-btn:disabled { opacity: .5; cursor: not-allowed; }
 .go-reg {
-    margin-top: 16px;
-    border: 1px solid #2b2b2e;
+    margin-top: 18px;
+    border: 1px solid rgba(239, 87, 119, .35);
     background: #151517;
     border-radius: 10px;
-    padding: 12px 14px;
+    padding: 14px;
     font-size: 13px;
     cursor: pointer;
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    gap: 12px;
     transition: border .2s;
 }
 .go-reg:hover { border-color: #ef5777; }
-.go-reg .t1 { color: #eee; }
+.go-reg .person { display: flex; align-items: center; font-size: 20px; color: #ddd; flex-shrink: 0; }
+.go-reg .txt { flex: 1; min-width: 0; }
+.go-reg .t1 { color: #eee; font-weight: bold; font-size: 14px; }
 .go-reg .t2 { color: #ef5777; font-size: 12px; margin-top: 3px; }
 .go-reg .arrow { color: #666; font-size: 16px; display: flex; align-items: center; }
 .xieyi { text-align: center; color: #666; font-size: 12px; margin-top: 18px; line-height: 1.6; }
@@ -176,7 +180,7 @@ body {
 </head>
 <body>
 <div id="loadMask"><svg xmlns="http://www.w3.org/2000/svg" class="spin" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3a9 9 0 1 0 9 9"/></svg></div>
-<div class="lang-tag">简</div>
+<!-- <div class="lang-tag">简</div> -->
 <div class="big-box">
     <div class="left-side">
         <video autoplay muted loop playsinline onerror="this.remove()">
@@ -190,10 +194,10 @@ body {
     </div>
     <div class="right-side">
         <div class="login-box" id="loginBox">
-            <div class="login-title">登录 烟雨庭 Portal</div>
-            <div class="login-sub">今天, 此刻, 回到属于你的庭院!</div>
+            <div class="login-title">登录 @team</div>
+            <div class="login-sub">今天, 此刻, 开始你的团队工作!</div>
             <div class="tip-box">
-                <b>烟雨庭成员工作空间</b>
+                <b>烟雨庭 @team</b>
                 这里是团队内部空间, 账号需要邀请码注册. 如果你还没有邀请码, 请联系管理员获取.
             </div>
             <div class="field-box">
@@ -210,42 +214,52 @@ body {
             <div class="err-msg" id="loginErr"></div>
             <button class="login-btn" id="loginBtn" onclick="doLogin()">登录</button>
             <div class="go-reg" onclick="showReg(true)">
-                <div>
-                    <div class="t1">没有烟雨庭 Passport?</div>
+                <div class="person"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0-8 0M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg></div>
+                <div class="txt">
+                    <div class="t1">没有Adventure Passport?</div>
                     <div class="t2">使用邀请码注册一个, 即可进入成员空间</div>
                 </div>
                 <div class="arrow"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 6l6 6l-6 6"/></svg></div>
             </div>
-            <div class="xieyi">继续即视为您已同意本站的使用协议及隐私政策</div>
+            <!-- <div class="xieyi">继续即视为您已同意本站的使用协议及隐私政策</div> -->
         </div>
         <div class="login-box hide" id="regBox">
-            <div class="login-title">注册 烟雨庭 Passport</div>
-            <div class="login-sub">欢迎加入, 先填好下面的信息吧!</div>
-            <div class="field-box">
-                <div class="field-top"><label>昵称</label></div>
-                <input type="text" id="regName" placeholder="你在团队里的名字">
-            </div>
+            <div class="login-title">注册 Adventure Passport</div>
+            <div class="login-sub">现在, 是时候, 加入我们了</div>
             <div class="field-box">
                 <div class="field-top"><label>邮箱</label></div>
-                <input type="email" id="regEmail" placeholder="you@mcyyt.cn">
+                <input type="email" id="regEmail" placeholder="welcome@mcyyt.cn">
+            </div>
+            <div class="field-box">
+                <div class="field-top"><label>昵称</label></div>
+                <input type="text" id="regName" placeholder="我们怎么称呼你">
             </div>
             <div class="field-box">
                 <div class="field-top"><label>密码</label></div>
                 <div class="pw-wrap">
-                    <input type="password" id="regPassword" placeholder="至少6位">
+                    <input type="password" id="regPassword" placeholder="至少 12 位">
                     <span class="eye" onclick="togglePw('regPassword', this)"></span>
+                </div>
+                <div class="pw-hint">密码要求: 至少 12 位, 并同时包含大写字母、小写字母、数字和符号.</div>
+            </div>
+            <div class="field-box">
+                <div class="field-top"><label>确认密码</label></div>
+                <div class="pw-wrap">
+                    <input type="password" id="regPassword2" placeholder="再次输入密码">
+                    <span class="eye" onclick="togglePw('regPassword2', this)"></span>
                 </div>
             </div>
             <div class="field-box">
                 <div class="field-top"><label>邀请码</label></div>
-                <input type="text" id="regCode" placeholder="YYT-XXXX-XXX">
+                <input type="text" id="regCode" placeholder="填写一次性邀请码">
             </div>
             <div class="err-msg" id="regErr"></div>
-            <button class="login-btn" id="regBtn" onclick="doReg()">注册并登录</button>
+            <button class="login-btn" id="regBtn" onclick="doReg()">注册</button>
             <div class="go-reg" onclick="showReg(false)">
-                <div>
-                    <div class="t1">已经有账号了?</div>
-                    <div class="t2">返回登录</div>
+                <div class="person"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0-8 0M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg></div>
+                <div class="txt">
+                    <div class="t1">已经拥有 Adventure Passport?</div>
+                    <div class="t2">前往登录页面，畅享众多 @team 服务。</div>
                 </div>
                 <div class="arrow"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 6l6 6l-6 6"/></svg></div>
             </div>
@@ -290,16 +304,29 @@ async function doLogin() {
     }
     btn.disabled = false;
 }
+function checkPwStrong(pw) {
+    return pw.length >= 12 && /[A-Z]/.test(pw) && /[a-z]/.test(pw) && /\d/.test(pw) && /[^A-Za-z0-9]/.test(pw);
+}
 async function doReg() {
     var btn = document.getElementById('regBtn');
     var err = document.getElementById('regErr');
     err.textContent = '';
+    var pw = document.getElementById('regPassword').value;
+    var pw2 = document.getElementById('regPassword2').value;
+    if (!checkPwStrong(pw)) {
+        err.textContent = '密码不符合要求';
+        return;
+    }
+    if (pw !== pw2) {
+        err.textContent = '两次输入的密码不一致';
+        return;
+    }
     btn.disabled = true;
     try {
         var ret = await postJson('/api/register', {
             name: document.getElementById('regName').value,
             email: document.getElementById('regEmail').value,
-            password: document.getElementById('regPassword').value,
+            password: pw,
             invite_code: document.getElementById('regCode').value
         });
         if (ret.code === 0) { location.reload(); return; }
