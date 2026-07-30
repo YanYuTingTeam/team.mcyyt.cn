@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>烟雨庭 · 成员空间</title>
+<link rel="icon" href="/assets/yyt64x.png">
+<style>
+@font-face {
+    font-family: 'Orbixbeta';
+    src: url('/assets/Orbixbeta-Regular.otf') format('opentype');
+    font-display: swap;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Orbixbeta', 'MiSans', '微软雅黑', sans-serif;
+    background: #000;
+    color: #eee;
+}
+a { color: #ef5777; }
+.big-box { display: flex; min-height: 100vh; }
+.side-bar {
+    width: 230px;
+    flex-shrink: 0;
+    background: #0a0a0b;
+    border-right: 1px solid #1c1c1f;
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+}
+.side-logo { padding: 20px 0 10px; text-align: center; overflow: visible; }
+.side-logo img { height: 112px; margin: -31px 0 -35px; }
+.search-box { padding: 10px 14px; }
+.search-box input {
+    width: 100%;
+    background: #131315;
+    border: 1px solid #232326;
+    border-radius: 8px;
+    padding: 8px 12px 8px 32px;
+    color: #eee;
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+}
+.search-box { position: relative; }
+.search-box svg { position: absolute; left: 24px; top: 50%; transform: translateY(-50%); color: #666; width: 15px; height: 15px; }
+.nav-list { margin-top: 8px; flex: 1; }
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 18px;
+    margin: 2px 10px;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #bbb;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    transition: all .15s;
+}
+.nav-item:hover { background: #141416; color: #fff; }
+.nav-item svg { width: 17px; height: 17px; flex-shrink: 0; }
+.nav-item.now {
+    background: #17171a;
+    color: #fff;
+    border-left-color: #ef5777;
+}
+.side-user {
+    border-top: 1px solid #1c1c1f;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.side-user img { width: 36px; height: 36px; border-radius: 50%; background: #fff; flex-shrink: 0; }
+.side-user .u-box { flex: 1; min-width: 0; }
+.side-user .u-name { font-size: 14px; }
+.side-user .u-mail { font-size: 11px; color: #888; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.logout-btn {
+    margin-left: auto;
+    background: none;
+    border: 1px solid #333;
+    color: #999;
+    border-radius: 6px;
+    padding: 5px 9px;
+    font-size: 12px;
+    font-family: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.logout-btn:hover { border-color: #ef5777; color: #ef5777; }
+.main-area { flex: 1; padding: 34px 34px 60px; max-width: 1500px; }
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+    gap: 20px;
+    align-items: start;
+}
+.card {
+    background: radial-gradient(95% 95% at 18% 115%, rgba(239, 87, 119, .17) 0%, rgba(239, 87, 119, .05) 38%, rgba(18, 18, 20, 0) 62%), #121214;
+    border: 1px solid #232326;
+    border-radius: 14px;
+    padding: 24px;
+    scroll-margin-top: 20px;
+    overflow: hidden;
+    box-shadow: inset 0 0 40px rgba(239, 87, 119, .04);
+}
+.card-head {
+    font-size: 15px;
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+    color: #fff;
+}
+.card-head::before { content: '/ '; color: #ef5777; }
+.hero-card {
+    grid-column: 1 / -1;
+    background: linear-gradient(115deg, #d9436b 0%, #ef5777 55%, #f07a93 100%);
+    border: none;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+}
+.hero-card .card-head { color: #fff; }
+.hero-card .card-head::before { color: #fff; }
+.hero-card .hero-text { font-size: 17px; line-height: 1.8; max-width: 720px; }
+.hero-card img.hero-logo {
+    position: absolute;
+    right: 24px;
+    bottom: -30px;
+    height: 150px;
+    opacity: .5;
+}
+.profile-name { font-size: 26px; font-weight: bold; }
+.profile-mail { color: #999; margin: 8px 0 14px; font-size: 14px; }
+.profile-row { font-size: 14px; margin-bottom: 10px; color: #ccc; }
+.skill-tag {
+    display: inline-block;
+    border: 1px solid #ef5777;
+    color: #ef5777;
+    border-radius: 20px;
+    padding: 2px 12px;
+    font-size: 12px;
+    margin: 0 6px 6px 0;
+}
+.small-btn {
+    background: #1d1d20;
+    border: 1px solid #333;
+    color: #ddd;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    margin-right: 8px;
+    transition: all .15s;
+}
+.small-btn:hover { border-color: #ef5777; color: #ef5777; }
+.small-btn { white-space: nowrap; }
+.todo-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #0d0d0f;
+    border: 1px solid #222;
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+.todo-item input[type=checkbox] { accent-color: #ef5777; width: 16px; height: 16px; cursor: pointer; flex-shrink: 0; }
+.todo-item .t { flex: 1; min-width: 0; overflow-wrap: break-word; }
+.todo-item.done .t { color: #666; text-decoration: line-through; }
+.todo-item .status { font-size: 11px; color: #888; flex-shrink: 0; }
+.todo-item.done .status { color: #4caf7d; }
+.add-row { display: flex; gap: 8px; margin-top: 12px; }
+.add-row input {
+    flex: 1;
+    min-width: 0;
+    background: #0d0d0f;
+    border: 1px solid #2b2b2e;
+    border-radius: 8px;
+    padding: 9px 12px;
+    color: #eee;
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+}
+.add-row input:focus { border-color: #ef5777; }
+.notice-item { border-bottom: 1px solid #1e1e21; padding: 12px 0; }
+.notice-item:last-child { border-bottom: none; }
+.notice-item .tt { font-size: 14px; color: #fff; margin-bottom: 4px; }
+.notice-item .cc { font-size: 13px; color: #999; line-height: 1.6; white-space: pre-wrap; }
+.notice-item .dd { font-size: 11px; color: #666; margin-top: 6px; }
+.project-item {
+    background: #0d0d0f;
+    border: 1px solid #222;
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 12px;
+}
+.project-item .proj-name { font-size: 15px; color: #fff; }
+.project-item .proj-info { font-size: 13px; color: #999; margin: 6px 0; line-height: 1.6; }
+.project-item .proj-mem { font-size: 12px; color: #777; }
+.empty-tip { color: #666; font-size: 13px; padding: 8px 0; }
+.menu-btn { display: none; }
+@media (max-width: 800px) {
+    .side-bar { position: fixed; z-index: 9; left: -240px; transition: left .2s; }
+    .side-bar.open { left: 0; }
+    .menu-btn {
+        display: flex;
+        align-items: center;
+        position: fixed;
+        top: 14px;
+        left: 14px;
+        z-index: 10;
+        background: #17171a;
+        border: 1px solid #333;
+        color: #eee;
+        border-radius: 8px;
+        padding: 8px 10px;
+        font-size: 16px;
+    }
+    .main-area { padding: 60px 16px 40px; }
+}
+</style>
+</head>
+<body>
+<button class="menu-btn" onclick="document.querySelector('.side-bar').classList.toggle('open')"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+<div class="big-box">
+    <div class="side-bar">
+        <div class="side-logo"><img src="/assets/yyt_w.png" alt="烟雨庭"></div>
+        <div class="search-box">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0-14 0m18 11l-6-6"/></svg>
+            <input id="searchInput" placeholder="搜索" oninput="doSearch(this.value)">
+        </div>
+        <div class="nav-list" id="navList">
+            <div class="nav-item now" onclick="goCard('cardHero', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M5 12H3l9-9l9 9h-2M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/><path d="M9 21v-6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v6"/></g></svg> 空间首页</div>
+            <div class="nav-item" onclick="goCard('cardTodo', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.5 5.5L5 7l2.5-2.5m-4 7L5 13l2.5-2.5m-4 7L5 19l2.5-2.5M11 6h9m-9 6h9m-9 6h9"/></svg> 待办事项</div>
+            <div class="nav-item" onclick="goCard('cardNotice', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3H4a4 4 0 0 0 2-3v-3a7 7 0 0 1 4-6M9 17v1a3 3 0 0 0 6 0v-1"/></svg> 通知动态</div>
+            <div class="nav-item" onclick="goCard('cardProject', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 16.008V7.99a1.98 1.98 0 0 0-1-1.717l-7-4.008a2.02 2.02 0 0 0-2 0L4 6.273c-.619.355-1 1.01-1 1.718v8.018c0 .709.381 1.363 1 1.717l7 4.008a2.02 2.02 0 0 0 2 0l7-4.008c.619-.355 1-1.01 1-1.718M12 22V12m0 0l8.73-5.04m-17.46 0L12 12"/></svg> 项目展示</div>
+        </div>
+        <div class="side-user">
+            <img src="/assets/yyt64x.png" alt="">
+            <div class="u-box">
+                <div class="u-name" id="sideName">--</div>
+                <div class="u-mail" id="sideMail">--</div>
+            </div>
+            <button class="logout-btn" onclick="doLogout()">退出</button>
+        </div>
+    </div>
+    <div class="main-area">
+        <div class="card-grid">
+            <div class="card hero-card" id="cardHero">
+                <div class="card-head">WELCOME</div>
+                <div class="hero-text" id="heroText">嘿! 欢迎回到烟雨庭. 这里汇总了你的待办、团队通知和正在进行的项目, 一起把服务器做得更好吧.</div>
+                <img class="hero-logo" src="/assets/yyt_w.png" alt="">
+            </div>
+            <div class="card" id="cardProfile">
+                <div class="card-head">MEMBER PROFILE</div>
+                <div class="profile-name" id="pfName">--</div>
+                <div class="profile-mail" id="pfMail">--</div>
+                <div class="profile-row" id="pfRole">职位: --</div>
+                <div class="profile-row">核心能力: <span id="pfSkill"><span class="empty-tip">还没有填写</span></span></div>
+                <div style="margin-top: 14px">
+                    <button class="small-btn" onclick="loadMe()">刷新信息</button>
+                </div>
+            </div>
+            <div class="card" id="cardTodo">
+                <div class="card-head">TO-DO CHECKLIST</div>
+                <div style="color:#999;font-size:13px;margin-bottom:12px">这里会汇总你当前需要处理的事项.</div>
+                <div id="todoList"></div>
+                <div class="add-row">
+                    <input id="todoInput" placeholder="添加一条待办, 回车提交" onkeydown="if(event.key==='Enter')addTodo()">
+                    <button class="small-btn" style="margin:0" onclick="addTodo()">添加</button>
+                </div>
+            </div>
+            <div class="card" id="cardNotice">
+                <div class="card-head">UPDATES</div>
+                <div style="color:#999;font-size:13px;margin-bottom:6px">团队的公告与最新动态都在这里.</div>
+                <div id="noticeList"></div>
+            </div>
+            <div class="card" id="cardProject">
+                <div class="card-head">PROJECTS</div>
+                <div style="color:#999;font-size:13px;margin-bottom:12px">团队正在进行的项目.</div>
+                <div id="projectList"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+function esc(s) {
+    var d = document.createElement('div');
+    d.textContent = s == null ? '' : String(s);
+    return d.innerHTML;
+}
+async function getJson(url) {
+    var res = await fetch(url);
+    var ret = await res.json();
+    if (ret.code === 401) { location.reload(); throw new Error('no login'); }
+    return ret;
+}
+async function postJson(url, body) {
+    var res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+    });
+    return res.json();
+}
+function goCard(id, el) {
+    document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('now'); });
+    el.classList.add('now');
+    document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+}
+function doSearch(kw) {
+    kw = kw.trim().toLowerCase();
+    document.querySelectorAll('.card').forEach(function(c) {
+        c.style.display = (!kw || c.textContent.toLowerCase().indexOf(kw) > -1) ? '' : 'none';
+    });
+}
+async function loadMe() {
+    var ret = await getJson('/api/me');
+    var u = ret.data;
+    document.getElementById('pfName').textContent = u.name;
+    document.getElementById('pfMail').textContent = u.email;
+    document.getElementById('pfRole').textContent = '职位: ' + (u.role || '--');
+    document.getElementById('sideName').textContent = u.name;
+    document.getElementById('sideMail').textContent = u.email;
+    document.getElementById('heroText').textContent = '嘿, ' + u.name + '! 欢迎回到烟雨庭. 这里汇总了你的待办、团队通知和正在进行的项目, 一起把服务器做得更好吧.';
+    var skillBox = document.getElementById('pfSkill');
+    if (u.skill) {
+        skillBox.innerHTML = u.skill.split(/[,，]/).map(function(s) {
+            return '<span class="skill-tag">' + esc(s.trim()) + '</span>';
+        }).join('');
+    } else {
+        skillBox.innerHTML = '<span class="empty-tip">还没有填写</span>';
+    }
+}
+async function loadTodo() {
+    var ret = await getJson('/api/todo');
+    var box = document.getElementById('todoList');
+    if (!ret.data || !ret.data.length) {
+        box.innerHTML = '<div class="empty-tip">暂时没有待办, 很清闲喵</div>';
+        return;
+    }
+    box.innerHTML = ret.data.map(function(it) {
+        var t = it.link ? '<a href="' + esc(it.link) + '" target="_blank">' + esc(it.title) + '</a>' : esc(it.title);
+        return '<div class="todo-item' + (it.is_done ? ' done' : '') + '">' +
+            '<input type="checkbox" ' + (it.is_done ? 'checked' : '') + ' onchange="toggleTodo(' + it.id + ', this.checked)">' +
+            '<div class="t">' + t + '</div>' +
+            '<div class="status">' + (it.is_done ? 'Complete' : 'Incomplete') + '</div></div>';
+    }).join('');
+}
+async function toggleTodo(id, done) {
+    await postJson('/api/todo', { id: id, done: done });
+    loadTodo();
+}
+async function addTodo() {
+    var ipt = document.getElementById('todoInput');
+    var title = ipt.value.trim();
+    if (!title) return;
+    var ret = await postJson('/api/todo', { title: title });
+    if (ret.code === 0) { ipt.value = ''; loadTodo(); }
+}
+async function loadNotice() {
+    var ret = await getJson('/api/notice');
+    var box = document.getElementById('noticeList');
+    if (!ret.data || !ret.data.length) {
+        box.innerHTML = '<div class="empty-tip">还没有任何通知</div>';
+        return;
+    }
+    box.innerHTML = ret.data.map(function(it) {
+        return '<div class="notice-item"><div class="tt">' + esc(it.title) + '</div>' +
+            (it.content ? '<div class="cc">' + esc(it.content) + '</div>' : '') +
+            '<div class="dd">' + esc(it.created_at) + '</div></div>';
+    }).join('');
+}
+async function loadProject() {
+    var ret = await getJson('/api/project');
+    var box = document.getElementById('projectList');
+    if (!ret.data || !ret.data.length) {
+        box.innerHTML = '<div class="empty-tip">还没有登记项目</div>';
+        return;
+    }
+    box.innerHTML = ret.data.map(function(it) {
+        var nm = it.link ? '<a href="' + esc(it.link) + '" target="_blank">' + esc(it.name) + '</a>' : esc(it.name);
+        return '<div class="project-item"><div class="proj-name">' + nm + '</div>' +
+            (it.info ? '<div class="proj-info">' + esc(it.info) + '</div>' : '') +
+            (it.members ? '<div class="proj-mem">成员: ' + esc(it.members) + '</div>' : '') + '</div>';
+    }).join('');
+}
+async function doLogout() {
+    await postJson('/api/logout', {});
+    location.reload();
+}
+loadMe();
+loadTodo();
+loadNotice();
+loadProject();
+</script>
+</body>
+</html>

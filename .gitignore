@@ -1,0 +1,12 @@
+*.log
+*.err
+*.class
+*.zip
+target/
+build/
+*.iml
+.idea/
+.vscode/
+*.*~
+*.pyc
+__pycache__/

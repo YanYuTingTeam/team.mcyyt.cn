@@ -1,0 +1,8 @@
+flask
+waitress
+pymysql
+python-dotenv
+Pillow
+cryptography
+bcrypt
+fcntl
