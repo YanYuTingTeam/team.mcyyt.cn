@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>烟雨庭 · 成员空间</title>
+<title>@team / YanYuTing</title>
 <link rel="icon" href="/assets/yyt64x.png">
 <style>
 @font-face {
@@ -23,6 +23,18 @@ body {
     color: #eee;
 }
 a { color: #ef5777; }
+#loadMask {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    z-index: 99;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#loadMask svg { width: 40px; height: 40px; color: #ef5777; }
+.spin { animation: spin1 .8s linear infinite; }
+@keyframes spin1 { to { transform: rotate(360deg); } }
 .big-box { display: flex; min-height: 100vh; }
 .side-bar {
     width: 230px;
@@ -72,31 +84,47 @@ a { color: #ef5777; }
     color: #fff;
     border-left-color: #ef5777;
 }
+.side-user-wrap { position: relative; border-top: 1px solid #1c1c1f; }
 .side-user {
-    border-top: 1px solid #1c1c1f;
     padding: 14px 16px;
     display: flex;
     align-items: center;
     gap: 10px;
+    cursor: pointer;
+    transition: background .15s;
 }
+.side-user:hover { background: #141416; }
+.side-user > svg { width: 16px; height: 16px; color: #888; margin-left: auto; flex-shrink: 0; }
 .side-user img { width: 36px; height: 36px; border-radius: 50%; background: #fff; flex-shrink: 0; }
 .side-user .u-box { flex: 1; min-width: 0; }
 .side-user .u-name { font-size: 14px; }
 .side-user .u-mail { font-size: 11px; color: #888; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.logout-btn {
-    margin-left: auto;
-    background: none;
-    border: 1px solid #333;
-    color: #999;
-    border-radius: 6px;
-    padding: 5px 9px;
-    font-size: 12px;
-    font-family: inherit;
-    cursor: pointer;
-    white-space: nowrap;
-    flex-shrink: 0;
+.user-menu {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 10px;
+    right: 10px;
+    background: #101012;
+    border: 1px solid #2b2b2e;
+    border-radius: 12px;
+    padding: 6px;
+    z-index: 20;
+    box-shadow: 0 8px 30px rgba(0,0,0,.5);
 }
-.logout-btn:hover { border-color: #ef5777; color: #ef5777; }
+.user-menu.hide { display: none; }
+.menu-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #ddd;
+    cursor: pointer;
+    transition: background .15s;
+}
+.menu-row:hover { background: #1c1c1f; }
+.menu-row svg { width: 16px; height: 16px; flex-shrink: 0; }
 .main-area { flex: 1; padding: 34px 34px 60px; min-width: 0; }
 .page.hide { display: none; }
 .card-grid {
@@ -153,6 +181,9 @@ a { color: #ef5777; }
     margin: 0 6px 6px 0;
 }
 .small-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     background: #1d1d20;
     border: 1px solid #333;
     color: #ddd;
@@ -164,6 +195,7 @@ a { color: #ef5777; }
     margin-right: 8px;
     transition: all .15s;
 }
+.small-btn svg { width: 14px; height: 14px; }
 .small-btn:hover { border-color: #ef5777; color: #ef5777; }
 .small-btn { white-space: nowrap; }
 .todo-item {
@@ -285,6 +317,7 @@ a { color: #ef5777; }
 </style>
 </head>
 <body>
+<div id="loadMask"><svg xmlns="http://www.w3.org/2000/svg" class="spin" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3a9 9 0 1 0 9 9"/></svg></div>
 <button class="menu-btn" onclick="document.querySelector('.side-bar').classList.toggle('open')"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
 <div class="big-box">
     <div class="side-bar">
@@ -294,18 +327,23 @@ a { color: #ef5777; }
             <input id="searchInput" placeholder="搜索" oninput="doSearch(this.value)">
         </div>
         <div class="nav-list" id="navList">
-            <div class="nav-item now" data-page="home" onclick="switchPage('home')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M5 12H3l9-9l9 9h-2M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/><path d="M9 21v-6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v6"/></g></svg> 空间首页</div>
-            <div class="nav-item" data-page="todo" onclick="switchPage('todo')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.5 5.5L5 7l2.5-2.5m-4 7L5 13l2.5-2.5m-4 7L5 19l2.5-2.5M11 6h9m-9 6h9m-9 6h9"/></svg> 待办事项</div>
-            <div class="nav-item" data-page="notice" onclick="switchPage('notice')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3H4a4 4 0 0 0 2-3v-3a7 7 0 0 1 4-6M9 17v1a3 3 0 0 0 6 0v-1"/></svg> 通知动态</div>
-            <div class="nav-item" data-page="project" onclick="switchPage('project')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 16.008V7.99a1.98 1.98 0 0 0-1-1.717l-7-4.008a2.02 2.02 0 0 0-2 0L4 6.273c-.619.355-1 1.01-1 1.718v8.018c0 .709.381 1.363 1 1.717l7 4.008a2.02 2.02 0 0 0 2 0l7-4.008c.619-.355 1-1.01 1-1.718M12 22V12m0 0l8.73-5.04m-17.46 0L12 12"/></svg> 项目展示</div>
+            <div class="nav-item now" data-page="home" onclick="switchPage('home', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M5 12H3l9-9l9 9h-2M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/><path d="M9 21v-6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v6"/></g></svg> 空间首页</div>
+            <div class="nav-item" data-page="todo" onclick="switchPage('todo', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.5 5.5L5 7l2.5-2.5m-4 7L5 13l2.5-2.5m-4 7L5 19l2.5-2.5M11 6h9m-9 6h9m-9 6h9"/></svg> 待办事项</div>
+            <div class="nav-item" data-page="notice" onclick="switchPage('notice', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3H4a4 4 0 0 0 2-3v-3a7 7 0 0 1 4-6M9 17v1a3 3 0 0 0 6 0v-1"/></svg> 通知动态</div>
+            <div class="nav-item" data-page="project" onclick="switchPage('project', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 16.008V7.99a1.98 1.98 0 0 0-1-1.717l-7-4.008a2.02 2.02 0 0 0-2 0L4 6.273c-.619.355-1 1.01-1 1.718v8.018c0 .709.381 1.363 1 1.717l7 4.008a2.02 2.02 0 0 0 2 0l7-4.008c.619-.355 1-1.01 1-1.718M12 22V12m0 0l8.73-5.04m-17.46 0L12 12"/></svg> 项目展示</div>
         </div>
-        <div class="side-user">
-            <img src="/assets/yyt64x.png" alt="">
-            <div class="u-box">
-                <div class="u-name" id="sideName">--</div>
-                <div class="u-mail" id="sideMail">--</div>
+        <div class="side-user-wrap">
+            <div class="user-menu hide" id="userMenu" onclick="event.stopPropagation()">
+                <div class="menu-row" onclick="btnRun(this, doLogout)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M14 8V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2v-2"/><path d="M9 12h12l-3-3m0 6l3-3"/></g></svg> 退出登录</div>
             </div>
-            <button class="logout-btn" onclick="doLogout()">退出</button>
+            <div class="side-user" onclick="toggleUserMenu(event)">
+                <img src="/assets/yyt64x.png" alt="">
+                <div class="u-box">
+                    <div class="u-name" id="sideName">--</div>
+                    <div class="u-mail" id="sideMail">--</div>
+                </div>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 12a1 1 0 1 0 2 0a1 1 0 1 0-2 0m0 7a1 1 0 1 0 2 0a1 1 0 1 0-2 0m0-14a1 1 0 1 0 2 0a1 1 0 1 0-2 0"/></svg>
+            </div>
         </div>
     </div>
     <div class="main-area">
@@ -323,7 +361,7 @@ a { color: #ef5777; }
                 <div class="profile-row" id="pfRole">职位: --</div>
                 <div class="profile-row">核心能力: <span id="pfSkill"><span class="empty-tip">还没有填写</span></span></div>
                 <div style="margin-top: 14px">
-                    <button class="small-btn" onclick="loadMe()">刷新信息</button>
+                    <button class="small-btn" onclick="btnRun(this, loadMe)">刷新信息</button>
                 </div>
             </div>
             <div class="card" id="cardTodo">
@@ -331,7 +369,7 @@ a { color: #ef5777; }
                 <div style="color:#999;font-size:13px;margin-bottom:12px">这里会汇总你当前需要处理的事项.</div>
                 <div id="todoList"></div>
                 <div style="margin-top:14px;display:flex;justify-content:flex-end">
-                    <button class="act-btn" onclick="switchPage('todo')">查看全部待办 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-6 6l6-6m-6-6l6 6"/></svg></button>
+                    <button class="act-btn" onclick="switchPage('todo', this)">查看全部待办 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-6 6l6-6m-6-6l6 6"/></svg></button>
                 </div>
             </div>
             <div class="card" id="cardNotice">
@@ -354,7 +392,7 @@ a { color: #ef5777; }
                 <div id="todoPageList"></div>
                 <div class="add-row">
                     <input id="todoInput" placeholder="添加一条待办, 回车提交" onkeydown="if(event.key==='Enter')addTodo()">
-                    <button class="small-btn" style="margin:0" onclick="addTodo()">添加</button>
+                    <button class="small-btn" style="margin:0" onclick="btnRun(this, addTodo)">添加</button>
                 </div>
             </div>
         </div>
@@ -393,6 +431,29 @@ async function postJson(url, body) {
     return res.json();
 }
 var PAGE_PATH = { home: '/', todo: '/todos', notice: '/notice', project: '/projects' };
+var PAGE_LOADER = { home: null, todo: loadTodo, notice: loadNotice, project: loadProject };
+var SPIN_SVG = '<svg xmlns="http://www.w3.org/2000/svg" class="spin" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3a9 9 0 1 0 9 9"/></svg>';
+async function btnRun(btn, fn) {
+    if (btn.dataset.busy) return;
+    btn.dataset.busy = '1';
+    var old = btn.innerHTML;
+    var svg = btn.querySelector('svg');
+    if (svg) svg.outerHTML = SPIN_SVG;
+    else btn.innerHTML = SPIN_SVG + old;
+    try {
+        await fn();
+    } finally {
+        btn.innerHTML = old;
+        delete btn.dataset.busy;
+    }
+}
+function toggleUserMenu(e) {
+    e.stopPropagation();
+    document.getElementById('userMenu').classList.toggle('hide');
+}
+document.addEventListener('click', function() {
+    document.getElementById('userMenu').classList.add('hide');
+});
 function showPage(name) {
     document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.toggle('now', n.dataset.page === name); });
     document.querySelectorAll('.page').forEach(function(p) { p.classList.add('hide'); });
@@ -400,9 +461,12 @@ function showPage(name) {
     document.getElementById(pageId).classList.remove('hide');
     window.scrollTo({ top: 0 });
 }
-function switchPage(name) {
+function switchPage(name, el) {
     history.pushState(null, '', PAGE_PATH[name]);
     showPage(name);
+    var fn = PAGE_LOADER[name];
+    if (!fn) return;
+    if (el) btnRun(el, fn); else fn();
 }
 function pageFromPath() {
     for (var k in PAGE_PATH) {
@@ -460,8 +524,8 @@ async function loadTodo() {
     pageBox.innerHTML = ret.data.map(function(it) {
         var t = it.link ? '<a href="' + esc(it.link) + '" target="_blank">' + esc(it.title) + '</a>' : esc(it.title);
         var btn = it.is_done
-        ? '<button class="act-btn" onclick="markDone(' + it.id + ', false)">' + UNDO_SVG + ' 撤销确认</button>'
-        : '<button class="act-btn" onclick="markDone(' + it.id + ', true)">' + CHECK_SVG + ' 我已完成</button>';
+        ? '<button class="act-btn" onclick="btnRun(this, function(){ return markDone(' + it.id + ', false) })">' + UNDO_SVG + ' 撤销确认</button>'
+        : '<button class="act-btn" onclick="btnRun(this, function(){ return markDone(' + it.id + ', true) })">' + CHECK_SVG + ' 我已完成</button>';
         return '<div class="trow' + (it.is_done ? ' done' : '') + '">' + (it.is_done ? OK_SVG : NO_SVG) +
             '<div class="t-main"><span class="t-title">' + t + '</span>' + chipHtml(it.is_done) + '</div>' + btn + '</div>';
     }).join('');
@@ -516,11 +580,17 @@ async function doLogout() {
     await postJson('/api/logout', {});
     location.reload();
 }
-loadMe();
-loadTodo();
-loadNotice();
-loadProject();
-showPage(pageFromPath());
+(async function boot() {
+    showPage(pageFromPath());
+    try {
+        await loadMe();
+    } finally {
+        document.getElementById('loadMask').style.display = 'none';
+    }
+    loadTodo();
+    loadNotice();
+    loadProject();
+})();
 </script>
 </body>
 </html>
