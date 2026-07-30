@@ -12,6 +12,18 @@
     font-display: swap;
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
+#loadMask {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    z-index: 99;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#loadMask svg { width: 40px; height: 40px; color: #ef5777; }
+.spin { animation: spin1 .8s linear infinite; }
+@keyframes spin1 { to { transform: rotate(360deg); } }
 body {
     font-family: 'Patika', 'MiSans', '微软雅黑', sans-serif;
     background: #0a0a0a;
@@ -163,6 +175,7 @@ body {
 </style>
 </head>
 <body>
+<div id="loadMask"><svg xmlns="http://www.w3.org/2000/svg" class="spin" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3a9 9 0 1 0 9 9"/></svg></div>
 <div class="lang-tag">简</div>
 <div class="big-box">
     <div class="left-side">
@@ -301,6 +314,13 @@ document.addEventListener('keydown', function(e) {
     if (document.getElementById('regBox').classList.contains('hide')) doLogin();
     else doReg();
 });
+function hideMask() {
+    document.getElementById('loadMask').style.display = 'none';
+}
+window.addEventListener('load', function() {
+    document.fonts.ready.then(hideMask);
+});
+setTimeout(hideMask, 4000);
 </script>
 </body>
 </html>
