@@ -11,9 +11,14 @@
     src: url('/assets/Orbixbeta-Regular.otf') format('opentype');
     font-display: swap;
 }
+@font-face {
+    font-family: 'Patika';
+    src: url('/assets/Patika-Medium.otf') format('opentype');
+    font-display: swap;
+}
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
-    font-family: 'Orbixbeta', 'MiSans', '微软雅黑', sans-serif;
+    font-family: 'Patika', 'MiSans', '微软雅黑', sans-serif;
     background: #000;
     color: #eee;
 }
@@ -92,7 +97,8 @@ a { color: #ef5777; }
     flex-shrink: 0;
 }
 .logout-btn:hover { border-color: #ef5777; color: #ef5777; }
-.main-area { flex: 1; padding: 34px 34px 60px; max-width: 1500px; }
+.main-area { flex: 1; padding: 34px 34px 60px; min-width: 0; }
+.page.hide { display: none; }
 .card-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
@@ -109,6 +115,7 @@ a { color: #ef5777; }
     box-shadow: inset 0 0 40px rgba(239, 87, 119, .04);
 }
 .card-head {
+    font-family: 'Orbixbeta', 'MiSans', '微软雅黑', sans-serif;
     font-size: 15px;
     letter-spacing: 2px;
     margin-bottom: 16px;
@@ -170,11 +177,10 @@ a { color: #ef5777; }
     margin-bottom: 10px;
     font-size: 14px;
 }
-.todo-item input[type=checkbox] { accent-color: #ef5777; width: 16px; height: 16px; cursor: pointer; flex-shrink: 0; }
+.todo-item svg { width: 15px; height: 15px; color: #ef5777; flex-shrink: 0; }
 .todo-item .t { flex: 1; min-width: 0; overflow-wrap: break-word; }
+.todo-item.done svg { color: #4caf7d; }
 .todo-item.done .t { color: #666; text-decoration: line-through; }
-.todo-item .status { font-size: 11px; color: #888; flex-shrink: 0; }
-.todo-item.done .status { color: #4caf7d; }
 .add-row { display: flex; gap: 8px; margin-top: 12px; }
 .add-row input {
     flex: 1;
@@ -205,6 +211,57 @@ a { color: #ef5777; }
 .project-item .proj-info { font-size: 13px; color: #999; margin: 6px 0; line-height: 1.6; }
 .project-item .proj-mem { font-size: 12px; color: #777; }
 .empty-tip { color: #666; font-size: 13px; padding: 8px 0; }
+.chip { font-size: 11px; border-radius: 20px; padding: 2px 10px; flex-shrink: 0; }
+.chip.no { color: #d8b877; background: #241c0c; border: 1px solid #4a3a1e; }
+.chip.ok { color: #4caf7d; background: #0d1f15; border: 1px solid #1e4a32; }
+.page-mini {
+    font-family: 'Orbixbeta', 'MiSans', '微软雅黑', sans-serif;
+    font-size: 14px;
+    letter-spacing: 2px;
+    color: #fff;
+}
+.page-mini::before { content: '/ '; color: #ef5777; }
+.page-title { font-size: 34px; font-weight: bold; margin: 10px 0 8px; }
+.page-sub { color: #999; font-size: 14px; margin-bottom: 24px; }
+.panel {
+    background: #101012;
+    border: 1px solid #232326;
+    border-radius: 14px;
+    padding: 10px 24px;
+}
+.trow {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 0;
+    border-bottom: 1px solid #1e1e21;
+}
+.trow:last-child { border-bottom: none; }
+.trow .st-icon { width: 22px; height: 22px; flex-shrink: 0; }
+.trow .st-icon.ok { color: #4caf7d; }
+.trow .st-icon.no { color: #ef8c37; }
+.trow .t-main { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.trow .t-title { font-size: 15px; color: #eee; }
+.trow.done .t-title { color: #777; }
+.act-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #1d1d20;
+    border: 1px solid #333;
+    color: #ddd;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: all .15s;
+}
+.act-btn svg { width: 14px; height: 14px; }
+.act-btn:hover { border-color: #ef5777; color: #ef5777; }
+.panel .add-row { margin: 8px 0 14px; }
 .menu-btn { display: none; }
 @media (max-width: 800px) {
     .side-bar { position: fixed; z-index: 9; left: -240px; transition: left .2s; }
@@ -237,10 +294,10 @@ a { color: #ef5777; }
             <input id="searchInput" placeholder="搜索" oninput="doSearch(this.value)">
         </div>
         <div class="nav-list" id="navList">
-            <div class="nav-item now" onclick="goCard('cardHero', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M5 12H3l9-9l9 9h-2M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/><path d="M9 21v-6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v6"/></g></svg> 空间首页</div>
-            <div class="nav-item" onclick="goCard('cardTodo', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.5 5.5L5 7l2.5-2.5m-4 7L5 13l2.5-2.5m-4 7L5 19l2.5-2.5M11 6h9m-9 6h9m-9 6h9"/></svg> 待办事项</div>
-            <div class="nav-item" onclick="goCard('cardNotice', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3H4a4 4 0 0 0 2-3v-3a7 7 0 0 1 4-6M9 17v1a3 3 0 0 0 6 0v-1"/></svg> 通知动态</div>
-            <div class="nav-item" onclick="goCard('cardProject', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 16.008V7.99a1.98 1.98 0 0 0-1-1.717l-7-4.008a2.02 2.02 0 0 0-2 0L4 6.273c-.619.355-1 1.01-1 1.718v8.018c0 .709.381 1.363 1 1.717l7 4.008a2.02 2.02 0 0 0 2 0l7-4.008c.619-.355 1-1.01 1-1.718M12 22V12m0 0l8.73-5.04m-17.46 0L12 12"/></svg> 项目展示</div>
+            <div class="nav-item now" data-page="home" onclick="switchPage('home')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M5 12H3l9-9l9 9h-2M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/><path d="M9 21v-6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v6"/></g></svg> 空间首页</div>
+            <div class="nav-item" data-page="todo" onclick="switchPage('todo')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.5 5.5L5 7l2.5-2.5m-4 7L5 13l2.5-2.5m-4 7L5 19l2.5-2.5M11 6h9m-9 6h9m-9 6h9"/></svg> 待办事项</div>
+            <div class="nav-item" data-page="notice" onclick="switchPage('notice')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3H4a4 4 0 0 0 2-3v-3a7 7 0 0 1 4-6M9 17v1a3 3 0 0 0 6 0v-1"/></svg> 通知动态</div>
+            <div class="nav-item" data-page="project" onclick="switchPage('project')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 16.008V7.99a1.98 1.98 0 0 0-1-1.717l-7-4.008a2.02 2.02 0 0 0-2 0L4 6.273c-.619.355-1 1.01-1 1.718v8.018c0 .709.381 1.363 1 1.717l7 4.008a2.02 2.02 0 0 0 2 0l7-4.008c.619-.355 1-1.01 1-1.718M12 22V12m0 0l8.73-5.04m-17.46 0L12 12"/></svg> 项目展示</div>
         </div>
         <div class="side-user">
             <img src="/assets/yyt64x.png" alt="">
@@ -252,6 +309,7 @@ a { color: #ef5777; }
         </div>
     </div>
     <div class="main-area">
+        <div class="page" id="pageHome">
         <div class="card-grid">
             <div class="card hero-card" id="cardHero">
                 <div class="card-head">WELCOME</div>
@@ -272,9 +330,8 @@ a { color: #ef5777; }
                 <div class="card-head">TO-DO CHECKLIST</div>
                 <div style="color:#999;font-size:13px;margin-bottom:12px">这里会汇总你当前需要处理的事项.</div>
                 <div id="todoList"></div>
-                <div class="add-row">
-                    <input id="todoInput" placeholder="添加一条待办, 回车提交" onkeydown="if(event.key==='Enter')addTodo()">
-                    <button class="small-btn" style="margin:0" onclick="addTodo()">添加</button>
+                <div style="margin-top:14px;display:flex;justify-content:flex-end">
+                    <button class="act-btn" onclick="switchPage('todo')">查看全部待办 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-6 6l6-6m-6-6l6 6"/></svg></button>
                 </div>
             </div>
             <div class="card" id="cardNotice">
@@ -287,6 +344,31 @@ a { color: #ef5777; }
                 <div style="color:#999;font-size:13px;margin-bottom:12px">团队正在进行的项目.</div>
                 <div id="projectList"></div>
             </div>
+        </div>
+        </div>
+        <div class="page hide" id="pageTodo">
+            <div class="page-mini">TO-DO CHECKLIST</div>
+            <div class="page-title">待办事项</div>
+            <div class="page-sub">在这里追踪需要你处理的事项.</div>
+            <div class="panel">
+                <div id="todoPageList"></div>
+                <div class="add-row">
+                    <input id="todoInput" placeholder="添加一条待办, 回车提交" onkeydown="if(event.key==='Enter')addTodo()">
+                    <button class="small-btn" style="margin:0" onclick="addTodo()">添加</button>
+                </div>
+            </div>
+        </div>
+        <div class="page hide" id="pageNotice">
+            <div class="page-mini">UPDATES</div>
+            <div class="page-title">通知动态</div>
+            <div class="page-sub">团队的公告与最新动态都在这里.</div>
+            <div class="panel" id="noticePageList"></div>
+        </div>
+        <div class="page hide" id="pageProject">
+            <div class="page-mini">PROJECTS</div>
+            <div class="page-title">项目展示</div>
+            <div class="page-sub">团队正在进行的项目.</div>
+            <div id="projectPageList"></div>
         </div>
     </div>
 </div>
@@ -310,11 +392,25 @@ async function postJson(url, body) {
     });
     return res.json();
 }
-function goCard(id, el) {
-    document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('now'); });
-    el.classList.add('now');
-    document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+var PAGE_PATH = { home: '/', todo: '/todos', notice: '/notice', project: '/projects' };
+function showPage(name) {
+    document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.toggle('now', n.dataset.page === name); });
+    document.querySelectorAll('.page').forEach(function(p) { p.classList.add('hide'); });
+    var pageId = 'page' + name.charAt(0).toUpperCase() + name.slice(1);
+    document.getElementById(pageId).classList.remove('hide');
+    window.scrollTo({ top: 0 });
 }
+function switchPage(name) {
+    history.pushState(null, '', PAGE_PATH[name]);
+    showPage(name);
+}
+function pageFromPath() {
+    for (var k in PAGE_PATH) {
+        if (PAGE_PATH[k] === location.pathname) return k;
+    }
+    return 'home';
+}
+window.addEventListener('popstate', function() { showPage(pageFromPath()); });
 function doSearch(kw) {
     kw = kw.trim().toLowerCase();
     document.querySelectorAll('.card').forEach(function(c) {
@@ -339,22 +435,38 @@ async function loadMe() {
         skillBox.innerHTML = '<span class="empty-tip">还没有填写</span>';
     }
 }
+var CLOCK_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0-18 0"/><path d="M12 7v5l3 3"/></g></svg>';
+var OK_SVG = '<svg xmlns="http://www.w3.org/2000/svg" class="st-icon ok" viewBox="0 0 24 24"><path fill="currentColor" d="M17 3.34a10 10 0 1 1-14.995 8.984L2 12l.005-.324A10 10 0 0 1 17 3.34m-1.293 5.953a1 1 0 0 0-1.32-.083l-.094.083L11 12.585l-1.293-1.292l-.094-.083a1 1 0 0 0-1.403 1.403l.083.094l2 2l.094.083a1 1 0 0 0 1.226 0l.094-.083l4-4l.083-.094a1 1 0 0 0-.083-1.32"/></svg>';
+var NO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" class="st-icon no" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2c5.523 0 10 4.477 10 10a10 10 0 0 1-19.995.324L2 12l.004-.28C2.152 6.327 6.57 2 12 2m.01 13l-.127.007a1 1 0 0 0 0 1.986L12 17l.127-.007a1 1 0 0 0 0-1.986zM12 7a1 1 0 0 0-.993.883L11 8v4l.007.117a1 1 0 0 0 1.986 0L13 12V8l-.007-.117A1 1 0 0 0 12 7"/></svg>';
+var CHECK_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 12l5 5L20 7"/></svg>';
+var UNDO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m9 14l-4-4l4-4"/><path d="M5 10h11a4 4 0 1 1 0 8h-1"/></g></svg>';
+function chipHtml(done) {
+    return done ? '<span class="chip ok">Complete</span>' : '<span class="chip no">Incomplete</span>';
+}
 async function loadTodo() {
     var ret = await getJson('/api/todo');
-    var box = document.getElementById('todoList');
+    var homeBox = document.getElementById('todoList');
+    var pageBox = document.getElementById('todoPageList');
     if (!ret.data || !ret.data.length) {
-        box.innerHTML = '<div class="empty-tip">暂时没有待办, 很清闲喵</div>';
+        homeBox.innerHTML = '<div class="empty-tip">暂时没有待办, 很清闲喵</div>';
+        pageBox.innerHTML = '<div class="empty-tip">暂时没有待办, 很清闲喵</div>';
         return;
     }
-    box.innerHTML = ret.data.map(function(it) {
+    homeBox.innerHTML = ret.data.slice(0, 3).map(function(it) {
         var t = it.link ? '<a href="' + esc(it.link) + '" target="_blank">' + esc(it.title) + '</a>' : esc(it.title);
-        return '<div class="todo-item' + (it.is_done ? ' done' : '') + '">' +
-            '<input type="checkbox" ' + (it.is_done ? 'checked' : '') + ' onchange="toggleTodo(' + it.id + ', this.checked)">' +
-            '<div class="t">' + t + '</div>' +
-            '<div class="status">' + (it.is_done ? 'Complete' : 'Incomplete') + '</div></div>';
+        return '<div class="todo-item' + (it.is_done ? ' done' : '') + '">' + CLOCK_SVG +
+            '<div class="t">' + t + '</div>' + chipHtml(it.is_done) + '</div>';
+    }).join('');
+    pageBox.innerHTML = ret.data.map(function(it) {
+        var t = it.link ? '<a href="' + esc(it.link) + '" target="_blank">' + esc(it.title) + '</a>' : esc(it.title);
+        var btn = it.is_done
+        ? '<button class="act-btn" onclick="markDone(' + it.id + ', false)">' + UNDO_SVG + ' 撤销确认</button>'
+        : '<button class="act-btn" onclick="markDone(' + it.id + ', true)">' + CHECK_SVG + ' 我已完成</button>';
+        return '<div class="trow' + (it.is_done ? ' done' : '') + '">' + (it.is_done ? OK_SVG : NO_SVG) +
+            '<div class="t-main"><span class="t-title">' + t + '</span>' + chipHtml(it.is_done) + '</div>' + btn + '</div>';
     }).join('');
 }
-async function toggleTodo(id, done) {
+async function markDone(id, done) {
     await postJson('/api/todo', { id: id, done: done });
     loadTodo();
 }
@@ -367,30 +479,38 @@ async function addTodo() {
 }
 async function loadNotice() {
     var ret = await getJson('/api/notice');
-    var box = document.getElementById('noticeList');
+    var homeBox = document.getElementById('noticeList');
+    var pageBox = document.getElementById('noticePageList');
     if (!ret.data || !ret.data.length) {
-        box.innerHTML = '<div class="empty-tip">还没有任何通知</div>';
+        homeBox.innerHTML = '<div class="empty-tip">还没有任何通知</div>';
+        pageBox.innerHTML = '<div class="empty-tip">还没有任何通知</div>';
         return;
     }
-    box.innerHTML = ret.data.map(function(it) {
+    var render = function(it) {
         return '<div class="notice-item"><div class="tt">' + esc(it.title) + '</div>' +
             (it.content ? '<div class="cc">' + esc(it.content) + '</div>' : '') +
             '<div class="dd">' + esc(it.created_at) + '</div></div>';
-    }).join('');
+    };
+    homeBox.innerHTML = ret.data.slice(0, 3).map(render).join('');
+    pageBox.innerHTML = ret.data.map(render).join('');
 }
 async function loadProject() {
     var ret = await getJson('/api/project');
-    var box = document.getElementById('projectList');
+    var homeBox = document.getElementById('projectList');
+    var pageBox = document.getElementById('projectPageList');
     if (!ret.data || !ret.data.length) {
-        box.innerHTML = '<div class="empty-tip">还没有登记项目</div>';
+        homeBox.innerHTML = '<div class="empty-tip">还没有登记项目</div>';
+        pageBox.innerHTML = '<div class="empty-tip">还没有登记项目</div>';
         return;
     }
-    box.innerHTML = ret.data.map(function(it) {
+    var render = function(it) {
         var nm = it.link ? '<a href="' + esc(it.link) + '" target="_blank">' + esc(it.name) + '</a>' : esc(it.name);
         return '<div class="project-item"><div class="proj-name">' + nm + '</div>' +
             (it.info ? '<div class="proj-info">' + esc(it.info) + '</div>' : '') +
             (it.members ? '<div class="proj-mem">成员: ' + esc(it.members) + '</div>' : '') + '</div>';
-    }).join('');
+    };
+    homeBox.innerHTML = ret.data.slice(0, 3).map(render).join('');
+    pageBox.innerHTML = ret.data.map(render).join('');
 }
 async function doLogout() {
     await postJson('/api/logout', {});
@@ -400,6 +520,7 @@ loadMe();
 loadTodo();
 loadNotice();
 loadProject();
+showPage(pageFromPath());
 </script>
 </body>
 </html>

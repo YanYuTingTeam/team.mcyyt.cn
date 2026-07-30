@@ -1,5 +1,5 @@
 DB_CONFIG = {
-    "host": "202.60.229.28",
+    "host": "localhost",
     "user": "",
     "password": "",
     "database": "",
