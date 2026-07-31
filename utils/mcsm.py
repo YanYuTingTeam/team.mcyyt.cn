@@ -46,7 +46,7 @@ def _forward(request, subpath, extra_set_cookie=None):
                 out.headers.add('Set-Cookie', extra_set_cookie)
             return out
     except urllib.error.HTTPError as e:
-        return Response(e.read(), status=e.code, mimetype="application/json")
+        out = Response(e.read(), status=e.code, mimetype="application/json")
     except Exception as e:
         return Response(
             #json.dumps({"status": 502, "data": None, "message": "代理请求失败: " + str(e)}, ensure_ascii=False),
@@ -54,6 +54,10 @@ def _forward(request, subpath, extra_set_cookie=None):
         )
 
 def proxy_api(request, subpath):
+    _clean_sessions()
+    sid = request.cookies.get('mcsm_sid')
+    if sid and PANEL_SESSIONS.get(sid, 0) > time.time():
+        return _forward(request, subpath)
     user = verify_sign(request)
     if not user:
         return _deny("签名无效、已过期或权限不足")
