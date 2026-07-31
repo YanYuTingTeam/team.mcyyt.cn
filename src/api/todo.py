@@ -11,23 +11,57 @@ def handle(request):
             data = request.get_json(silent=True) or {}
             with db.cursor() as cur:
                 if 'id' in data:
+                    if data.get('done'):
+                        cur.execute(
+                            "UPDATE yyt_todo_assign SET is_done = 1, done_at = NOW() WHERE todo_id = %s AND user_id = %s",
+                            (data['id'], user['id'])
+                        )
+                    else:
+                        cur.execute(
+                            "UPDATE yyt_todo_assign SET is_done = 0, done_at = NULL WHERE todo_id = %s AND user_id = %s",
+                            (data['id'], user['id'])
+                        )
+                    db.commit()
+                    return {"code": 0, "message": "ok"}
+                title = (data.get('title') or '').strip()
+                if not title:
+                    return {"code": 400, "message": "事项标题不能为空"}
+                link = (data.get('link') or '').strip()
+                content = (data.get('content') or '').strip()
+                cur.execute(
+                    "INSERT INTO yyt_todo (creator_id, title, link, content) VALUES (%s, %s, %s, %s)",
+                    (user['id'], title, link or None, content or None)
+                )
+                new_id = cur.lastrowid
+                if not link:
                     cur.execute(
-                        "UPDATE yyt_todo SET is_done = %s WHERE id = %s AND user_id = %s",
-                        (1 if data.get('done') else 0, data['id'], user['id'])
+                        "UPDATE yyt_todo SET link = %s WHERE id = %s",
+                        ('/todos/' + str(new_id), new_id)
                     )
-                else:
-                    title = (data.get('title') or '').strip()
-                    if not title:
-                        return {"code": 400, "message": "事项内容不能为空"}
+                assignees = data.get('assignees') or []
+                clean_ids = []
+                for a in assignees:
+                    try:
+                        clean_ids.append(int(a))
+                    except (ValueError, TypeError):
+                        pass
+                if not clean_ids:
+                    clean_ids = [user['id']]
+                clean_ids = list(dict.fromkeys(clean_ids))
+                for uid in clean_ids:
                     cur.execute(
-                        "INSERT INTO yyt_todo (user_id, title, link) VALUES (%s, %s, %s)",
-                        (user['id'], title, (data.get('link') or '').strip() or None)
+                        "INSERT INTO yyt_todo_assign (todo_id, user_id) VALUES (%s, %s)",
+                        (new_id, uid)
                     )
             db.commit()
             return {"code": 0, "message": "ok"}
         with db.cursor() as cur:
             cur.execute(
-                "SELECT id, title, link, is_done, created_at FROM yyt_todo WHERE user_id = %s ORDER BY is_done ASC, id DESC",
+                "SELECT t.id, t.title, t.link, t.content, t.created_at, a.is_done, u.name AS creator_name "
+                "FROM yyt_todo_assign a "
+                "JOIN yyt_todo t ON a.todo_id = t.id "
+                "JOIN yyt_user u ON t.creator_id = u.id "
+                "WHERE a.user_id = %s ORDER BY a.is_done ASC, t.id DESC",
                 (user['id'],)
             )
             rows = cur.fetchall()

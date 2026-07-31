@@ -171,12 +171,13 @@ a { color: #ef5777; }
 }
 .card-head {
     font-family: 'Orbixbeta', 'MiSans', '微软雅黑', sans-serif;
+    font-feature-settings: 'ss01' 1;
     font-size: 15px;
     letter-spacing: 2px;
     margin-bottom: 16px;
     color: #fff;
 }
-.card-head::before { content: '/ '; color: #ef5777; }
+.card-head::before { font-feature-settings: 'ss01' 0; content: '/ '; color: #ef5777; }
 .hero-card {
     grid-column: 1 / -1;
     background: linear-gradient(115deg, #d9436b 0%, #ef5777 55%, #f07a93 100%);
@@ -239,7 +240,18 @@ a { color: #ef5777; }
 .todo-item svg { width: 15px; height: 15px; color: #ef5777; flex-shrink: 0; }
 .todo-item .t { flex: 1; min-width: 0; overflow-wrap: break-word; }
 .todo-item.done svg { color: #4caf7d; }
-.todo-item.done .t { color: #666; text-decoration: line-through; }
+.todo-item.done svg { color: #ef5777; }
+.todo-link {
+    color: #ef5777;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+.todo-link:hover { opacity: .8; }
+.todo-link svg { width: 13px; height: 13px; }
 .add-row { display: flex; gap: 8px; margin-top: 12px; }
 .add-row input {
     flex: 1;
@@ -275,11 +287,12 @@ a { color: #ef5777; }
 .chip.ok { color: #4caf7d; background: #0d1f15; border: 1px solid #1e4a32; }
 .page-mini {
     font-family: 'Orbixbeta', 'MiSans', '微软雅黑', sans-serif;
+    font-feature-settings: 'ss01' 1;
     font-size: 14px;
     letter-spacing: 2px;
     color: #fff;
 }
-.page-mini::before { content: '/ '; color: #ef5777; }
+.page-mini::before { font-feature-settings: 'ss01' 0; content: '/ '; color: #ef5777; }
 .page-title { font-size: 34px; font-weight: bold; margin: 10px 0 8px; }
 .page-sub { color: #999; font-size: 14px; margin-bottom: 24px; }
 .panel {
@@ -299,7 +312,6 @@ a { color: #ef5777; }
 .trow .st-icon { width: 22px; height: 22px; flex-shrink: 0; }
 .trow .st-icon.ok { color: #4caf7d; }
 .trow .st-icon.no { color: #ef8c37; }
-.trow .t-main { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .trow .t-title { font-size: 15px; color: #eee; }
 .trow.done .t-title { color: #777; }
 .act-btn {
@@ -321,6 +333,125 @@ a { color: #ef5777; }
 .act-btn svg { width: 14px; height: 14px; }
 .act-btn:hover { border-color: #ef5777; color: #ef5777; }
 .panel .add-row { margin: 8px 0 14px; }
+.page-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.page-head .htxt { min-width: 0; }
+.add-todo-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(90deg, #d9436b, #ef5777);
+    border: none;
+    color: #fff;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-family: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: opacity .15s;
+}
+.add-todo-btn:hover { opacity: .88; }
+.add-todo-btn svg { width: 16px; height: 16px; }
+.trow .t-body { flex: 1; min-width: 0; }
+.trow .t-line { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.trow .t-desc { font-size: 13px; color: #999; line-height: 1.6; margin-top: 6px; }
+.trow .t-meta { font-size: 12px; color: #666; margin-top: 6px; }
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #999;
+    font-size: 14px;
+    cursor: pointer;
+    margin-bottom: 16px;
+}
+.back-link:hover { color: #ef5777; }
+.back-link svg { width: 16px; height: 16px; }
+.form-box { max-width: 640px; }
+.form-label { font-size: 14px; color: #ddd; margin-bottom: 8px; display: block; }
+.form-label b { color: #ef5777; }
+.form-input, .form-area {
+    width: 100%;
+    background: #0d0d0f;
+    border: 1px solid #2b2b2e;
+    border-radius: 8px;
+    padding: 11px 13px;
+    color: #eee;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: border .2s;
+}
+.form-input:focus, .form-area:focus { border-color: #ef5777; }
+.form-area { resize: vertical; min-height: 96px; line-height: 1.6; }
+.form-row { margin-bottom: 20px; }
+.picker-wrap { position: relative; }
+.picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    background: #0d0d0f;
+    border: 1px solid #2b2b2e;
+    border-radius: 8px;
+    padding: 8px 10px;
+    cursor: text;
+}
+.picker:focus-within { border-color: #ef5777; }
+.picker input {
+    flex: 1;
+    min-width: 120px;
+    background: none;
+    border: none;
+    outline: none;
+    color: #eee;
+    font-size: 14px;
+    font-family: inherit;
+    padding: 4px 2px;
+}
+.u-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #23161b;
+    border: 1px solid rgba(239, 87, 119, .4);
+    border-radius: 20px;
+    padding: 3px 8px 3px 4px;
+    font-size: 13px;
+    color: #eee;
+}
+.u-chip img { width: 20px; height: 20px; border-radius: 50%; background: #fff; }
+.u-chip .rm { display: flex; cursor: pointer; color: #999; }
+.u-chip .rm:hover { color: #ef5777; }
+.u-chip .rm svg { width: 13px; height: 13px; }
+.picker-drop {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: #131315;
+    border: 1px solid #2b2b2e;
+    border-radius: 8px;
+    padding: 4px;
+    z-index: 30;
+    max-height: 240px;
+    overflow-y: auto;
+}
+.picker-drop.hide { display: none; }
+.drop-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.drop-row:hover { background: #1c1c1f; }
+.drop-row img { width: 26px; height: 26px; border-radius: 50%; background: #fff; }
+.drop-row .dn { font-size: 14px; color: #eee; }
+.drop-row .de { font-size: 12px; color: #777; }
+.drop-empty { padding: 10px; color: #666; font-size: 13px; }
 .menu-btn { display: none; }
 @media (max-width: 800px) {
     .side-bar { position: fixed; z-index: 9; left: -240px; transition: left .2s; }
@@ -413,15 +544,45 @@ a { color: #ef5777; }
         </div>
         </div>
         <div class="page hide" id="pageTodo">
-            <div class="page-mini">TO-DO CHECKLIST</div>
-            <div class="page-title">待办事项</div>
-            <div class="page-sub">在这里追踪需要你处理的事项.</div>
-            <div class="panel">
-                <div id="todoPageList"></div>
-                <div class="add-row">
-                    <input id="todoInput" placeholder="添加一条待办, 回车提交" onkeydown="if(event.key==='Enter')addTodo()">
-                    <button class="small-btn" style="margin:0" onclick="btnRun(this, addTodo)">添加</button>
+            <div class="page-head">
+                <div class="htxt">
+                    <div class="page-mini">TO-DO CHECKLIST</div>
+                    <div class="page-title">待办事项</div>
+                    <div class="page-sub">在这里追踪需要你处理的事项.</div>
                 </div>
+                <button class="add-todo-btn" onclick="switchPage('addtodo', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m-7-7h14"/></svg> 添加待办</button>
+            </div>
+            <div class="panel" id="todoPageList"></div>
+        </div>
+        <div class="page hide" id="pageAddtodo">
+            <div class="back-link" onclick="switchPage('todo', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12l6 6m-6-6l6-6"/></svg> 返回上一页</div>
+            <div class="page-mini">TO-DO CHECKLIST</div>
+            <div class="page-title">添加待办</div>
+            <div class="page-sub">填写待办详情, 并选择为谁添加.</div>
+            <div class="form-box">
+                <div class="form-row">
+                    <label class="form-label"><b>*</b> 标题</label>
+                    <input class="form-input" id="atTitle" placeholder="待办标题">
+                </div>
+                <div class="form-row">
+                    <label class="form-label">URL <span style="color:#666;font-size:12px">(留空则自动分配)</span></label>
+                    <input class="form-input" id="atLink" placeholder="https://... 或留空">
+                </div>
+                <div class="form-row">
+                    <label class="form-label">内容</label>
+                    <textarea class="form-area" id="atContent" placeholder="待办的详细说明"></textarea>
+                </div>
+                <div class="form-row">
+                    <label class="form-label">为谁添加 <span style="color:#666;font-size:12px">(留空则添加给自己)</span></label>
+                    <div class="picker-wrap">
+                        <div class="picker" id="assignPicker" onclick="document.getElementById('assignInput').focus()">
+                            <input id="assignInput" placeholder="输入昵称搜索并选择" autocomplete="off" oninput="searchUser(this.value)" onkeydown="assignKey(event)">
+                        </div>
+                        <div class="picker-drop hide" id="assignDrop"></div>
+                    </div>
+                </div>
+                <div class="err-msg" id="atErr" style="color:#ff6b81;font-size:13px;min-height:18px;margin-bottom:8px"></div>
+                <button class="add-todo-btn" id="atSubmit" onclick="btnRun(this, submitTodo)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m-7-7h14"/></svg> 创建待办</button>
             </div>
         </div>
         <div class="page hide" id="pageNotice">
@@ -458,8 +619,9 @@ async function postJson(url, body) {
     });
     return res.json();
 }
-var PAGE_PATH = { home: '/', todo: '/todos', notice: '/notice', project: '/projects' };
-var PAGE_LOADER = { home: null, todo: loadTodo, notice: loadNotice, project: loadProject };
+var PAGE_PATH = { home: '/', todo: '/todos', notice: '/notice', project: '/projects', addtodo: '/todos/add' };
+var NAV_OF = { home: 'home', todo: 'todo', notice: 'notice', project: 'project', addtodo: 'todo' };
+var PAGE_LOADER = { home: null, todo: loadTodo, notice: loadNotice, project: loadProject, addtodo: resetAddTodo };
 var SPIN_SVG = '<svg xmlns="http://www.w3.org/2000/svg" class="spin" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3a9 9 0 1 0 9 9"/></svg>';
 async function btnRun(btn, fn) {
     if (btn.dataset.busy) return false;
@@ -483,8 +645,13 @@ function toggleUserMenu(e) {
     e.stopPropagation();
     document.getElementById('userMenu').classList.toggle('hide');
 }
-document.addEventListener('click', function() {
+document.addEventListener('click', function(e) {
     document.getElementById('userMenu').classList.add('hide');
+    var pw = document.querySelector('.picker-wrap');
+    if (pw && !pw.contains(e.target)) {
+        var drop = document.getElementById('assignDrop');
+        if (drop) drop.classList.add('hide');
+    }
 });
 var nowPage = 'home';
 var barNum = 0;
@@ -498,7 +665,8 @@ function topBarOff() {
 }
 function showPage(name) {
     nowPage = name;
-    document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.toggle('now', n.dataset.page === name); });
+    var navName = NAV_OF[name] || name;
+    document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.toggle('now', n.dataset.page === navName); });
     document.querySelectorAll('.page').forEach(function(p) { p.classList.add('hide'); });
     var pageId = 'page' + name.charAt(0).toUpperCase() + name.slice(1);
     document.getElementById(pageId).classList.remove('hide');
@@ -523,8 +691,11 @@ async function switchPage(name, el) {
     showPage(name);
 }
 function pageFromPath() {
+    var p = location.pathname;
+    if (p === '/todos/add') return 'addtodo';
+    if (p === '/todos' || p.indexOf('/todos/') === 0) return 'todo';
     for (var k in PAGE_PATH) {
-        if (PAGE_PATH[k] === location.pathname) return k;
+        if (PAGE_PATH[k] === p) return k;
     }
     return 'home';
 }
@@ -558,6 +729,8 @@ var OK_SVG = '<svg xmlns="http://www.w3.org/2000/svg" class="st-icon ok" viewBox
 var NO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" class="st-icon no" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2c5.523 0 10 4.477 10 10a10 10 0 0 1-19.995.324L2 12l.004-.28C2.152 6.327 6.57 2 12 2m.01 13l-.127.007a1 1 0 0 0 0 1.986L12 17l.127-.007a1 1 0 0 0 0-1.986zM12 7a1 1 0 0 0-.993.883L11 8v4l.007.117a1 1 0 0 0 1.986 0L13 12V8l-.007-.117A1 1 0 0 0 12 7"/></svg>';
 var CHECK_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 12l5 5L20 7"/></svg>';
 var UNDO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m9 14l-4-4l4-4"/><path d="M5 10h11a4 4 0 1 1 0 8h-1"/></g></svg>';
+var LINK_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6m-7 1l9-9m-5 0h5v5"/></svg>';
+var X_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 6L6 18M6 6l12 12"/></svg>';
 function chipHtml(done) {
     return done ? '<span class="chip ok">Complete</span>' : '<span class="chip no">Incomplete</span>';
 }
@@ -571,29 +744,106 @@ async function loadTodo() {
         return;
     }
     homeBox.innerHTML = ret.data.slice(0, 3).map(function(it) {
-        var t = it.link ? '<a href="' + esc(it.link) + '" target="_blank">' + esc(it.title) + '</a>' : esc(it.title);
         return '<div class="todo-item' + (it.is_done ? ' done' : '') + '">' + CLOCK_SVG +
-            '<div class="t">' + t + '</div>' + chipHtml(it.is_done) + '</div>';
+            '<div class="t"><a class="todo-link" href="' + esc(it.link) + '">' + esc(it.title) + LINK_SVG + '</a></div>' + chipHtml(it.is_done) + '</div>';
     }).join('');
     pageBox.innerHTML = ret.data.map(function(it) {
-        var t = it.link ? '<a href="' + esc(it.link) + '" target="_blank">' + esc(it.title) + '</a>' : esc(it.title);
+        var t = '<a class="todo-link" href="' + esc(it.link) + '">' + esc(it.title) + LINK_SVG + '</a>';
         var btn = it.is_done
         ? '<button class="act-btn" onclick="btnRun(this, function(){ return markDone(' + it.id + ', false) })">' + UNDO_SVG + ' 撤销确认</button>'
         : '<button class="act-btn" onclick="btnRun(this, function(){ return markDone(' + it.id + ', true) })">' + CHECK_SVG + ' 我已完成</button>';
+        var desc = it.content ? '<div class="t-desc">' + esc(it.content) + '</div>' : '';
+        var meta = '<div class="t-meta">由 ' + esc(it.creator_name) + ' 创建 · ' + esc(it.created_at) + '</div>';
         return '<div class="trow' + (it.is_done ? ' done' : '') + '">' + (it.is_done ? OK_SVG : NO_SVG) +
-            '<div class="t-main"><span class="t-title">' + t + '</span>' + chipHtml(it.is_done) + '</div>' + btn + '</div>';
+            '<div class="t-body"><div class="t-line">' + t + chipHtml(it.is_done) + '</div>' + desc + meta + '</div>' + btn + '</div>';
     }).join('');
 }
 async function markDone(id, done) {
     await postJson('/api/todo', { id: id, done: done });
-    loadTodo();
+    await loadTodo();
 }
-async function addTodo() {
-    var ipt = document.getElementById('todoInput');
-    var title = ipt.value.trim();
-    if (!title) return;
-    var ret = await postJson('/api/todo', { title: title });
-    if (ret.code === 0) { ipt.value = ''; loadTodo(); }
+var assignUsers = [];
+function resetAddTodo() {
+    document.getElementById('atTitle').value = '';
+    document.getElementById('atLink').value = '';
+    document.getElementById('atContent').value = '';
+    document.getElementById('atErr').textContent = '';
+    document.getElementById('assignInput').value = '';
+    document.getElementById('assignDrop').classList.add('hide');
+    assignUsers = [];
+    renderChips();
+}
+function renderChips() {
+    var picker = document.getElementById('assignPicker');
+    var input = document.getElementById('assignInput');
+    picker.querySelectorAll('.u-chip').forEach(function(c) { c.remove(); });
+    assignUsers.forEach(function(u) {
+        var chip = document.createElement('span');
+        chip.className = 'u-chip';
+        chip.innerHTML = '<img src="/assets/yyt64x.png" alt=""><span>' + esc(u.name) + '</span><span class="rm" data-id="' + u.id + '">' + X_SVG + '</span>';
+        chip.querySelector('.rm').onclick = function(e) { e.stopPropagation(); removeChip(u.id); };
+        picker.insertBefore(chip, input);
+    });
+}
+function removeChip(id) {
+    assignUsers = assignUsers.filter(function(u) { return u.id !== id; });
+    renderChips();
+}
+function addChip(u) {
+    if (!assignUsers.some(function(x) { return x.id === u.id; })) assignUsers.push(u);
+    document.getElementById('assignInput').value = '';
+    document.getElementById('assignDrop').classList.add('hide');
+    renderChips();
+    document.getElementById('assignInput').focus();
+}
+function assignKey(e) {
+    if (e.key === 'Backspace' && !e.target.value && assignUsers.length) {
+        removeChip(assignUsers[assignUsers.length - 1].id);
+    }
+}
+var searchTimer = null;
+function searchUser(kw) {
+    kw = kw.trim();
+    var drop = document.getElementById('assignDrop');
+    if (searchTimer) clearTimeout(searchTimer);
+    if (!kw) { drop.classList.add('hide'); return; }
+    searchTimer = setTimeout(async function() {
+        var ret = await getJson('/api/user_search?q=' + encodeURIComponent(kw));
+        var list = (ret.data || []).filter(function(u) {
+            return !assignUsers.some(function(x) { return x.id === u.id; });
+        });
+        if (!list.length) {
+            drop.innerHTML = '<div class="drop-empty">没有匹配的用户</div>';
+        } else {
+            drop.innerHTML = '';
+            list.forEach(function(u) {
+                var row = document.createElement('div');
+                row.className = 'drop-row';
+                row.innerHTML = '<img src="/assets/yyt64x.png" alt=""><div><div class="dn">' + esc(u.name) + '</div><div class="de">' + esc(u.email) + '</div></div>';
+                row.onclick = function() { addChip({ id: u.id, name: u.name }); };
+                drop.appendChild(row);
+            });
+        }
+        drop.classList.remove('hide');
+    }, 200);
+}
+async function submitTodo() {
+    var err = document.getElementById('atErr');
+    err.textContent = '';
+    var title = document.getElementById('atTitle').value.trim();
+    if (!title) { err.textContent = '标题不能为空'; return; }
+    var ret = await postJson('/api/todo', {
+        title: title,
+        link: document.getElementById('atLink').value.trim(),
+        content: document.getElementById('atContent').value.trim(),
+        assignees: assignUsers.map(function(u) { return u.id; })
+    });
+    if (ret.code === 0) {
+        resetAddTodo();
+        await switchPage('todo');
+    } else {
+        err.textContent = ret.message || '创建失败';
+    }
 }
 async function loadNotice() {
     var ret = await getJson('/api/notice');

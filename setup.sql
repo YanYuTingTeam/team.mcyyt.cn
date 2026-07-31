@@ -25,11 +25,21 @@ CREATE TABLE IF NOT EXISTS yyt_invite (
 
 CREATE TABLE IF NOT EXISTS yyt_todo (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
+    creator_id INT NOT NULL,
     title VARCHAR(255) NOT NULL,
     link VARCHAR(255) DEFAULT NULL,
-    is_done TINYINT DEFAULT 0,
+    content TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    KEY idx_creator (creator_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS yyt_todo_assign (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    todo_id INT NOT NULL,
+    user_id INT NOT NULL,
+    is_done TINYINT DEFAULT 0,
+    done_at DATETIME DEFAULT NULL,
+    KEY idx_todo (todo_id),
     KEY idx_user (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

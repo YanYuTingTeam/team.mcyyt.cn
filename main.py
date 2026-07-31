@@ -77,6 +77,11 @@ def serve_image(uuid, filename):
 def serve_assets(filename):
     return send_from_directory(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'assets'), filename)
 
+@app.route('/todos/<tid>', methods=['GET'])
+def todo_detail_page(tid):
+    from utils.page import serve_space
+    return serve_space(request)
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     try:
