@@ -563,6 +563,16 @@ a { color: #ef5777; }
 .mcsm-frame-wrap { border: 1px solid #232326; border-radius: 12px; overflow: hidden; background: #0d0d0f; height: calc(100vh - 200px); min-height: 420px; }
 .mcsm-frame-wrap iframe { width: 100%; height: 100%; border: none; display: block; }
 .mcsm-tip { color: #999; font-size: 14px; padding: 40px 10px; text-align: center; line-height: 1.8; }
+.mcsm-fs-overlay { position: fixed; inset: 0; z-index: 600; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; animation: fadeIn .22s ease forwards; }
+.mcsm-fs-overlay.closing { animation: fadeOut .18s ease forwards; pointer-events: none; }
+.mcsm-fs-top { position: absolute; top: 0; left: 0; right: 0; height: 44px; display: flex; align-items: center; justify-content: center; color: #555; font-size: 13px; letter-spacing: 1px; background: #000; z-index: 2; }
+.mcsm-fs-frame { flex: 1; width: calc(100vw - 48px); max-width: 100%; margin: 0 24px; border-radius: 8px; overflow: hidden; background: #0d0d0f; border: 1px solid #1a1a1a; }
+.mcsm-fs-frame iframe { width: 100%; height: 100%; border: none; display: block; }
+.mcsm-fs-bottom { position: absolute; bottom: 0; left: 0; right: 0; height: 52px; display: flex; align-items: center; justify-content: center; background: #000; z-index: 2; }
+.mcsm-fs-exit { display: inline-flex; align-items: center; gap: 6px; background: #1d1d20; border: 1px solid #333; color: #bbb; border-radius: 8px; padding: 7px 18px; font-size: 13px; font-family: inherit; cursor: pointer; transition: all .15s; }
+.mcsm-fs-exit:hover { border-color: #ef5777; color: #ef5777; }
+.mcsm-fs-exit svg { width: 14px; height: 14px; }
+.mcsm-tut-video { width: 100%; max-width: 640px; aspect-ratio: 16/9; background: #0d0d0f; border: 1px solid #2b2b2e; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #555; font-size: 14px; }
 .api-card {
     background: #101012;
     border: 1px solid #232326;
@@ -815,8 +825,10 @@ input.input-error, select.input-error, textarea.input-error { border-color: #ef5
 .pg-edit-row .pecb { flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: #888; cursor: pointer; }
 .pg-edit-row .pecb input { width: 14px; height: 14px; accent-color: #ef5777; }
 .group-members { max-height: 240px; overflow-y: auto; margin-top: 10px; }
-.masonry-grid { column-width: 330px; column-gap: 20px; }
-.masonry-grid .card { break-inside: avoid; margin-bottom: 20px; display: inline-block; width: 100%; }
+.masonry-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.masonry-grid .card { margin-bottom: 0; }
+@media (max-width: 1100px) { .masonry-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 720px) { .masonry-grid { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
@@ -1073,7 +1085,14 @@ input.input-error, select.input-error, textarea.input-error { border-color: #ef5
         </div>
         <div class="page hide" id="pageMcsm">
             <div class="page-mini">MCSMANAGER</div>
-            <div class="page-title">MCSManager</div>
+            <div class="page-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+                <span>MCSManager</span>
+                <div style="display:flex;gap:8px" id="mcsmToolbar">
+                    <button class="card-head-btn" onclick="mcsmRefresh()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 11A8.1 8.1 0 0 0 4.5 9M4 5v4h4m-4 4a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg> 刷新</button>
+                    <button class="card-head-btn" onclick="mcsmTutorial()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> 教程</button>
+                    <button class="card-head-btn" onclick="mcsmFullscreen()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4h4m12 4V4h-4M4 16v4h4m12-4v4h-4"/></svg> 全屏</button>
+                </div>
+            </div>
             <div class="page-sub">这里是你无远程时 唯一可以接触到面板的入口.</div>
             <div id="mcsmBox"><div class="mcsm-tip">正在准备面板...</div></div>
         </div>
@@ -1727,6 +1746,48 @@ async function loadMcsm() {
     var b = hmacMd5(d.salt, d.apikey + a + '/');
     var url = 'https://' + d.panel_host + '.' + d.panel_suffix + '/?apikey=' + encodeURIComponent(d.apikey) + '&a=' + a + '&b=' + b;
     box.innerHTML = '<div class="mcsm-frame-wrap"><iframe src="' + url + '"></iframe></div>';
+}
+function mcsmRefresh() {
+    var iframe = document.querySelector('#mcsmBox iframe');
+    if (iframe) {
+        btnRun(document.querySelector('#mcsmToolbar button'), async function() {
+            iframe.src = iframe.src;
+        });
+    } else {
+        loadMcsm();
+    }
+}
+function mcsmTutorial() {
+    var body = '<div style="text-align:center">' +
+        '<div class="mcsm-tut-video">视频教程即将上线</div>' +
+        '<div style="color:#777;font-size:13px;margin-top:14px;line-height:1.7">本教程将指导你如何使用 MCSManager 管理服务器实例、<br>查看控制台、上传文件等. 视频资源后续补充.</div>' +
+        '</div>';
+    var foot = '<button class="add-todo-btn" onclick="closeModal()">知道了</button>';
+    openModal('MCSManager 使用教程', body, foot);
+}
+var __mcsmFsUrl = '';
+function mcsmFullscreen() {
+    var iframe = document.querySelector('#mcsmBox iframe');
+    if (!iframe) return;
+    __mcsmFsUrl = iframe.src;
+    var overlay = document.createElement('div');
+    overlay.className = 'mcsm-fs-overlay';
+    overlay.id = 'mcsmFsOverlay';
+    overlay.innerHTML =
+        '<div class="mcsm-fs-top">@team - YanYuTing / MCSManager</div>' +
+        '<div class="mcsm-fs-frame"><iframe src="' + __mcsmFsUrl + '"></iframe></div>' +
+        '<div class="mcsm-fs-bottom"><button class="mcsm-fs-exit" onclick="mcsmExitFullscreen()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 9H5V5m10 4h4V5M9 15H5v4m10-4h4v4"/></svg> 退出全屏</button></div>';
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
+}
+function mcsmExitFullscreen() {
+    var overlay = document.getElementById('mcsmFsOverlay');
+    if (!overlay) return;
+    overlay.classList.add('closing');
+    document.body.style.overflow = '';
+    setTimeout(function() {
+        if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+    }, 180);
 }
 async function killSession(sid, isCurrent) {
     var ret = await postJson('/api/session_kill', { sid: sid });

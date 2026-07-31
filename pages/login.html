@@ -176,6 +176,19 @@ body {
     .left-side { display: none; }
     .right-side { min-width: 0; }
 }
+@media (max-width: 600px) {
+    body { height: auto; min-height: 100vh; overflow: auto; }
+    .big-box { display: block; height: auto; min-height: 100vh; }
+    .right-side { padding: 20px 16px; min-height: 100vh; align-items: flex-start; padding-top: 8vh; }
+    .login-box { max-width: 100%; }
+    .login-title { font-size: 24px; }
+    .login-sub { font-size: 14px; margin: 10px 0 20px; }
+    .tip-box { font-size: 12px; padding: 10px 12px; margin-bottom: 16px; }
+    .field-box { margin-bottom: 16px; }
+    .field-box input { padding: 11px 12px; font-size: 13px; }
+    .login-btn { padding: 12px; font-size: 14px; }
+    .go-reg { padding: 12px; }
+}
 </style>
 </head>
 <body>
