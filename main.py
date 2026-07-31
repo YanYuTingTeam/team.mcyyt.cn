@@ -84,6 +84,11 @@ def todo_detail_page(tid):
     from utils.page import serve_space
     return serve_space(request)
 
+@app.route('/mcsm/<path:subpath>', methods=['GET', 'POST', 'PUT', 'DELETE'])
+def mcsm_proxy(subpath):
+    from utils.mcsm import proxy
+    return proxy(request, subpath)
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     try:

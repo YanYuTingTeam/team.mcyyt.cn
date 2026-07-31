@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS yyt_invite (
 CREATE TABLE IF NOT EXISTS yyt_api_log (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
+    ip VARCHAR(64) DEFAULT NULL,
     path VARCHAR(128) DEFAULT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     KEY idx_user_time (user_id, created_at)

@@ -39,9 +39,10 @@ def check_apikey(request):
             )
             row = cur.fetchone()
             if row:
+                ip, _ = get_client_info(request)
                 cur.execute(
-                    "INSERT INTO yyt_api_log (user_id, path) VALUES (%s, %s)",
-                    (row['id'], request.path[:128])
+                    "INSERT INTO yyt_api_log (user_id, ip, path) VALUES (%s, %s, %s)",
+                    (row['id'], ip, request.path[:128])
                 )
                 db.commit()
             return row
