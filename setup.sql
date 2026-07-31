@@ -75,4 +75,23 @@ CREATE TABLE IF NOT EXISTS yyt_project (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE IF NOT EXISTS yyt_page_access (
+    page_key VARCHAR(32) PRIMARY KEY,
+    min_level INT DEFAULT 1,
+    show_in_nav TINYINT DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS yyt_visit (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT DEFAULT NULL,
+    ip VARCHAR(64) DEFAULT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    KEY idx_time (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO yyt_page_access (page_key, min_level, show_in_nav) VALUES
+    ('home', 0, 1), ('overview', 0, 1), ('todo', 1, 1), ('notice', 1, 1),
+    ('project', 1, 1), ('apis', 1, 1), ('mcsm', 4, 1), ('team', 5, 1)
+ON DUPLICATE KEY UPDATE page_key = page_key;
+
 INSERT INTO yyt_invite (code) VALUES ('YYT-WELCOME-001');

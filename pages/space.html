@@ -174,7 +174,7 @@ a { color: #ef5777; }
     font-family: 'Orbixbeta', 'MiSans', '微软雅黑', sans-serif;
     font-feature-settings: 'ss01' 1;
     font-size: 15px;
-    letter-spacing: 2px;
+    letter-spacing: 1px;
     margin-bottom: 16px;
     color: #fff;
 }
@@ -290,7 +290,7 @@ a { color: #ef5777; }
     font-family: 'Orbixbeta', 'MiSans', '微软雅黑', sans-serif;
     font-feature-settings: 'ss01' 1;
     font-size: 14px;
-    letter-spacing: 2px;
+    letter-spacing: 1px;
     color: #fff;
 }
 .page-mini::before { font-feature-settings: 'ss01' 0; content: '/ '; color: #ef5777; }
@@ -597,6 +597,41 @@ a { color: #ef5777; }
     }
     .main-area { padding: 60px 16px 40px; }
 }
+.select-input {
+    background: #0d0d0f;
+    border: 1px solid #2b2b2e;
+    border-radius: 8px;
+    padding: 6px 10px;
+    color: #eee;
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+    cursor: pointer;
+}
+.select-input:focus { border-color: #ef5777; }
+.lvl-badge { font-size: 11px; border-radius: 20px; padding: 2px 10px; border: 1px solid rgba(239,87,119,.4); color: #ef5777; white-space: nowrap; }
+.team-scroll { max-height: 460px; overflow-y: auto; }
+.team-scroll::-webkit-scrollbar { width: 6px; }
+.team-scroll::-webkit-scrollbar-thumb { background: #2b2b2e; border-radius: 3px; }
+.mrow { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #1e1e21; }
+.mrow:last-child { border-bottom: none; }
+.mrow .m-name { font-size: 14px; color: #fff; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mrow .m-mail { font-size: 12px; color: #777; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mrow .m-skill { flex: 1; min-width: 80px; }
+.mrow .m-skill input { width: 100%; background: #0d0d0f; border: 1px solid #2b2b2e; border-radius: 8px; padding: 6px 10px; color: #eee; font-size: 12px; font-family: inherit; outline: none; }
+.mrow .m-skill input:focus { border-color: #ef5777; }
+.stat-block { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; }
+.stat-block .sb { background: #0d0d0f; border: 1px solid #222; border-radius: 10px; padding: 16px 10px; text-align: center; }
+.stat-block .sb .n { font-size: 26px; font-weight: bold; color: #fff; }
+.stat-block .sb .l { font-size: 12px; color: #999; margin-top: 4px; }
+.pg-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #1e1e21; }
+.pg-row:last-child { border-bottom: none; }
+.pg-row .pg-name { flex: 1; font-size: 14px; color: #eee; }
+.pg-toggle { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #999; cursor: pointer; }
+.pg-toggle input { width: 15px; height: 15px; accent-color: #ef5777; }
+.grp-card { background: #0d0d0f; border: 1px solid #222; border-radius: 10px; padding: 14px; margin-bottom: 12px; display: flex; align-items: center; gap: 14px; }
+.grp-card .grp-name { font-size: 15px; color: #fff; min-width: 130px; }
+.grp-card .grp-count { font-size: 13px; color: #999; }
 </style>
 </head>
 <body>
@@ -618,6 +653,7 @@ a { color: #ef5777; }
             <div class="nav-item" data-page="project" onclick="switchPage('project', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 16.008V7.99a1.98 1.98 0 0 0-1-1.717l-7-4.008a2.02 2.02 0 0 0-2 0L4 6.273c-.619.355-1 1.01-1 1.718v8.018c0 .709.381 1.363 1 1.717l7 4.008a2.02 2.02 0 0 0 2 0l7-4.008c.619-.355 1-1.01 1-1.718M12 22V12m0 0l8.73-5.04m-17.46 0L12 12"/></svg> 项目展示</div>
             <div class="nav-item" data-page="apis" onclick="switchPage('apis', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 13h5m3 3V8h3a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-3m8-5v8M9 16v-5.5a2.5 2.5 0 0 0-5 0V16"/></svg> API 文档</div>
             <div class="nav-item" data-page="mcsm" onclick="switchPage('mcsm', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1zm4 15h10m-8-4v4m6-4v4"/></svg> MCSManager</div>
+            <div class="nav-item hide" data-page="team" onclick="switchPage('team', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8a4 4 0 0 0 0 8m13 10v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg> 团队管理</div>
         </div>
         <div class="side-user-wrap">
             <div class="user-menu hide" id="userMenu" onclick="event.stopPropagation()">
@@ -782,15 +818,55 @@ a { color: #ef5777; }
             </div>
         </div>
         <div class="page hide" id="pageNotice">
-            <div class="page-mini">UPDATES</div>
-            <div class="page-title">通知动态</div>
-            <div class="page-sub">团队的公告与最新动态都在这里.</div>
+            <div class="page-head">
+                <div class="htxt">
+                    <div class="page-mini">UPDATES</div>
+                    <div class="page-title">通知动态</div>
+                    <div class="page-sub">团队的公告与最新动态都在这里.</div>
+                </div>
+                <button class="add-todo-btn hide" id="noticeAddBtn" onclick="toggleNoticeForm()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m-7-7h14"/></svg> 发布通知</button>
+            </div>
+            <div class="form-box hide" id="noticeFormBox" style="margin-bottom:20px">
+                <div class="form-row">
+                    <label class="form-label"><b>*</b> 标题</label>
+                    <input class="form-input" id="noticeTitle" placeholder="通知标题">
+                </div>
+                <div class="form-row">
+                    <label class="form-label">内容</label>
+                    <textarea class="form-area" id="noticeContent" placeholder="通知正文"></textarea>
+                </div>
+                <button class="add-todo-btn" onclick="btnRun(this, submitNotice)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 12l5 5L20 7"/></svg> 发布</button>
+            </div>
             <div class="panel" id="noticePageList"></div>
         </div>
         <div class="page hide" id="pageProject">
-            <div class="page-mini">PROJECTS</div>
-            <div class="page-title">项目展示</div>
-            <div class="page-sub">团队正在进行的项目.</div>
+            <div class="page-head">
+                <div class="htxt">
+                    <div class="page-mini">PROJECTS</div>
+                    <div class="page-title">项目展示</div>
+                    <div class="page-sub">团队正在进行的项目.</div>
+                </div>
+                <button class="add-todo-btn hide" id="projectAddBtn" onclick="toggleProjectForm()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m-7-7h14"/></svg> 添加项目</button>
+            </div>
+            <div class="form-box hide" id="projectFormBox" style="margin-bottom:20px">
+                <div class="form-row">
+                    <label class="form-label"><b>*</b> 项目名</label>
+                    <input class="form-input" id="projectName" placeholder="项目名称">
+                </div>
+                <div class="form-row">
+                    <label class="form-label">简介</label>
+                    <input class="form-input" id="projectInfo" placeholder="一句话介绍">
+                </div>
+                <div class="form-row">
+                    <label class="form-label">链接</label>
+                    <input class="form-input" id="projectLink" placeholder="https://...">
+                </div>
+                <div class="form-row">
+                    <label class="form-label">成员</label>
+                    <input class="form-input" id="projectMembers" placeholder="成员, 逗号分隔">
+                </div>
+                <button class="add-todo-btn" onclick="btnRun(this, submitProject)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 12l5 5L20 7"/></svg> 添加</button>
+            </div>
             <div id="projectPageList"></div>
         </div>
         <div class="page hide" id="pageApis">
@@ -809,8 +885,48 @@ a { color: #ef5777; }
         <div class="page hide" id="pageMcsm">
             <div class="page-mini">MCSMANAGER</div>
             <div class="page-title">MCSManager</div>
-            <div class="page-sub">经签名代理安全访问面板, 真实地址已隐藏.</div>
+            <div class="page-sub">这里是你无远程时 唯一可以接触到面板的入口.</div>
             <div id="mcsmBox"><div class="mcsm-tip">正在准备面板...</div></div>
+        </div>
+        <div class="page hide" id="pageTeam">
+            <div class="page-mini">TEAM ADMIN</div>
+            <div class="page-title">团队管理</div>
+            <div class="page-sub">管理团队成员、权限组、页面访问、邀请码与站点统计. 仅服主可访问.</div>
+            <div class="card-grid">
+                <div class="card" style="grid-column:1/-1">
+                    <div class="card-head">PERMISSION GROUPS</div>
+                    <div style="color:#999;font-size:13px;margin-bottom:14px">团队权限组与各等级人数. 可在「成员管理」中调整成员等级.</div>
+                    <div id="teamGroups"></div>
+                </div>
+                <div class="card" style="grid-column:1/-1">
+                    <div class="card-head">MEMBERS</div>
+                    <div style="color:#999;font-size:13px;margin-bottom:14px">所有注册账号. 可快捷编辑核心能力与权限组.</div>
+                    <div class="team-scroll" id="teamMembers"></div>
+                </div>
+                <div class="card" style="grid-column:1/-1">
+                    <div class="card-head">PAGE ACCESS</div>
+                    <div style="color:#999;font-size:13px;margin-bottom:14px">管理各页面在侧栏的显示与最低访问等级.</div>
+                    <div id="teamPages"></div>
+                </div>
+                <div class="card" style="grid-column:1/-1">
+                    <div class="card-head">INVITE CODES</div>
+                    <div style="color:#999;font-size:13px;margin-bottom:14px">全站邀请码与使用情况.</div>
+                    <div class="team-scroll" id="teamInvites"></div>
+                </div>
+                <div class="card" style="grid-column:1/-1">
+                    <div class="card-head">STATISTICS</div>
+                    <div style="color:#999;font-size:13px;margin-bottom:16px">站点全局统计.</div>
+                    <div id="teamStats"></div>
+                </div>
+                <div class="card" style="grid-column:1/-1">
+                    <div class="card-head">ACTIVITY LOGS</div>
+                    <div style="color:#999;font-size:13px;margin-bottom:14px">最近的用户操作日志.</div>
+                    <div class="team-scroll" id="teamLogs"></div>
+                    <div style="margin-top:14px;display:flex;justify-content:flex-end">
+                        <button class="act-btn" id="teamLogsMoreBtn" onclick="btnRun(this, loadTeamLogsAll)">查看全部日志 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-6 6l6-6m-6-6l6 6"/></svg></button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -834,10 +950,32 @@ async function postJson(url, body) {
     });
     return res.json();
 }
-var PAGE_PATH = { home: '/', overview: '/overview', todo: '/todos', notice: '/notice', project: '/projects', apis: '/apis', logs: '/logs', mcsm: '/mcsmanager', addtodo: '/todos/add' };
-var NAV_OF = { home: 'home', overview: 'overview', todo: 'todo', notice: 'notice', project: 'project', apis: 'apis', logs: 'overview', mcsm: 'mcsm', addtodo: 'todo' };
-var PAGE_LOADER = { home: null, overview: loadOverview, todo: loadTodo, notice: loadNotice, project: loadProject, apis: loadApis, logs: loadLogs, mcsm: loadMcsm, addtodo: resetAddTodo };
+var PAGE_PATH = { home: '/', overview: '/overview', todo: '/todos', notice: '/notice', project: '/projects', apis: '/apis', logs: '/logs', mcsm: '/mcsmanager', team: '/team', addtodo: '/todos/add' };
+var NAV_OF = { home: 'home', overview: 'overview', todo: 'todo', notice: 'notice', project: 'project', apis: 'apis', logs: 'overview', mcsm: 'mcsm', team: 'team', addtodo: 'todo' };
+var PAGE_LOADER = { home: null, overview: loadOverview, todo: loadTodo, notice: loadNotice, project: loadProject, apis: loadApis, logs: loadLogs, mcsm: loadMcsm, team: loadTeam, addtodo: resetAddTodo };
 var SPIN_SVG = '<svg xmlns="http://www.w3.org/2000/svg" class="spin" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3a9 9 0 1 0 9 9"/></svg>';
+var LEVEL_NAME = { 0: '待定', 1: '志愿者 | 初级', 2: '志愿者 | 中级', 3: '志愿者 | 高级', 4: '管理员', 5: '服主' };
+var DEFAULT_PAGE_ACCESS = {
+    home: { min_level: 0, show_in_nav: 1 }, overview: { min_level: 0, show_in_nav: 1 },
+    todo: { min_level: 1, show_in_nav: 1 }, notice: { min_level: 1, show_in_nav: 1 },
+    project: { min_level: 1, show_in_nav: 1 }, apis: { min_level: 1, show_in_nav: 1 },
+    mcsm: { min_level: 4, show_in_nav: 1 }, team: { min_level: 5, show_in_nav: 1 }
+};
+var PAGE_LABEL = { home: '空间首页', overview: '个人概览', todo: '待办事项', notice: '通知动态', project: '项目展示', apis: 'API 文档', mcsm: 'MCSManager', team: '团队管理' };
+var meUser = null;
+var pageAccess = {};
+function myLevel() { return (meUser && meUser.level) || 0; }
+function levelName(lv) { return LEVEL_NAME[lv] || '待定'; }
+function pageCfg(page) {
+    var c = pageAccess[page] || DEFAULT_PAGE_ACCESS[page] || { min_level: 0, show_in_nav: 1 };
+    return { min_level: c.min_level || 0, show_in_nav: c.show_in_nav ? 1 : 0 };
+}
+function canAccess(page) { return myLevel() >= pageCfg(page).min_level; }
+function levelOptions(sel) {
+    var o = '';
+    for (var i = 0; i <= 5; i++) o += '<option value="' + i + '"' + (i === sel ? ' selected' : '') + '>' + levelName(i) + '</option>';
+    return o;
+}
 async function btnRun(btn, fn) {
     if (btn.dataset.busy) return false;
     btn.dataset.busy = '1';
@@ -889,6 +1027,7 @@ function showPage(name) {
 }
 async function switchPage(name, el) {
     if (name === nowPage) return;
+    if (!canAccess(name)) return;
     var fn = PAGE_LOADER[name];
     if (fn) {
         topBarOn();
@@ -924,11 +1063,15 @@ function doSearch(kw) {
 async function loadMe() {
     var ret = await getJson('/api/me');
     var u = ret.data;
+    meUser = u;
     document.getElementById('pfName').textContent = u.name;
     document.getElementById('pfMail').textContent = u.email;
-    document.getElementById('pfRole').textContent = '职位: ' + (u.role || '--');
+    document.getElementById('pfRole').textContent = '等级: ' + levelName(u.level || 0);
     document.getElementById('sideName').textContent = u.name;
     document.getElementById('sideMail').textContent = u.email;
+    var canPublish = (u.level || 0) >= 4;
+    var nb = document.getElementById('noticeAddBtn'); if (nb) nb.classList.toggle('hide', !canPublish);
+    var pb = document.getElementById('projectAddBtn'); if (pb) pb.classList.toggle('hide', !canPublish);
     document.getElementById('heroText').textContent = '嘿, ' + u.name + '! 欢迎回到烟雨庭. 这里汇总了你的待办、团队通知和正在进行的项目, 一起把服务器做得更好吧.';
     var skillBox = document.getElementById('pfSkill');
     if (u.skill) {
@@ -1106,7 +1249,7 @@ async function loadOverview() {
     ovData = ret.data;
     var u = ovData.user;
     document.getElementById('ovName').textContent = u.name;
-    document.getElementById('ovRole').textContent = u.role || '成员';
+    document.getElementById('ovRole').textContent = levelName(u.level || 0);
     document.getElementById('ovMail').textContent = u.email;
     document.getElementById('ovSkill').textContent = u.skill || '还没有填写';
     document.getElementById('ovId').textContent = u.id;
@@ -1351,16 +1494,193 @@ async function doLogout() {
     await postJson('/api/logout', {});
     location.reload();
 }
+async function loadPagesConfig() {
+    var ret = await getJson('/api/pages');
+    var list = ret.data || [];
+    list.forEach(function(p) {
+        pageAccess[p.page_key] = { min_level: p.min_level, show_in_nav: p.show_in_nav };
+    });
+}
+function applyNavFilter() {
+    var lv = myLevel();
+    document.querySelectorAll('.nav-item').forEach(function(n) {
+        var page = n.dataset.page;
+        if (!page) return;
+        var cfg = pageCfg(page);
+        n.classList.toggle('hide', !(cfg.show_in_nav && lv >= cfg.min_level));
+    });
+}
+async function loadTeam() {
+    var ru = await getJson('/api/admin_users');
+    if (ru.code === 403) {
+        ['teamGroups','teamMembers','teamPages','teamInvites','teamStats','teamLogs'].forEach(function(id) {
+            document.getElementById(id).innerHTML = '<div class="empty-tip">无权限访问</div>';
+        });
+        return;
+    }
+    var users = ru.data || [];
+    var ret = await Promise.all([
+        getJson('/api/admin_invites'),
+        getJson('/api/admin_stats'),
+        getJson('/api/admin_logs?limit=50'),
+        getJson('/api/pages')
+    ]);
+    renderTeamGroups(users);
+    renderTeamMembers(users);
+    renderTeamPages(ret[3].data || []);
+    renderTeamInvites(ret[0].data || []);
+    renderTeamStats(ret[1].data || {});
+    renderTeamLogs(ret[2].data || []);
+}
+function renderTeamGroups(users) {
+    var counts = {};
+    for (var i = 0; i <= 5; i++) counts[i] = 0;
+    users.forEach(function(u) { counts[u.level || 0] = (counts[u.level || 0] || 0) + 1; });
+    var html = '';
+    for (var i = 5; i >= 0; i--) {
+        html += '<div class="grp-card"><span class="lvl-badge">' + esc(levelName(i)) + '</span>' +
+            '<div class="grp-name">' + esc(levelName(i)) + '</div>' +
+            '<div class="grp-count">' + counts[i] + ' 人</div></div>';
+    }
+    document.getElementById('teamGroups').innerHTML = html;
+}
+function renderTeamMembers(users) {
+    if (!users.length) {
+        document.getElementById('teamMembers').innerHTML = '<div class="empty-tip">还没有成员</div>';
+        return;
+    }
+    var html = users.map(function(u) {
+        return '<div class="mrow">' +
+            '<div style="min-width:130px"><div class="m-name">' + esc(u.name) + '</div><div class="m-mail">' + esc(u.email) + '</div></div>' +
+            '<div class="m-skill"><input value="' + esc(u.skill || '') + '" placeholder="核心能力" onchange="saveUserField(' + u.id + ', \'skill\', this.value)"></div>' +
+            '<select class="select-input" onchange="saveUserField(' + u.id + ', \'level\', this.value)">' + levelOptions(u.level || 0) + '</select>' +
+            '</div>';
+    }).join('');
+    document.getElementById('teamMembers').innerHTML = html;
+}
+function renderTeamPages(pages) {
+    if (!pages.length) {
+        document.getElementById('teamPages').innerHTML = '<div class="empty-tip">无页面配置</div>';
+        return;
+    }
+    var html = pages.map(function(p) {
+        var label = PAGE_LABEL[p.page_key] || p.page_key;
+        return '<div class="pg-row" data-pk="' + esc(p.page_key) + '">' +
+            '<div class="pg-name">' + esc(label) + '</div>' +
+            '<select class="select-input pg-lvl" onchange="savePageAccess(\'' + p.page_key + '\')">' + levelOptions(p.min_level || 0) + '</select>' +
+            '<label class="pg-toggle"><input type="checkbox" class="pg-nav" ' + (p.show_in_nav ? 'checked' : '') + ' onchange="savePageAccess(\'' + p.page_key + '\')"> 侧栏显示</label>' +
+            '</div>';
+    }).join('');
+    document.getElementById('teamPages').innerHTML = html;
+}
+function renderTeamInvites(invites) {
+    if (!invites.length) {
+        document.getElementById('teamInvites').innerHTML = '<div class="empty-tip">还没有邀请码</div>';
+        return;
+    }
+    var html = invites.map(function(iv) {
+        var used = !!iv.used_at;
+        var top = '<div class="iv-top"><span class="iv-code">#' + esc(iv.code) + '</span>' +
+            (used ? '<span class="chip no">已被使用</span>' : '<span class="chip ok">未使用</span>') + '</div>';
+        var creator = iv.creator_name ? '创建者: ' + esc(iv.creator_name) : '创建者: 系统';
+        var mid = used
+            ? '<div class="iv-user"><img src="/assets/yyt64x.png" alt=""><div><div class="iv-un">' + esc(iv.used_name || '--') + '</div><div class="iv-ue">' + esc(iv.used_email || '--') + '</div></div></div>' +
+              '<div class="iv-date">' + creator + '<br>创建: ' + esc(iv.created_at) + '<br>使用: ' + esc(iv.used_at) + '</div>'
+            : '<div class="iv-date">' + creator + '<br>创建: ' + esc(iv.created_at) + '</div>' +
+              '<div style="margin-top:10px"><button class="act-btn" style="width:100%;justify-content:center" onclick="copyText(\'' + esc(iv.code) + '\', this)">复制邀请码</button></div>';
+        return '<div class="invite-box">' + top + mid + '</div>';
+    }).join('');
+    document.getElementById('teamInvites').innerHTML = html;
+}
+function renderTeamStats(s) {
+    var items = [
+        ['注册用户', s.users], ['API调用总数', s.api_total], ['今日API', s.api_today],
+        ['近7天API', s.api_week], ['访问总数', s.visits_total], ['今日访问', s.visits_today],
+        ['近7天访问', s.visits_week], ['通知数', s.notices], ['项目数', s.projects],
+        ['待办数', s.todos], ['邀请码', s.invites], ['已用邀请码', s.invites_used], ['在线会话', s.sessions]
+    ];
+    document.getElementById('teamStats').innerHTML = '<div class="stat-block">' + items.map(function(it) {
+        return '<div class="sb"><div class="n">' + esc(it[1]) + '</div><div class="l">' + esc(it[0]) + '</div></div>';
+    }).join('') + '</div>';
+}
+function renderTeamLogs(logs) {
+    if (!logs.length) {
+        document.getElementById('teamLogs').innerHTML = '<div class="empty-tip">还没有日志</div>';
+        return;
+    }
+    var html = logs.map(function(l) {
+        return '<div class="trow"><div class="t-body"><div class="t-line"><span class="t-title">' + esc(l.path || '--') + '</span></div>' +
+            '<div class="t-meta">' + esc(l.user_name || '未知') + ' · IP: ' + esc(l.ip || '未知') + ' · ' + esc(l.created_at) + '</div></div></div>';
+    }).join('');
+    document.getElementById('teamLogs').innerHTML = html;
+}
+async function loadTeamLogsAll() {
+    var ret = await getJson('/api/admin_logs?limit=500');
+    renderTeamLogs(ret.data || []);
+}
+async function saveUserField(id, field, value) {
+    var body = { id: id };
+    body[field] = value;
+    await postJson('/api/admin_users', body);
+}
+async function savePageAccess(pk) {
+    var row = document.querySelector('.pg-row[data-pk="' + pk + '"]');
+    if (!row) return;
+    var lvl = parseInt(row.querySelector('.pg-lvl').value) || 0;
+    var nav = row.querySelector('.pg-nav').checked ? 1 : 0;
+    pageAccess[pk] = { min_level: lvl, show_in_nav: nav };
+    await postJson('/api/pages', { page_key: pk, min_level: lvl, show_in_nav: nav });
+    applyNavFilter();
+}
+function toggleNoticeForm() {
+    document.getElementById('noticeFormBox').classList.toggle('hide');
+}
+async function submitNotice() {
+    var title = document.getElementById('noticeTitle').value.trim();
+    if (!title) return;
+    var content = document.getElementById('noticeContent').value.trim();
+    var ret = await postJson('/api/notice', { title: title, content: content });
+    if (ret.code === 0) {
+        document.getElementById('noticeTitle').value = '';
+        document.getElementById('noticeContent').value = '';
+        document.getElementById('noticeFormBox').classList.add('hide');
+        await loadNotice();
+    }
+}
+function toggleProjectForm() {
+    document.getElementById('projectFormBox').classList.toggle('hide');
+}
+async function submitProject() {
+    var name = document.getElementById('projectName').value.trim();
+    if (!name) return;
+    var ret = await postJson('/api/project', {
+        name: name,
+        info: document.getElementById('projectInfo').value.trim(),
+        link: document.getElementById('projectLink').value.trim(),
+        members: document.getElementById('projectMembers').value.trim()
+    });
+    if (ret.code === 0) {
+        ['projectName','projectInfo','projectLink','projectMembers'].forEach(function(id) { document.getElementById(id).value = ''; });
+        document.getElementById('projectFormBox').classList.add('hide');
+        await loadProject();
+    }
+}
 (async function boot() {
     var start = pageFromPath();
     showPage(start);
     try {
-        var jobs = [loadMe(), loadTodo(), loadNotice(), loadProject(), document.fonts.ready];
+        var jobs = [loadMe(), loadPagesConfig(), loadTodo(), loadNotice(), loadProject(), document.fonts.ready];
         if (start === 'overview') jobs.push(loadOverview());
         if (start === 'apis') jobs.push(loadApis());
         if (start === 'logs') jobs.push(loadLogs());
         if (start === 'mcsm') jobs.push(loadMcsm());
+        if (start === 'team') jobs.push(loadTeam());
         await Promise.all(jobs);
+        applyNavFilter();
+        if (!canAccess(start)) {
+            history.replaceState(null, '', '/');
+            showPage('home');
+        }
     } finally {
         document.getElementById('loadMask').style.display = 'none';
     }
