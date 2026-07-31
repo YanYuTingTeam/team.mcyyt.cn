@@ -27,15 +27,19 @@ def proxy(request, subpath):
     req = urllib.request.Request(target, data=body, method=request.method)
     req.add_header('Content-Type', 'application/json; charset=utf-8')
     req.add_header('X-Requested-With', 'XMLHttpRequest')
+    out = None
     try:
         with urllib.request.urlopen(req, timeout=30) as resp:
             data = resp.read()
             ctype = resp.headers.get('Content-Type', 'application/json')
-            return Response(data, status=resp.status, mimetype=ctype.split(';')[0])
+            out = Response(data, status=resp.status, mimetype=ctype.split(';')[0])
     except urllib.error.HTTPError as e:
-        return Response(e.read(), status=e.code, mimetype="application/json")
+        out = Response(e.read(), status=e.code, mimetype="application/json")
     except Exception as e:
-        return Response(
+        out = Response(
             json.dumps({"status": 500, "data": None, "message": "代理请求失败: " + str(e)}, ensure_ascii=False),
             status=502, mimetype="application/json"
         )
+    if user.get('apikey'):
+        out.set_cookie('mcsm_proxy_key', user['apikey'], httponly=True, path='/', samesite='Lax')
+    return out

@@ -27,7 +27,7 @@ def check_login(request):
         db.close()
 
 def check_apikey(request):
-    key = request.headers.get('X-API-Key') or request.args.get('apikey')
+    key = request.headers.get('X-API-Key') or request.args.get('apikey') or request.cookies.get('mcsm_proxy_key')
     if not key:
         return None
     db = get_db()
