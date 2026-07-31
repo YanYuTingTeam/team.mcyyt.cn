@@ -17,10 +17,103 @@
     font-display: swap;
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
+:root { --err: #ef5777; --brd: #2b2b2e; --bg0: #0a0a0b; --bg1: #0d0d0f; --txt: #eee; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: #080809; }
+::-webkit-scrollbar-thumb { background: #2a2a2e; border-radius: 5px; border: 2px solid #080809; }
+::-webkit-scrollbar-thumb:hover { background: #3a3a3f; }
+::-webkit-scrollbar-corner { background: #080809; }
+html, body { scrollbar-color: #2a2a2e #080809; scrollbar-width: thin; }
 body {
     font-family: 'Patika', 'MiSans', '微软雅黑', sans-serif;
     background: #000;
     color: #eee;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+}
+.sky-bg {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background:
+        radial-gradient(ellipse at 20% 10%, rgba(99, 102, 241, 0.08), transparent 55%),
+        radial-gradient(ellipse at 85% 0%, rgba(139, 92, 246, 0.08), transparent 55%),
+        radial-gradient(ellipse at 50% 100%, rgba(239, 87, 119, 0.05), transparent 60%),
+        linear-gradient(180deg, #07080c 0%, #0a0a0f 50%, #08080a 100%);
+    overflow: hidden;
+}
+.sky-bg::before, .sky-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-repeat: repeat;
+    will-change: transform;
+}
+.sky-bg::before {
+    background-image:
+        radial-gradient(1px 1px at 20px 30px, #fff, transparent),
+        radial-gradient(1px 1px at 140px 220px, rgba(255,255,255,.7), transparent),
+        radial-gradient(1px 1px at 300px 90px, #fff, transparent),
+        radial-gradient(1.5px 1.5px at 420px 320px, rgba(255,255,255,.8), transparent),
+        radial-gradient(1px 1px at 540px 150px, #fff, transparent),
+        radial-gradient(1px 1px at 680px 260px, rgba(255,255,255,.6), transparent),
+        radial-gradient(1.5px 1.5px at 80px 400px, #fff, transparent),
+        radial-gradient(1px 1px at 820px 60px, rgba(255,255,255,.7), transparent);
+    background-size: 900px 500px;
+    animation: starsDrift 180s linear infinite;
+    opacity: .65;
+}
+.sky-bg::after {
+    background-image:
+        radial-gradient(1px 1px at 50px 110px, rgba(255,255,255,.8), transparent),
+        radial-gradient(1.5px 1.5px at 220px 380px, #fff, transparent),
+        radial-gradient(1px 1px at 360px 200px, rgba(255,255,255,.7), transparent),
+        radial-gradient(1px 1px at 520px 460px, #fff, transparent),
+        radial-gradient(2px 2px at 720px 180px, rgba(255,255,255,.6), transparent);
+    background-size: 1100px 600px;
+    animation: starsDrift 320s linear infinite reverse;
+    opacity: .5;
+}
+@keyframes starsDrift {
+    from { transform: translate3d(0, 0, 0); }
+    to { transform: translate3d(-450px, -250px, 0); }
+}
+.meteors {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    overflow: hidden;
+}
+.meteor {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow:
+        0 0 6px 2px rgba(255, 255, 255, .55),
+        0 0 12px 4px rgba(139, 92, 246, .35);
+    opacity: 0;
+    will-change: transform, opacity;
+}
+.meteor::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 2px;
+    height: 1px;
+    width: 180px;
+    max-width: 22vw;
+    background: linear-gradient(90deg, rgba(255,255,255,.85), rgba(139, 92, 246, .55), transparent);
+    transform: translateY(-50%);
+}
+@keyframes meteorFly {
+    0% { transform: rotate(-32deg) translateX(0); opacity: 0; }
+    8% { opacity: 1; }
+    85% { opacity: 1; }
+    100% { transform: rotate(-32deg) translateX(-1200px); opacity: 0; }
 }
 a { color: #ef5777; }
 .hide { display: none !important; }
@@ -202,13 +295,17 @@ a { color: #ef5777; }
 .profile-row { font-size: 14px; margin-bottom: 10px; color: #ccc; }
 .skill-tag {
     display: inline-block;
-    border: 1px solid #ef5777;
-    color: #ef5777;
     border-radius: 20px;
     padding: 2px 12px;
     font-size: 12px;
     margin: 0 6px 6px 0;
+    background: rgba(239, 87, 119, 0.06);
+    border: 1px solid;
+    border-color: rgba(239, 87, 119, .4);
+    color: #ef5777;
+    white-space: nowrap;
 }
+.skill-tag.sm { padding: 1px 10px; font-size: 11px; }
 .small-btn {
     display: inline-flex;
     align-items: center;
@@ -267,6 +364,8 @@ a { color: #ef5777; }
     outline: none;
 }
 .add-row input:focus { border-color: #ef5777; }
+.add-row input.err { border-color: #ef5777; box-shadow: 0 0 0 2px rgba(239,87,119,.15); }
+.add-row input.err.changed, .add-row input.err:not(:placeholder-shown) { border-color: #2b2b2e; box-shadow: none; }
 .notice-item { border-bottom: 1px solid #1e1e21; padding: 12px 0; }
 .notice-item:last-child { border-bottom: none; }
 .notice-item .tt { font-size: 14px; color: #fff; margin-bottom: 4px; }
@@ -390,6 +489,9 @@ a { color: #ef5777; }
     transition: border .2s;
 }
 .form-input:focus, .form-area:focus { border-color: #ef5777; }
+.form-input.err, .form-area.err { border-color: #ef5777; box-shadow: 0 0 0 2px rgba(239,87,119,.18); }
+.form-input.err:not(:placeholder-shown), .form-area.err:not(:placeholder-shown),
+.form-input.err.changed, .form-area.err.changed { border-color: #2b2b2e; box-shadow: none; }
 .form-area { resize: vertical; min-height: 96px; line-height: 1.6; }
 .form-row { margin-bottom: 20px; }
 .picker-wrap { position: relative; }
@@ -512,11 +614,11 @@ a { color: #ef5777; }
 #inviteList::-webkit-scrollbar, #deviceList::-webkit-scrollbar { width: 6px; }
 #inviteList::-webkit-scrollbar-thumb, #deviceList::-webkit-scrollbar-thumb { background: #2b2b2e; border-radius: 3px; }
 .ov-col .card { width: 100%; }
-.ov-profile { display: flex; gap: 16px; }
+.ov-profile { display: flex; gap: 16px; align-items: flex-start; }
 .ov-profile img { width: 72px; height: 72px; border-radius: 50%; background: #fff; flex-shrink: 0; }
 .ov-profile .pv-main { flex: 1; min-width: 0; }
-.ov-profile .pv-name { font-size: 20px; font-weight: bold; }
-.ov-profile .pv-role { font-size: 12px; color: #ef5777; border: 1px solid rgba(239,87,119,.4); border-radius: 20px; padding: 1px 10px; margin-left: 8px; vertical-align: 2px; }
+.ov-profile .pv-name { font-size: 20px; font-weight: bold; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.ov-profile .pv-role { display: inline-flex; align-items: center; font-size: 11px; border-radius: 20px; padding: 2px 10px; border: 1px solid; white-space: nowrap; line-height: 1.4; }
 .ov-profile .pv-row { font-size: 13px; color: #999; margin-top: 6px; word-break: break-all; }
 .stat-grid { display: flex; text-align: center; }
 .stat-grid .st { flex: 1; }
@@ -548,7 +650,9 @@ a { color: #ef5777; }
     font-size: 13px;
     font-family: inherit;
     outline: none;
+    transition: border-color .2s, box-shadow .2s;
 }
+.key-row input.err { border-color: #ef5777; box-shadow: 0 0 0 2px rgba(239,87,119,.15); }
 .dev-row {
     display: flex;
     align-items: center;
@@ -575,8 +679,11 @@ a { color: #ef5777; }
     font-size: 13px;
     font-family: inherit;
     outline: none;
+    transition: border-color .2s, box-shadow .2s;
 }
 .edit-row input:focus { border-color: #ef5777; }
+.edit-row input.err { border-color: #ef5777; box-shadow: 0 0 0 2px rgba(239,87,119,.15); }
+.edit-row input.err.changed, .edit-row input.err:not(:placeholder-shown) { border-color: #2b2b2e; box-shadow: none; }
 .menu-btn { display: none; }
 @media (max-width: 800px) {
     .side-bar { position: fixed; z-index: 9; left: -240px; transition: left .2s; }
@@ -607,9 +714,11 @@ a { color: #ef5777; }
     font-family: inherit;
     outline: none;
     cursor: pointer;
+    transition: border-color .2s, box-shadow .2s;
 }
 .select-input:focus { border-color: #ef5777; }
-.lvl-badge { font-size: 11px; border-radius: 20px; padding: 2px 10px; border: 1px solid rgba(239,87,119,.4); color: #ef5777; white-space: nowrap; }
+.select-input.err { border-color: #ef5777; box-shadow: 0 0 0 2px rgba(239,87,119,.15); }
+.lvl-badge { font-size: 11px; border-radius: 20px; padding: 2px 10px; border: 1px solid; color: var(--lc, #ef5777); border-color: var(--lcbd, rgba(239,87,119,.4)); white-space: nowrap; display: inline-flex; align-items: center; line-height: 1.4; }
 .team-scroll { max-height: 460px; overflow-y: auto; }
 .team-scroll::-webkit-scrollbar { width: 6px; }
 .team-scroll::-webkit-scrollbar-thumb { background: #2b2b2e; border-radius: 3px; }
@@ -629,9 +738,18 @@ a { color: #ef5777; }
 .pg-row .pg-name { flex: 1; font-size: 14px; color: #eee; }
 .pg-toggle { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #999; cursor: pointer; }
 .pg-toggle input { width: 15px; height: 15px; accent-color: #ef5777; }
-.grp-card { background: #0d0d0f; border: 1px solid #222; border-radius: 10px; padding: 14px; margin-bottom: 12px; display: flex; align-items: center; gap: 14px; }
-.grp-card .grp-name { font-size: 15px; color: #fff; flex: 1; min-width: 0; }
-.grp-card .grp-count { font-size: 13px; color: #999; }
+.grp-card { background: #0d0d0f; border: 1px solid #222; border-radius: 10px; padding: 14px; margin-bottom: 12px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.grp-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+@media (max-width: 720px) { .grp-grid { grid-template-columns: 1fr; } }
+.grp-card .grp-name { font-size: 15px; color: #fff; flex: 1 1 120px; min-width: 0; word-break: break-all; }
+.grp-card .grp-count { font-size: 13px; color: #999; flex-shrink: 0; }
+.grp-card .grp-actions { display: flex; gap: 8px; width: 100%; justify-content: flex-end; }
+@media (min-width: 720px) { .grp-card .grp-actions { width: auto; } }
+.card-head-btn.danger { color: #ef5777; }
+.card-head-btn.danger:hover { border-color: #ef5777; background: rgba(239, 87, 119, .08); }
+input.input-error, select.input-error, textarea.input-error { border-color: #ef5777 !important; box-shadow: 0 0 0 2px rgba(239, 87, 119, .18) !important; animation: shakeInp .28s ease 1; }
+@keyframes shakeInp { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+.u-chip.skill img { display: none; }
 .card-head-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
 .card-head-row .card-head { margin: 0; }
 .card-head-btn { display: inline-flex; align-items: center; gap: 6px; background: #1d1d20; border: 1px solid #333; color: #bbb; border-radius: 8px; padding: 6px 12px; font-size: 12px; font-family: inherit; cursor: pointer; transition: all .15s; white-space: nowrap; }
@@ -643,15 +761,21 @@ a { color: #ef5777; }
 .member-bar .mb-name { font-size: 14px; color: #fff; display: flex; align-items: center; gap: 8px; }
 .member-bar .mb-mail { font-size: 12px; color: #777; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .member-bar .mb-skill { font-size: 12px; color: #999; margin-top: 4px; }
-.modal-mask { position: fixed; inset: 0; background: rgba(0,0,0,.65); z-index: 500; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.modal-mask { position: fixed; inset: 0; background: rgba(0,0,0,.0); z-index: 500; display: flex; align-items: center; justify-content: center; padding: 20px; animation: fadeIn .22s ease forwards; }
 .modal-mask.hide { display: none; }
-.modal-box { background: #121214; border: 1px solid #232326; border-radius: 14px; width: 100%; max-width: 820px; max-height: calc(100vh - 40px); display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 80px rgba(0,0,0,.6); }
-.modal-head { padding: 20px 24px; border-bottom: 1px solid #1e1e21; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.modal-head .mh-title { font-size: 18px; font-weight: bold; color: #fff; }
-.modal-close { background: none; border: none; color: #999; font-size: 22px; cursor: pointer; padding: 0 6px; line-height: 1; }
-.modal-close:hover { color: #ef5777; }
-.modal-body { padding: 20px 24px; overflow-y: auto; }
-.modal-foot { padding: 16px 24px; border-top: 1px solid #1e1e21; display: flex; justify-content: flex-end; gap: 10px; }
+.modal-mask.closing { animation: fadeOut .18s ease forwards; pointer-events: none; }
+.modal-box { background: #121214; border: 1px solid #232326; border-radius: 14px; width: 100%; max-width: 820px; max-height: calc(100vh - 40px); display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 80px rgba(0,0,0,.6); animation: popIn .24s cubic-bezier(.2,.9,.25,1.15) forwards; transform-origin: center; }
+.modal-mask.closing .modal-box { animation: popOut .18s ease forwards; }
+@keyframes fadeIn { from { background: rgba(0,0,0,0); } to { background: rgba(0,0,0,.68); } }
+@keyframes fadeOut { from { background: rgba(0,0,0,.68); } to { background: rgba(0,0,0,0); } }
+@keyframes popIn { from { opacity: 0; transform: translateY(14px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes popOut { from { opacity: 1; transform: translateY(0) scale(1); } to { opacity: 0; transform: translateY(10px) scale(.98); } }
+.modal-head { padding: 18px 22px; border-bottom: 1px solid #1e1e21; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.modal-head .mh-title { font-size: 17px; font-weight: bold; color: #fff; }
+.modal-close { background: none; border: none; color: #999; font-size: 22px; cursor: pointer; padding: 0 6px; line-height: 1; transition: color .15s, transform .15s; }
+.modal-close:hover { color: #ef5777; transform: scale(1.1); }
+.modal-body { padding: 18px 22px; overflow-y: auto; }
+.modal-foot { padding: 14px 22px; border-top: 1px solid #1e1e21; display: flex; justify-content: flex-end; gap: 10px; }
 .md-section { margin-bottom: 24px; }
 .md-section:last-child { margin-bottom: 0; }
 .md-label { font-size: 12px; color: #ef5777; letter-spacing: 0.75px; margin-bottom: 10px; font-family: 'Orbixbeta'; }
@@ -659,9 +783,11 @@ a { color: #ef5777; }
 .md-row:last-child { border-bottom: none; }
 .md-row .md-k { color: #888; font-size: 13px; width: 100px; flex-shrink: 0; padding-top: 6px; }
 .md-row .md-v { color: #ddd; font-size: 13px; flex: 1; min-width: 0; word-break: break-all; padding-top: 6px; }
-.md-row .md-v input, .md-row .md-v select, .md-row .md-v .color-in { background: #0d0d0f; border: 1px solid #2b2b2e; border-radius: 8px; padding: 6px 10px; color: #eee; font-size: 13px; font-family: inherit; outline: none; width: 100%; }
+.md-row .md-v input, .md-row .md-v select, .md-row .md-v .color-in { background: #0d0d0f; border: 1px solid #2b2b2e; border-radius: 8px; padding: 6px 10px; color: #eee; font-size: 13px; font-family: inherit; outline: none; width: 100%; transition: border-color .2s, box-shadow .2s; }
 .md-row .md-v .color-in { width: 80px; height: 32px; padding: 2px; cursor: pointer; }
 .md-row .md-v input:focus, .md-row .md-v select:focus { border-color: #ef5777; }
+.md-row .md-v input.err, .md-row .md-v select.err { border-color: #ef5777; box-shadow: 0 0 0 2px rgba(239,87,119,.15); }
+.md-row .md-v input.err.changed, .md-row .md-v input.err:not(:placeholder-shown) { border-color: #2b2b2e; box-shadow: none; }
 .mem-avatar-row { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
 .mem-avatar-row img { width: 64px; height: 64px; border-radius: 50%; background: #fff; }
 .mem-avatar-row .ma-name { font-size: 20px; font-weight: bold; color: #fff; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
@@ -728,6 +854,8 @@ a { color: #ef5777; }
             </div>
         </div>
     </div>
+    <div class="sky-bg"></div>
+    <div class="meteors" id="meteorsLayer"></div>
     <div class="main-area">
         <div class="page" id="pageHome">
         <div class="card-grid">
@@ -738,9 +866,8 @@ a { color: #ef5777; }
             </div>
             <div class="card" id="cardProfile">
                 <div class="card-head">MEMBER PROFILE</div>
-                <div class="profile-name" id="pfName">--</div>
+                <div class="profile-name" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span id="pfName">--</span><span id="pfRole"></span></div>
                 <div class="profile-mail" id="pfMail">--</div>
-                <div class="profile-row" id="pfRole">职位: --</div>
                 <div class="profile-row">核心能力: <span id="pfSkill"><span class="empty-tip">还没有填写</span></span></div>
                 <div style="margin-top: 14px">
                     <button class="small-btn" onclick="btnRun(this, loadMe)">刷新信息</button>
@@ -981,6 +1108,14 @@ a { color: #ef5777; }
                 </div>
                 <div class="card">
                     <div class="card-head-row">
+                        <div class="card-head">CORE SKILLS</div>
+                        <button class="card-head-btn" onclick="btnRun(this, reloadSkills)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 11A8.1 8.1 0 0 0 4.5 9M4 5v4h4m-4 4a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg> 刷新</button>
+                    </div>
+                    <div style="color:#999;font-size:13px;margin-bottom:14px">核心能力标签. 可修改颜色、名称、统计人数, 快捷增删.</div>
+                    <div id="teamSkills"></div>
+                </div>
+                <div class="card">
+                    <div class="card-head-row">
                         <div class="card-head">STATISTICS</div>
                         <button class="card-head-btn" onclick="btnRun(this, loadTeamStats)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 11A8.1 8.1 0 0 0 4.5 9M4 5v4h4m-4 4a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg> 刷新</button>
                     </div>
@@ -1018,6 +1153,36 @@ function esc(s) {
     d.textContent = s == null ? '' : String(s);
     return d.innerHTML;
 }
+function escAttr(s) { return String(s == null ? '' : s).replace(/\"/g, '&quot;').replace(/'/g, '&#39;').replace(/\\/g, '\\\\'); }
+function markErr(input, msg) {
+    if (!input) return;
+    input.classList.add('input-error');
+    if (msg) {
+        var wrap = input.closest('.md-v, .form-row, .picker-wrap, .add-todo-row');
+        if (wrap) {
+            var t = wrap.querySelector('.err-tip');
+            if (!t) {
+                t = document.createElement('div');
+                t.className = 'err-tip';
+                t.style.color = '#ef5777'; t.style.fontSize = '12px'; t.style.marginTop = '4px';
+                wrap.appendChild(t);
+            }
+            t.textContent = msg;
+        }
+    }
+    setTimeout(function(){ input && input.classList.remove('input-error'); }, 300);
+    input.classList.add('input-error');
+}
+document.addEventListener('input', function(e) {
+    if (e.target.classList && e.target.classList.contains('input-error')) {
+        e.target.classList.remove('input-error');
+        var wrap = e.target.closest('.md-v, .form-row, .picker-wrap, .add-todo-row');
+        if (wrap) {
+            var t = wrap.querySelector('.err-tip');
+            if (t) t.textContent = '';
+        }
+    }
+});
 async function getJson(url) {
     var res = await fetch(url);
     var ret = await res.json();
@@ -1049,10 +1214,30 @@ var DEFAULT_PAGE_ACCESS = {
 var PAGE_LABEL = { home: '空间首页', overview: '个人概览', todo: '待办事项', notice: '通知动态', project: '项目展示', apis: 'API 文档', mcsm: 'MCSManager', team: '团队管理' };
 var meUser = null;
 var pageAccess = {};
+function hexA(hex, a) {
+    var h = (hex || '#ef5777').replace('#','');
+    if (h.length === 3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+    var r = parseInt(h.substr(0,2),16), g = parseInt(h.substr(2,2),16), b = parseInt(h.substr(4,2),16);
+    return 'rgba(' + r + ',' + g + ',' + b + ',' + (a||0.1) + ')';
+}
+function renderSkillHtml(raw) {
+    if (!raw) return '<span class="empty-tip">未填写</span>';
+    var list = String(raw).split(/[,，]/).map(function(x) { return x.trim(); }).filter(Boolean);
+    if (!list.length) return '<span class="empty-tip">未填写</span>';
+    var lookup = window.__SKILL_META || {};
+    return list.map(function(nm) {
+        var m = null;
+        for (var k in lookup) {
+            if (lookup[k] && lookup[k].name === nm) { m = lookup[k]; break; }
+        }
+        var c = m ? m.color : '#ef5777';
+        return '<span class="skill-tag sm" style="color:' + c + ';border-color:' + hexA(c,.45) + ';background:' + hexA(c,.08) + '">' + esc(nm) + '</span>';
+    }).join('');
+}
 function myLevel() { return (meUser && meUser.level) || 0; }
 function levelName(lv) { var m = levelMeta[lv]; return (m && m.name) || LEVEL_NAME[lv] || '待定'; }
 function levelColor(lv) { var m = levelMeta[lv]; return (m && m.color) || LEVEL_COLOR[lv] || '#888'; }
-function lvlBadge(lv) { var c = levelColor(lv); return '<span class="lvl-badge" style="border-color:' + c + ';color:' + c + '">' + esc(levelName(lv)) + '</span>'; }
+function lvlBadge(lv) { var c = levelColor(lv); return '<span class="lvl-badge" style="--lc:' + c + ';--lcbd:' + hexA(c,.45) + ';border-color:' + c + ';color:' + c + ';background:' + hexA(c,.08) + '">' + esc(levelName(lv)) + '</span>'; }
 function pageCfg(page) {
     var c = pageAccess[page] || DEFAULT_PAGE_ACCESS[page] || { min_level: 0, show_in_nav: 1 };
     return { min_level: c.min_level || 0, show_in_nav: c.show_in_nav ? 1 : 0 };
@@ -1067,15 +1252,23 @@ function levelOptions(sel) {
     return o;
 }
 function openModal(title, bodyHtml, footHtml) {
+    var root = document.getElementById('modalRoot');
+    root.classList.remove('closing');
     document.getElementById('modalTitle').textContent = title || '';
     document.getElementById('modalBody').innerHTML = bodyHtml || '';
     document.getElementById('modalFoot').innerHTML = footHtml || '';
-    document.getElementById('modalRoot').classList.remove('hide');
+    root.classList.remove('hide');
 }
 function closeModal() {
-    document.getElementById('modalRoot').classList.add('hide');
-    document.getElementById('modalBody').innerHTML = '';
-    document.getElementById('modalFoot').innerHTML = '';
+    var root = document.getElementById('modalRoot');
+    if (root.classList.contains('hide')) return;
+    root.classList.add('closing');
+    setTimeout(function() {
+        root.classList.add('hide');
+        root.classList.remove('closing');
+        document.getElementById('modalBody').innerHTML = '';
+        document.getElementById('modalFoot').innerHTML = '';
+    }, 180);
 }
 async function btnRun(btn, fn) {
     if (btn.dataset.busy) return false;
@@ -1175,13 +1368,7 @@ async function loadMe() {
     var pb = document.getElementById('projectAddBtn'); if (pb) pb.classList.toggle('hide', !canPublish);
     document.getElementById('heroText').textContent = '嘿, ' + u.name + '! 欢迎回到烟雨庭. 这里汇总了你的待办、团队通知和正在进行的项目, 一起把服务器做得更好吧.';
     var skillBox = document.getElementById('pfSkill');
-    if (u.skill) {
-        skillBox.innerHTML = u.skill.split(/[,，]/).map(function(s) {
-            return '<span class="skill-tag">' + esc(s.trim()) + '</span>';
-        }).join('');
-    } else {
-        skillBox.innerHTML = '<span class="empty-tip">还没有填写</span>';
-    }
+    skillBox.innerHTML = renderSkillHtml(u.skill);
 }
 var CLOCK_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0-18 0"/><path d="M12 7v5l3 3"/></g></svg>';
 var OK_SVG = '<svg xmlns="http://www.w3.org/2000/svg" class="st-icon ok" viewBox="0 0 24 24"><path fill="currentColor" d="M17 3.34a10 10 0 1 1-14.995 8.984L2 12l.005-.324A10 10 0 0 1 17 3.34m-1.293 5.953a1 1 0 0 0-1.32-.083l-.094.083L11 12.585l-1.293-1.292l-.094-.083a1 1 0 0 0-1.403 1.403l.083.094l2 2l.094.083a1 1 0 0 0 1.226 0l.094-.083l4-4l.083-.094a1 1 0 0 0-.083-1.32"/></svg>';
@@ -1345,14 +1532,41 @@ var DESKTOP_SVG = '<svg xmlns="http://www.w3.org/2000/svg" class="dv-icon" viewB
 var MOBILE_SVG = '<svg xmlns="http://www.w3.org/2000/svg" class="dv-icon" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2zm5-1h2m-1 13v.01"/></svg>';
 var LOGOUT_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M14 8V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2v-2"/><path d="M9 12h12l-3-3m0 6l3-3"/></g></svg>';
 var ovData = null;
+function renderSkillHtml(raw) {
+    if (!raw) return '<span class="empty-tip">未填写</span>';
+    var list = String(raw).split(/[,，]/).map(function(x) { return x.trim(); }).filter(Boolean);
+    if (!list.length) return '<span class="empty-tip">未填写</span>';
+    var lookup = window.__SKILL_META || {};
+    return list.map(function(nm) {
+        var m = null;
+        for (var k in lookup) {
+            if (lookup[k] && lookup[k].name === nm) { m = lookup[k]; break; }
+        }
+        var c = m ? m.color : '#ef5777';
+        return '<span class="skill-tag sm" style="color:' + c + ';border-color:' + hexA(c,.45) + ';background:' + hexA(c,.08) + '">' + esc(nm) + '</span>';
+    }).join('');
+}
+function hexA(hex, a) {
+    var h = (hex || '#ef5777').replace('#','');
+    if (h.length === 3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+    var r = parseInt(h.substr(0,2),16), g = parseInt(h.substr(2,2),16), b = parseInt(h.substr(4,2),16);
+    return 'rgba(' + r + ',' + g + ',' + b + ',' + (a||0.1) + ')';
+}
 async function loadOverview() {
     var ret = await getJson('/api/overview');
     ovData = ret.data;
     var u = ovData.user;
     document.getElementById('ovName').textContent = u.name;
-    document.getElementById('ovRole').innerHTML = lvlBadge(u.level || 0);
+    var roleEl = document.getElementById('ovRole');
+    var c = levelColor(u.level || 0);
+    roleEl.outerHTML = roleEl.outerHTML; // noop keep
+    roleEl = document.getElementById('ovRole');
+    roleEl.style.color = c;
+    roleEl.style.borderColor = hexA(c, .45);
+    roleEl.style.background = hexA(c, .08);
+    roleEl.innerHTML = lvlBadge(u.level || 0);
     document.getElementById('ovMail').textContent = u.email;
-    document.getElementById('ovSkill').textContent = u.skill || '还没有填写';
+    document.getElementById('ovSkill').innerHTML = renderSkillHtml(u.skill);
     document.getElementById('ovId').textContent = u.id;
     document.getElementById('stYesterday').textContent = ovData.calls.yesterday;
     document.getElementById('stToday').textContent = ovData.calls.today;
@@ -1636,8 +1850,8 @@ function applyNavFilter() {
 async function loadTeam() {
     var ru = await getJson('/api/admin_users');
     if (ru.code === 403) {
-        ['teamGroups','teamMembers','teamInvites','teamStats','teamLogs'].forEach(function(id) {
-            document.getElementById(id).innerHTML = '<div class="empty-tip">无权限访问</div>';
+        ['teamGroups','teamMembers','teamInvites','teamStats','teamLogs','teamSkills'].forEach(function(id) {
+            var el = document.getElementById(id); if (el) el.innerHTML = '<div class="empty-tip">无权限访问</div>';
         });
         return;
     }
@@ -1646,7 +1860,8 @@ async function loadTeam() {
         getJson('/api/admin_invites'),
         getJson('/api/admin_stats'),
         getJson('/api/admin_logs?limit=50'),
-        loadPagesConfig().then(function(){})
+        loadPagesConfig().then(function(){}),
+        loadSkillsMeta()
     ]);
     applyNavFilter();
     renderTeamGroups(ALL_USERS);
@@ -1654,10 +1869,107 @@ async function loadTeam() {
     renderTeamInvites(ret[0].data || []);
     renderTeamStats(ret[1].data || {});
     renderTeamLogs(ret[2].data || []);
+    var sret = await getJson('/api/admin_skills');
+    renderTeamSkills(sret.data || []);
 }
 async function refreshTeamInvites() {
     var ret = await getJson('/api/admin_invites');
     renderTeamInvites(ret.data || []);
+}
+async function loadSkillsMeta() {
+    try {
+        var ret = await getJson('/api/skills');
+        var arr = (ret.data || []).reduce(function(acc, s) {
+            acc[s.id] = { id: s.id, name: s.name, color: s.color || '#ef5777' };
+            return acc;
+        }, {});
+        window.__SKILL_META = arr;
+        return arr;
+    } catch (e) {
+        window.__SKILL_META = window.__SKILL_META || {};
+        return window.__SKILL_META;
+    }
+}
+async function reloadSkills() {
+    await loadSkillsMeta();
+    var ret = await getJson('/api/admin_skills');
+    renderTeamSkills(ret.data || []);
+}
+function renderTeamSkills(list) {
+    var box = document.getElementById('teamSkills');
+    if (!box) return;
+    var addBtn = '<div style="margin-top:12px"><button class="add-todo-btn" onclick="openSkillEdit(null)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m-7-7h14"/></svg> 新增核心能力</button></div>';
+    if (!list || !list.length) {
+        box.innerHTML = '<div class="empty-tip">还没有能力标签</div>' + addBtn;
+        return;
+    }
+    var html = '<div class="grp-grid">';
+    list.forEach(function(s) {
+        var c = s.color || '#ef5777';
+        html += '<div class="grp-card">' +
+            '<span class="skill-tag sm" style="color:' + c + ';border-color:' + hexA(c,.45) + ';background:' + hexA(c,.08) + '">' + esc(s.name) + '</span>' +
+            '<div class="grp-name">' + esc(s.name) + '</div>' +
+            '<div class="grp-count">' + (s.count || 0) + ' 人</div>' +
+            '<div class="grp-actions">' +
+            '<button class="card-head-btn" onclick="openSkillMembers(\'' + escAttr(s.name) + '\')">成员</button>' +
+            '<button class="card-head-btn" onclick="openSkillEdit(' + s.id + ',\'' + escAttr(s.name) + '\',\'' + escAttr(c) + '\')">编辑</button>' +
+            '<button class="card-head-btn danger" onclick="btnRun(this, function(btn){ return deleteSkill(' + s.id + ',\'' + escAttr(s.name) + '\',btn); })">删除</button>' +
+            '</div></div>';
+    });
+    html += '</div>' + addBtn;
+    box.innerHTML = html;
+}
+function openSkillMembers(sName) {
+    var users = (ALL_USERS || []).filter(function(u) {
+        var raw = u.skill || '';
+        return raw.split(/[,，]/).map(function(x) { return x.trim(); }).indexOf(sName) !== -1;
+    });
+    var head = '<div style="margin-bottom:10px"><span class="skill-tag sm" style="color:#ef5777;border-color:rgba(239,87,119,.45);background:rgba(239,87,119,.08)">' + esc(sName) + '</span> · 共 ' + users.length + ' 人</div>';
+    var html = head + '<div class="group-members">';
+    if (!users.length) html += '<div class="empty-tip">该能力暂无成员</div>';
+    else {
+        html += users.map(function(u) {
+            return '<div class="member-bar">' +
+                '<img class="mb-ava" src="/assets/yyt64x.png" alt=""><div class="mb-main">' +
+                '<div class="mb-name">' + esc(u.name) + ' ' + lvlBadge(u.level || 0) + '</div>' +
+                '<div class="mb-mail">' + esc(u.email) + '</div>' +
+                '<div class="mb-skill">' + renderSkillHtml(u.skill) + '</div></div>' +
+                '<button class="act-btn" onclick="openMemberDetail(' + u.id + ')">详情</button></div>';
+        }).join('');
+    }
+    html += '</div>';
+    openModal('能力成员 · ' + sName, html, '<button class="add-todo-btn" onclick="closeModal()">关闭</button>');
+}
+function openSkillEdit(id, name, color) {
+    name = name || '';
+    color = color || '#ef5777';
+    var isNew = !id;
+    var title = isNew ? '新增核心能力' : '编辑核心能力';
+    var body = '<div class="md-section"><div class="md-label">基础设置</div>' +
+        '<div class="md-row"><div class="md-k">名称</div><div class="md-v"><input id="sk_name" value="' + esc(name) + '" placeholder="如 开发/运维/策划"></div></div>' +
+        '<div class="md-row"><div class="md-k">标识颜色</div><div class="md-v"><input type="color" class="color-in" id="sk_color" value="' + esc(color) + '"></div></div>' +
+        '</div>';
+    var foot = '<button class="act-btn" onclick="closeModal()">关闭</button>' +
+        '<button class="add-todo-btn" onclick="btnRun(this, function(btn){ return saveSkill(' + (id || 'null') + ',' + isNew + ',btn); })">保存</button>';
+    openModal(title, body, foot);
+}
+async function saveSkill(id, isNew, btn) {
+    var name = document.getElementById('sk_name').value.trim();
+    var color = document.getElementById('sk_color').value;
+    if (!name) { markErr(document.getElementById('sk_name'), '名称不能为空'); return; }
+    var action = isNew ? 'add' : 'update';
+    var body = { action: action, name: name, color: color };
+    if (!isNew) body.id = id;
+    var ret = await postJson('/api/admin_skills', body);
+    if (ret.code === 0) {
+        closeModal();
+        await reloadSkills();
+    }
+}
+async function deleteSkill(id, name, btn) {
+    if (!confirm('确定删除能力「' + name + '」? 所有成员的该能力会被移除。')) return;
+    var ret = await postJson('/api/admin_skills', { action: 'delete', id: id });
+    if (ret.code === 0) await reloadSkills();
 }
 async function loadTeamStats() {
     var ret = await getJson('/api/admin_stats');
@@ -1695,7 +2007,7 @@ function renderTeamMembers(users) {
         return;
     }
     var html = users.map(function(u) {
-        var skillTxt = u.skill ? esc(u.skill) : '<span class="empty-tip">未填写核心能力</span>';
+        var skillTxt = renderSkillHtml(u.skill);
         return '<div class="member-bar">' +
             '<img class="mb-ava" src="/assets/yyt64x.png" alt="">' +
             '<div class="mb-main">' +
@@ -1750,7 +2062,8 @@ function renderTeamLogs(logs) {
     document.getElementById('teamLogs').innerHTML = html;
 }
 async function openMemberDetail(uid) {
-    openModal('成员详情', SPIN_SVG);
+    var SMALL_SPIN = '<div style="display:flex;align-items:center;justify-content:center;padding:28px 12px;color:#999;gap:10px;font-size:13px"><svg xmlns="http://www.w3.org/2000/svg" class="spin" viewBox="0 0 24 24" style="width:18px;height:18px;color:#ef5777"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3a9 9 0 1 0 9 9"/></svg> 正在加载成员信息…</div>';
+    openModal('成员详情', SMALL_SPIN);
     try {
         var ret = await getJson('/api/admin_users?id=' + uid);
         if (ret.code !== 0 || !ret.data) {
@@ -1768,7 +2081,7 @@ async function openMemberDetail(uid) {
             '<div class="md-row"><div class="md-k">昵称</div><div class="md-v"><input id="mm_name" value="' + esc(u.name || '') + '"></div></div>' +
             '<div class="md-row"><div class="md-k">邮箱</div><div class="md-v">' + esc(u.email) + '</div></div>' +
             '<div class="md-row"><div class="md-k">账号ID</div><div class="md-v">' + esc(u.id) + '</div></div>' +
-            '<div class="md-row"><div class="md-k">核心能力</div><div class="md-v"><input id="mm_skill" value="' + esc(u.skill || '') + '"></div></div>' +
+            '<div class="md-row"><div class="md-k">核心能力</div><div class="md-v"><div class="picker-wrap"><div class="picker" id="mmSkillPicker" onclick="document.getElementById(\'mmSkillInput\').focus()"><input id="mmSkillInput" placeholder="输入添加或从下拉选择" autocomplete="off" oninput="skillPickerSearch(this.value,\'mm\')" onkeydown="skillPickerKey(event,\'mm\')"></div><div class="picker-drop hide" id="mmSkillDrop"></div></div></div></div>' +
             '<div class="md-row"><div class="md-k">权限组</div><div class="md-v"><select id="mm_level">' + levelOptions(u.level || 0) + '</select></div></div>' +
             '<div class="md-row"><div class="md-k">面板节点</div><div class="md-v"><input id="mm_host" value="' + esc(u.panel_host || '') + '"></div></div>' +
             '<div class="md-row"><div class="md-k">注册时间</div><div class="md-v">' + esc(u.created_at || '--') + '</div></div></div>';
@@ -1789,7 +2102,7 @@ async function openMemberDetail(uid) {
                     '<div class="dv-main"><div class="dv-ip">' + esc(si.ip || '未知IP') + '</div>' +
                     '<div class="dv-ua">' + esc(si.ua || '未知设备') + '</div>' +
                     '<div class="dv-time">创建: ' + esc(si.created_at || '--') + ' · 到期: ' + esc(si.expire_time || '--') + '</div></div>' +
-                    '<button class="act-btn" onclick="mmKillSession(' + u.id + ',' + si.id + ',this)">' + LOGOUT_SVG + ' 踢下线</button></div>';
+                    '<button class="act-btn" onclick="btnRun(this, function(btn){ return mmKillSession(' + u.id + ',' + si.id + ',btn); })">' + LOGOUT_SVG + ' 踢下线</button></div>';
             }).join('');
         }
         sesHtml += '</div>';
@@ -1834,20 +2147,133 @@ async function openMemberDetail(uid) {
                 }).join('') + '</div></div>';
         }
         var foot = '<button class="act-btn" onclick="closeModal()">关闭</button>' +
-            '<button class="add-todo-btn" onclick="mmSave(' + u.id + ')">保存修改</button>';
+            '<button class="add-todo-btn" onclick="btnRun(this, function(btn){ return mmSave(' + u.id + ',btn); })">保存修改</button>';
         openModal('成员详情 · ' + u.name, avatarHtml + infoHtml + statsHtml + sesHtml + invHtml + pgsHtml + logsHtml, foot);
+        setTimeout(function() { initSkillPicker(u.skill || ''); }, 0);
     } catch (e) {
         closeModal();
     }
 }
-async function mmSave(uid) {
+var __mmSkills = [];
+function initSkillPicker(skillRaw) {
+    var list = String(skillRaw || '').split(/[,，]/).map(function(x) { return x.trim(); }).filter(Boolean);
+    __mmSkills = [];
+    var meta = window.__SKILL_META || {};
+    list.forEach(function(nm) {
+        var hit = null;
+        for (var k in meta) { if (meta[k].name === nm) { hit = meta[k]; break; } }
+        __mmSkills.push(hit ? { id: hit.id, name: hit.name, color: hit.color } : { id: 0, name: nm, color: '#ef5777' });
+    });
+    renderSkillPickerChips();
+    document.getElementById('mmSkillDrop').classList.add('hide');
+}
+function renderSkillPickerChips() {
+    var pk = document.getElementById('mmSkillPicker');
+    if (!pk) return;
+    pk.querySelectorAll('.u-chip.skill').forEach(function(c) { c.remove(); });
+    var input = document.getElementById('mmSkillInput');
+    __mmSkills.forEach(function(s, idx) {
+        var chip = document.createElement('span');
+        chip.className = 'u-chip skill';
+        chip.style.color = s.color;
+        chip.style.borderColor = hexA(s.color, .45);
+        chip.style.background = hexA(s.color, .08);
+        chip.innerHTML = '<span>' + esc(s.name) + '</span><span class="rm" data-idx="' + idx + '">' + X_SVG + '</span>';
+        chip.querySelector('.rm').onclick = function(e) {
+            e.stopPropagation();
+            var i = parseInt(this.dataset.idx || '0');
+            __mmSkills.splice(i, 1);
+            renderSkillPickerChips();
+        };
+        pk.insertBefore(chip, input);
+    });
+}
+var __skillSearchTimer = null;
+function skillPickerSearch(kw, ctx) {
+    kw = kw.trim();
+    var drop = document.getElementById('mmSkillDrop');
+    if (!drop) return;
+    if (__skillSearchTimer) clearTimeout(__skillSearchTimer);
+    if (!kw) {
+        __skillSearchTimer = setTimeout(function() {
+            var meta = window.__SKILL_META || {};
+            var arr = [];
+            for (var k in meta) arr.push(meta[k]);
+            _renderSkillDrop(arr.filter(function(x) { return !__mmSkills.some(function(y) { return y.name === x.name; }); }));
+        }, 30);
+        return;
+    }
+    __skillSearchTimer = setTimeout(function() {
+        var meta = window.__SKILL_META || {};
+        var arr = [];
+        for (var k in meta) arr.push(meta[k]);
+        var matched = arr.filter(function(x) { return x.name.indexOf(kw) !== -1; }).filter(function(x) { return !__mmSkills.some(function(y) { return y.name === x.name; }); });
+        _renderSkillDrop(matched, kw);
+    }, 120);
+}
+function _renderSkillDrop(arr, kw) {
+    var drop = document.getElementById('mmSkillDrop');
+    if (!drop) return;
+    if (!arr.length && !kw) { drop.classList.add('hide'); return; }
+    var html = '';
+    if (kw) {
+        html += '<div class="drop-row" onclick="addFreeSkill(\'' + escAttr(kw) + '\')"><div style="padding:2px 8px"><div class="dn">+ 添加「' + esc(kw) + '」为新能力</div><div class="de">当前下拉中未找到匹配, 按名称新增</div></div></div>';
+    }
+    if (!arr.length && kw) {
+        drop.innerHTML = html || '<div class="drop-empty">没有匹配的能力</div>';
+        drop.classList.remove('hide');
+        return;
+    }
+    arr.forEach(function(x) {
+        html += '<div class="drop-row" onclick="addMetaSkill(' + x.id + ',\'' + escAttr(x.name) + '\',\'' + escAttr(x.color || '#ef5777') + '\')"><div style="display:flex;align-items:center;gap:8px"><span class="skill-tag sm" style="color:' + x.color + ';border-color:' + hexA(x.color,.45) + ';background:' + hexA(x.color,.08) + '">' + esc(x.name) + '</span><div class="de">' + esc(x.name) + '</div></div></div>';
+    });
+    drop.innerHTML = html;
+    drop.classList.remove('hide');
+}
+function skillPickerKey(e, ctx) {
+    if (e.key === 'Backspace' && !e.target.value && __mmSkills.length) {
+        __mmSkills.pop();
+        renderSkillPickerChips();
+    }
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        var kw = e.target.value.trim();
+        if (kw) addFreeSkill(kw);
+    }
+}
+function addMetaSkill(id, name, color) {
+    if (__mmSkills.some(function(x) { return x.name === name; })) return;
+    __mmSkills.push({ id: id, name: name, color: color || '#ef5777' });
+    renderSkillPickerChips();
+    var inp = document.getElementById('mmSkillInput');
+    if (inp) { inp.value = ''; inp.focus(); }
+    document.getElementById('mmSkillDrop').classList.add('hide');
+}
+function addFreeSkill(nm) {
+    nm = (nm || '').trim();
+    if (!nm) return;
+    if (__mmSkills.some(function(x) { return x.name === nm; })) return;
+    var meta = window.__SKILL_META || {};
+    var c = '#ef5777';
+    for (var k in meta) { if (meta[k].name === nm) { c = meta[k].color || c; break; } }
+    __mmSkills.push({ id: 0, name: nm, color: c });
+    renderSkillPickerChips();
+    var inp = document.getElementById('mmSkillInput');
+    if (inp) { inp.value = ''; inp.focus(); }
+    document.getElementById('mmSkillDrop').classList.add('hide');
+}
+async function mmSave(uid, btn) {
     var body = {
         id: uid,
         name: document.getElementById('mm_name').value.trim(),
-        skill: document.getElementById('mm_skill').value.trim(),
+        skill: __mmSkills.map(function(x) { return x.name; }).join(','),
         level: parseInt(document.getElementById('mm_level').value) || 0,
         panel_host: document.getElementById('mm_host').value.trim()
     };
+    if (!body.name) {
+        markErr(document.getElementById('mm_name'), '昵称不能为空');
+        return;
+    }
     var ret = await postJson('/api/admin_users', body);
     if (ret.code === 0) {
         closeModal();
@@ -1856,7 +2282,8 @@ async function mmSave(uid) {
 }
 async function mmKillSession(uid, sid, btn) {
     await postJson('/api/admin_users', { id: uid, kill_session: sid });
-    btn.closest('.dev-row').remove();
+    var row = btn.closest('.dev-row');
+    if (row) row.remove();
 }
 async function openGroupEdit(lv) {
     var color = levelColor(lv);
@@ -1885,12 +2312,13 @@ async function openGroupEdit(lv) {
     }).join('');
     pgEdit += '</div>';
     var foot = '<button class="act-btn" onclick="closeModal()">关闭</button>' +
-        '<button class="add-todo-btn" onclick="geSave(' + lv + ')">保存配置</button>';
+        '<button class="add-todo-btn" onclick="btnRun(this, function(btn){ return geSave(' + lv + ',btn); })">保存配置</button>';
     openModal('编辑权限组 · ' + name, head + basic + pgEdit, foot);
 }
-async function geSave(lv) {
+async function geSave(lv, btn) {
     var nm = document.getElementById('ge_name').value.trim();
     var col = document.getElementById('ge_color').value;
+    if (!nm) { markErr(document.getElementById('ge_name'), '组名不能为空'); return; }
     await postJson('/api/admin_levels', { level: lv, name: nm, color: col });
     levelMeta[lv] = { name: nm, color: col };
     var pages = {};
@@ -1906,28 +2334,136 @@ async function geSave(lv) {
     closeModal();
     await loadTeam();
 }
+var __gmMembers = [];
+var __gmLevel = 0;
+var __gmTimer = null;
 async function openGroupMembers(lv) {
+    __gmLevel = lv;
     var members = ALL_USERS.filter(function(u) { return (u.level || 0) === lv; });
-    var head = '<div style="margin-bottom:10px">' + lvlBadge(lv) + ' · 共 ' + members.length + ' 人</div>';
-    var html = head + '<div class="group-members">';
-    if (!members.length) {
-        html += '<div class="empty-tip">该组暂无成员</div>';
-    } else {
-        html += members.map(function(u) {
-            return '<div class="member-bar">' +
-                '<img class="mb-ava" src="/assets/yyt64x.png" alt="">' +
-                '<div class="mb-main">' +
-                '<div class="mb-name">' + esc(u.name) + ' ' + lvlBadge(u.level || 0) + '</div>' +
-                '<div class="mb-mail">' + esc(u.email) + '</div>' +
-                '<div class="mb-skill">' + (u.skill ? esc(u.skill) : '<span class="empty-tip">未填写核心能力</span>') + '</div>' +
-                '</div>' +
-                '<button class="act-btn" onclick="openMemberDetail(' + u.id + ')">详情</button>' +
-                '</div>';
-        }).join('');
-    }
+    var head = '<div style="margin-bottom:10px">' + lvlBadge(lv) + ' · 共 <span id="gmCount">' + members.length + '</span> 人</div>';
+    var addBox = '<div style="margin-bottom:16px;padding:12px 14px;border:1px dashed #2b2b2e;border-radius:10px;background:#0d0d0f">' +
+        '<div style="font-size:12px;color:#777;margin-bottom:8px">添加成员到该组 (输入昵称搜索)</div>' +
+        '<div class="picker-wrap"><div class="picker" id="gmPicker" onclick="document.getElementById(\'gmInput\').focus()"><input id="gmInput" placeholder="搜索或选择用户" autocomplete="off" oninput="gmSearch(this.value)" onkeydown="gmKey(event)"></div><div class="picker-drop hide" id="gmDrop"></div></div>' +
+        '<div style="margin-top:10px;display:flex;gap:10px;align-items:center">' +
+        '<button class="add-todo-btn" style="margin:0" onclick="btnRun(this, gmAddLevel)">把所选成员加入该组</button>' +
+        '<button class="act-btn" style="margin:0" onclick="gmClear()">清空选择</button>' +
+        '<span id="gmTip" style="color:#777;font-size:12px"></span>' +
+        '</div></div>';
+    var html = head + addBox + '<div class="group-members" id="gmList">';
+    html += renderGroupMemberList(members);
     html += '</div>';
     var foot = '<button class="add-todo-btn" onclick="closeModal()">关闭</button>';
     openModal('组内成员 · ' + levelName(lv), html, foot);
+    __gmMembers = [];
+    setTimeout(function() { renderGmChips(); document.getElementById('gmDrop').classList.add('hide'); }, 0);
+}
+function renderGroupMemberList(list) {
+    if (!list || !list.length) return '<div class="empty-tip">该组暂无成员</div>';
+    return list.map(function(u) {
+        return '<div class="member-bar">' +
+            '<img class="mb-ava" src="/assets/yyt64x.png" alt=""><div class="mb-main">' +
+            '<div class="mb-name">' + esc(u.name) + ' ' + lvlBadge(u.level || 0) + '</div>' +
+            '<div class="mb-mail">' + esc(u.email) + '</div>' +
+            '<div class="mb-skill">' + renderSkillHtml(u.skill) + '</div></div>' +
+            '<button class="act-btn" onclick="openMemberDetail(' + u.id + ')">详情</button></div>';
+    }).join('');
+}
+function renderGmChips() {
+    var pk = document.getElementById('gmPicker');
+    if (!pk) return;
+    pk.querySelectorAll('.u-chip').forEach(function(c) { c.remove(); });
+    var input = document.getElementById('gmInput');
+    __gmMembers.forEach(function(u, idx) {
+        var chip = document.createElement('span');
+        chip.className = 'u-chip';
+        chip.innerHTML = '<img src="/assets/yyt64x.png" alt=""><span>' + esc(u.name) + '</span><span class="rm" data-idx="' + idx + '">' + X_SVG + '</span>';
+        chip.querySelector('.rm').onclick = function(e) {
+            e.stopPropagation();
+            var i = parseInt(this.dataset.idx || '0');
+            __gmMembers.splice(i, 1);
+            renderGmChips();
+        };
+        pk.insertBefore(chip, input);
+    });
+}
+function gmSearch(kw) {
+    kw = (kw || '').trim();
+    var drop = document.getElementById('gmDrop');
+    if (!drop) return;
+    if (__gmTimer) clearTimeout(__gmTimer);
+    if (!kw) {
+        var list = (ALL_USERS || []).slice(0, 30).filter(function(u) {
+            return !__gmMembers.some(function(x) { return x.id === u.id; });
+        });
+        gmRenderDrop(list);
+        return;
+    }
+    __gmTimer = setTimeout(async function() {
+        try {
+            var ret = await getJson('/api/user_search?q=' + encodeURIComponent(kw));
+            var list = (ret.data || []).filter(function(u) {
+                return !__gmMembers.some(function(x) { return x.id === u.id; });
+            });
+            gmRenderDrop(list, kw);
+        } catch (e) {}
+    }, 160);
+}
+function gmRenderDrop(list, kw) {
+    var drop = document.getElementById('gmDrop');
+    if (!drop) return;
+    if (!list || !list.length) {
+        drop.innerHTML = '<div class="drop-empty">没有匹配的用户</div>';
+    } else {
+        drop.innerHTML = '';
+        list.forEach(function(u) {
+            var row = document.createElement('div');
+            row.className = 'drop-row';
+            row.innerHTML = '<img src="/assets/yyt64x.png" alt=""><div><div class="dn">' + esc(u.name) + (u.level != null ? ' <span style="font-size:11px;color:#777">当前' + esc(levelName(u.level)) + '</span>' : '') + '</div><div class="de">' + esc(u.email) + '</div></div>';
+            row.onclick = function() { gmAddChip(u); };
+            drop.appendChild(row);
+        });
+    }
+    drop.classList.remove('hide');
+}
+function gmKey(e) {
+    if (e.key === 'Backspace' && !e.target.value && __gmMembers.length) {
+        __gmMembers.pop();
+        renderGmChips();
+    }
+}
+function gmAddChip(u) {
+    if (__gmMembers.some(function(x) { return x.id === u.id; })) return;
+    __gmMembers.push({ id: u.id, name: u.name, email: u.email, level: u.level || 0 });
+    var inp = document.getElementById('gmInput');
+    if (inp) { inp.value = ''; inp.focus(); }
+    document.getElementById('gmDrop').classList.add('hide');
+    renderGmChips();
+}
+function gmClear() {
+    __gmMembers = [];
+    renderGmChips();
+    document.getElementById('gmTip').textContent = '';
+}
+async function gmAddLevel(btn) {
+    if (!__gmMembers.length) {
+        document.getElementById('gmTip').textContent = '请先选择要加入的成员';
+        return;
+    }
+    var ok = 0, fail = 0;
+    for (var i = 0; i < __gmMembers.length; i++) {
+        var u = __gmMembers[i];
+        var r = await postJson('/api/admin_users', { id: u.id, level: __gmLevel });
+        if (r && r.code === 0) ok++; else fail++;
+    }
+    document.getElementById('gmTip').textContent = '已加入 ' + ok + ' 人' + (fail ? '，失败 ' + fail + ' 人' : '');
+    __gmMembers = [];
+    renderGmChips();
+    await loadTeam();
+    var list = (ALL_USERS || []).filter(function(u) { return (u.level || 0) === __gmLevel; });
+    var el = document.getElementById('gmList');
+    if (el) el.innerHTML = renderGroupMemberList(list);
+    var cc = document.getElementById('gmCount');
+    if (cc) cc.textContent = list.length;
 }
 async function saveUserField(id, field, value) {
     var body = { id: id };
@@ -1970,6 +2506,14 @@ async function submitProject() {
 (async function boot() {
     var start = pageFromPath();
     showPage(start);
+    initMeteors();
+    document.addEventListener('click', function(e) {
+        ['#assignDrop','#mmSkillDrop','#gmDrop'].forEach(function(sel) {
+            var d = document.querySelector(sel);
+            if (!d || d.classList.contains('hide')) return;
+            if (!e.target.closest('.picker-wrap')) d.classList.add('hide');
+        });
+    });
     try {
         var jobs = [loadMe(), loadPagesConfig(), loadTodo(), loadNotice(), loadProject(), document.fonts.ready];
         if (start === 'overview') jobs.push(loadOverview());
@@ -1989,6 +2533,28 @@ async function submitProject() {
     var m = location.pathname.match(/^\/todos\/(\d+)$/);
     if (m) flashTodo(m[1]);
 })();
+function initMeteors() {
+    var layer = document.getElementById('meteorsLayer');
+    if (!layer) return;
+    var total = 10;
+    function spawnOnce(i) {
+        var el = document.createElement('div');
+        el.className = 'meteor';
+        var top = -10 + Math.random() * 70;
+        var left = 20 + Math.random() * 100;
+        var dur = 5500 + Math.random() * 6500;
+        var delay = Math.random() * 7000;
+        el.style.top = top + 'vh';
+        el.style.left = left + 'vw';
+        el.style.animation = 'meteorFly ' + dur + 'ms linear ' + delay + 'ms forwards';
+        layer.appendChild(el);
+        setTimeout(function() {
+            if (el.parentNode) el.parentNode.removeChild(el);
+            spawnOnce(i);
+        }, dur + delay + 200);
+    }
+    for (var i = 0; i < total; i++) spawnOnce(i);
+}
 </script>
 </body>
 </html>

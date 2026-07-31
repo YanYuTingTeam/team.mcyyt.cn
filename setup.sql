@@ -130,3 +130,17 @@ CREATE TABLE IF NOT EXISTS yyt_sec_counter (
     UNIQUE KEY uniq_key (c_key),
     KEY idx_expire (expire_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS yyt_skill_meta (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(64) NOT NULL UNIQUE,
+    color VARCHAR(16) DEFAULT '#ef5777'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO yyt_skill_meta (name, color) VALUES
+    ('策划', '#ef5777'),
+    ('运维', '#4dabf7'),
+    ('开发', '#cc5de8'),
+    ('美术', '#f59f00'),
+    ('运营', '#4caf7d')
+ON DUPLICATE KEY UPDATE name = name;
