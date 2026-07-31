@@ -88,7 +88,6 @@ function myLevel() { return (meUser && meUser.level) || 0; }
 function levelName(lv) { var m = levelMeta[lv]; return (m && m.name) || LEVEL_NAME[lv] || '待定'; }
 function levelColor(lv) { var m = levelMeta[lv]; return (m && m.color) || LEVEL_COLOR[lv] || '#888'; }
 function lvlBadge(lv) { var c = levelColor(lv); return '<span class="lvl-badge" style="--lc:' + c + ';--lcbd:' + hexA(c,.45) + ';border-color:' + c + ';color:' + c + ';background:' + hexA(c,.08) + '">' + esc(levelName(lv)) + '</span>'; }
-//function lvlBadge(lv) { var c = levelColor(lv); return esc(levelName(lv)) }
 function pageCfg(page) {
     var c = pageAccess[page] || DEFAULT_PAGE_ACCESS[page] || { min_level: 0, show_in_nav: 1 };
     return { min_level: c.min_level || 0, show_in_nav: c.show_in_nav ? 1 : 0 };
