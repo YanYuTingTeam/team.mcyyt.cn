@@ -630,8 +630,65 @@ a { color: #ef5777; }
 .pg-toggle { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #999; cursor: pointer; }
 .pg-toggle input { width: 15px; height: 15px; accent-color: #ef5777; }
 .grp-card { background: #0d0d0f; border: 1px solid #222; border-radius: 10px; padding: 14px; margin-bottom: 12px; display: flex; align-items: center; gap: 14px; }
-.grp-card .grp-name { font-size: 15px; color: #fff; min-width: 130px; }
+.grp-card .grp-name { font-size: 15px; color: #fff; flex: 1; min-width: 0; }
 .grp-card .grp-count { font-size: 13px; color: #999; }
+.card-head-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.card-head-row .card-head { margin: 0; }
+.card-head-btn { display: inline-flex; align-items: center; gap: 6px; background: #1d1d20; border: 1px solid #333; color: #bbb; border-radius: 8px; padding: 6px 12px; font-size: 12px; font-family: inherit; cursor: pointer; transition: all .15s; white-space: nowrap; }
+.card-head-btn svg { width: 13px; height: 13px; }
+.card-head-btn:hover { border-color: #ef5777; color: #ef5777; }
+.member-bar { display: flex; align-items: center; gap: 12px; background: #0d0d0f; border: 1px solid #222; border-radius: 10px; padding: 12px; margin-bottom: 10px; }
+.member-bar .mb-ava { width: 48px; height: 48px; border-radius: 50%; background: #fff; flex-shrink: 0; }
+.member-bar .mb-main { flex: 1; min-width: 0; }
+.member-bar .mb-name { font-size: 14px; color: #fff; display: flex; align-items: center; gap: 8px; }
+.member-bar .mb-mail { font-size: 12px; color: #777; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.member-bar .mb-skill { font-size: 12px; color: #999; margin-top: 4px; }
+.modal-mask { position: fixed; inset: 0; background: rgba(0,0,0,.65); z-index: 500; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.modal-mask.hide { display: none; }
+.modal-box { background: #121214; border: 1px solid #232326; border-radius: 14px; width: 100%; max-width: 820px; max-height: calc(100vh - 40px); display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 80px rgba(0,0,0,.6); }
+.modal-head { padding: 20px 24px; border-bottom: 1px solid #1e1e21; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.modal-head .mh-title { font-size: 18px; font-weight: bold; color: #fff; }
+.modal-close { background: none; border: none; color: #999; font-size: 22px; cursor: pointer; padding: 0 6px; line-height: 1; }
+.modal-close:hover { color: #ef5777; }
+.modal-body { padding: 20px 24px; overflow-y: auto; }
+.modal-foot { padding: 16px 24px; border-top: 1px solid #1e1e21; display: flex; justify-content: flex-end; gap: 10px; }
+.md-section { margin-bottom: 24px; }
+.md-section:last-child { margin-bottom: 0; }
+.md-label { font-size: 12px; color: #ef5777; letter-spacing: 0.75px; margin-bottom: 10px; font-family: 'Orbixbeta'; }
+.md-row { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid #1e1e21; }
+.md-row:last-child { border-bottom: none; }
+.md-row .md-k { color: #888; font-size: 13px; width: 100px; flex-shrink: 0; padding-top: 6px; }
+.md-row .md-v { color: #ddd; font-size: 13px; flex: 1; min-width: 0; word-break: break-all; padding-top: 6px; }
+.md-row .md-v input, .md-row .md-v select, .md-row .md-v .color-in { background: #0d0d0f; border: 1px solid #2b2b2e; border-radius: 8px; padding: 6px 10px; color: #eee; font-size: 13px; font-family: inherit; outline: none; width: 100%; }
+.md-row .md-v .color-in { width: 80px; height: 32px; padding: 2px; cursor: pointer; }
+.md-row .md-v input:focus, .md-row .md-v select:focus { border-color: #ef5777; }
+.mem-avatar-row { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+.mem-avatar-row img { width: 64px; height: 64px; border-radius: 50%; background: #fff; }
+.mem-avatar-row .ma-name { font-size: 20px; font-weight: bold; color: #fff; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.mem-avatar-row .ma-mail { font-size: 13px; color: #888; margin-top: 4px; }
+.sec-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+.sec-grid .ss { background: #0d0d0f; border: 1px solid #222; border-radius: 10px; padding: 12px; text-align: center; }
+.sec-grid .ss .n { font-size: 22px; font-weight: bold; color: #fff; }
+.sec-grid .ss .l { font-size: 11px; color: #999; margin-top: 3px; }
+.mini-logs { background: #0d0d0f; border: 1px solid #222; border-radius: 10px; padding: 8px 12px; max-height: 180px; overflow-y: auto; }
+.mini-logs .ml { display: flex; gap: 8px; font-size: 12px; padding: 5px 0; border-bottom: 1px solid #1e1e21; }
+.mini-logs .ml:last-child { border-bottom: none; }
+.mini-logs .ml .mp { color: #fff; flex: 1; min-width: 0; word-break: break-all; }
+.mini-logs .ml .mi { color: #777; flex-shrink: 0; }
+.mini-logs .ml .mt { color: #666; flex-shrink: 0; white-space: nowrap; }
+.grp-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+.gp-edit-box { background: #101012; border: 1px solid #2b2b2e; border-radius: 12px; padding: 14px; margin-top: 10px; }
+.gp-edit-box .ge-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.gp-edit-box .ge-name { font-size: 14px; color: #fff; }
+.gp-close { background: none; border: none; color: #888; cursor: pointer; font-size: 18px; line-height: 1; }
+.gp-close:hover { color: #ef5777; }
+.pg-edit-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #1e1e21; }
+.pg-edit-row:last-child { border-bottom: none; }
+.pg-edit-row .pen { flex: 1; font-size: 13px; color: #eee; min-width: 0; }
+.pg-edit-row .pes { flex-shrink: 0; width: 100px; background: #0d0d0f; border: 1px solid #2b2b2e; border-radius: 8px; padding: 5px 8px; color: #eee; font-size: 12px; font-family: inherit; outline: none; }
+.pg-edit-row .pecb { flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: #888; cursor: pointer; }
+.pg-edit-row .pecb input { width: 14px; height: 14px; accent-color: #ef5777; }
+.group-members { max-height: 240px; overflow-y: auto; margin-top: 10px; }
 </style>
 </head>
 <body>
@@ -762,7 +819,10 @@ a { color: #ef5777; }
             </div>
             <div class="ov-col">
                 <div class="card">
-                    <div class="card-head">INVITE CODES</div>
+                    <div class="card-head-row">
+                        <div class="card-head">INVITE CODES</div>
+                        <button class="card-head-btn" onclick="btnRun(this, refreshOvInvite)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 11A8.1 8.1 0 0 0 4.5 9M4 5v4h4m-4 4a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg> 刷新</button>
+                    </div>
                     <div style="color:#999;font-size:13px;margin-bottom:12px">邀请码和使用情况概览.</div>
                     <button class="add-todo-btn" style="width:100%;justify-content:center;margin-bottom:14px" onclick="btnRun(this, createInvite)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m-7-7h14"/></svg> 创建邀请码</button>
                     <div id="inviteList"></div>
@@ -891,35 +951,45 @@ a { color: #ef5777; }
         <div class="page hide" id="pageTeam">
             <div class="page-mini">TEAM ADMIN</div>
             <div class="page-title">团队管理</div>
-            <div class="page-sub">管理团队成员、权限组、页面访问、邀请码与站点统计. 仅服主可访问.</div>
+            <div class="page-sub">管理团队成员、权限组、邀请码与站点统计. 仅服主可访问.</div>
             <div class="card-grid">
                 <div class="card">
-                    <div class="card-head">PERMISSION GROUPS</div>
-                    <div style="color:#999;font-size:13px;margin-bottom:14px">团队权限组与各等级人数. 可在「成员管理」中调整成员等级.</div>
+                    <div class="card-head-row">
+                        <div class="card-head">PERMISSION GROUPS</div>
+                        <button class="card-head-btn" onclick="btnRun(this, loadTeam)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 11A8.1 8.1 0 0 0 4.5 9M4 5v4h4m-4 4a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg> 刷新</button>
+                    </div>
+                    <div style="color:#999;font-size:13px;margin-bottom:14px">团队权限组与各等级人数. 可编辑颜色、页面权限, 查看组内成员.</div>
                     <div id="teamGroups"></div>
                 </div>
                 <div class="card">
-                    <div class="card-head">MEMBERS</div>
-                    <div style="color:#999;font-size:13px;margin-bottom:14px">所有注册账号. 可快捷编辑核心能力与权限组.</div>
+                    <div class="card-head-row">
+                        <div class="card-head">MEMBERS</div>
+                        <button class="card-head-btn" onclick="btnRun(this, loadTeam)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 11A8.1 8.1 0 0 0 4.5 9M4 5v4h4m-4 4a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg> 刷新</button>
+                    </div>
+                    <div style="color:#999;font-size:13px;margin-bottom:14px">所有注册账号. 点击右侧编辑查看详情与权限.</div>
                     <div class="team-scroll" id="teamMembers"></div>
                 </div>
                 <div class="card">
-                    <div class="card-head">PAGE ACCESS</div>
-                    <div style="color:#999;font-size:13px;margin-bottom:14px">管理各页面在侧栏的显示与最低访问等级.</div>
-                    <div id="teamPages"></div>
-                </div>
-                <div class="card">
-                    <div class="card-head">INVITE CODES</div>
+                    <div class="card-head-row">
+                        <div class="card-head">INVITE CODES</div>
+                        <button class="card-head-btn" onclick="btnRun(this, refreshTeamInvites)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 11A8.1 8.1 0 0 0 4.5 9M4 5v4h4m-4 4a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg> 刷新</button>
+                    </div>
                     <div style="color:#999;font-size:13px;margin-bottom:14px">全站邀请码与使用情况.</div>
                     <div class="team-scroll" id="teamInvites"></div>
                 </div>
                 <div class="card">
-                    <div class="card-head">STATISTICS</div>
+                    <div class="card-head-row">
+                        <div class="card-head">STATISTICS</div>
+                        <button class="card-head-btn" onclick="btnRun(this, loadTeamStats)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 11A8.1 8.1 0 0 0 4.5 9M4 5v4h4m-4 4a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg> 刷新</button>
+                    </div>
                     <div style="color:#999;font-size:13px;margin-bottom:16px">站点全局统计.</div>
                     <div id="teamStats"></div>
                 </div>
                 <div class="card">
-                    <div class="card-head">ACTIVITY LOGS</div>
+                    <div class="card-head-row">
+                        <div class="card-head">ACTIVITY LOGS</div>
+                        <button class="card-head-btn" onclick="btnRun(this, loadTeamLogs)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 11A8.1 8.1 0 0 0 4.5 9M4 5v4h4m-4 4a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg> 刷新</button>
+                    </div>
                     <div style="color:#999;font-size:13px;margin-bottom:14px">最近的用户操作日志.</div>
                     <div class="team-scroll" id="teamLogs"></div>
                     <div style="margin-top:14px;display:flex;justify-content:flex-end">
@@ -928,6 +998,16 @@ a { color: #ef5777; }
                 </div>
             </div>
         </div>
+    </div>
+</div>
+<div class="modal-mask hide" id="modalRoot" onclick="if(event.target===this) closeModal()">
+    <div class="modal-box" id="modalBox">
+        <div class="modal-head">
+            <div class="mh-title" id="modalTitle">--</div>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+        <div class="modal-foot" id="modalFoot"></div>
     </div>
 </div>
 <script>
@@ -955,6 +1035,9 @@ var NAV_OF = { home: 'home', overview: 'overview', todo: 'todo', notice: 'notice
 var PAGE_LOADER = { home: null, overview: loadOverview, todo: loadTodo, notice: loadNotice, project: loadProject, apis: loadApis, logs: loadLogs, mcsm: loadMcsm, team: loadTeam, addtodo: resetAddTodo };
 var SPIN_SVG = '<svg xmlns="http://www.w3.org/2000/svg" class="spin" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3a9 9 0 1 0 9 9"/></svg>';
 var LEVEL_NAME = { 0: '待定', 1: '志愿者 | 初级', 2: '志愿者 | 中级', 3: '志愿者 | 高级', 4: '管理员', 5: '服主' };
+var LEVEL_COLOR = { 0: '#888', 1: '#4caf7d', 2: '#4dabf7', 3: '#cc5de8', 4: '#f59f00', 5: '#ef5777' };
+var levelMeta = {};
+var ALL_USERS = [];
 var DEFAULT_PAGE_ACCESS = {
     home: { min_level: 0, show_in_nav: 1 }, overview: { min_level: 0, show_in_nav: 1 },
     todo: { min_level: 1, show_in_nav: 1 }, notice: { min_level: 1, show_in_nav: 1 },
@@ -965,7 +1048,9 @@ var PAGE_LABEL = { home: '空间首页', overview: '个人概览', todo: '待办
 var meUser = null;
 var pageAccess = {};
 function myLevel() { return (meUser && meUser.level) || 0; }
-function levelName(lv) { return LEVEL_NAME[lv] || '待定'; }
+function levelName(lv) { var m = levelMeta[lv]; return (m && m.name) || LEVEL_NAME[lv] || '待定'; }
+function levelColor(lv) { var m = levelMeta[lv]; return (m && m.color) || LEVEL_COLOR[lv] || '#888'; }
+function lvlBadge(lv) { var c = levelColor(lv); return '<span class="lvl-badge" style="border-color:' + c + ';color:' + c + '">' + esc(levelName(lv)) + '</span>'; }
 function pageCfg(page) {
     var c = pageAccess[page] || DEFAULT_PAGE_ACCESS[page] || { min_level: 0, show_in_nav: 1 };
     return { min_level: c.min_level || 0, show_in_nav: c.show_in_nav ? 1 : 0 };
@@ -973,8 +1058,22 @@ function pageCfg(page) {
 function canAccess(page) { return myLevel() >= pageCfg(page).min_level; }
 function levelOptions(sel) {
     var o = '';
-    for (var i = 0; i <= 5; i++) o += '<option value="' + i + '"' + (i === sel ? ' selected' : '') + '>' + levelName(i) + '</option>';
+    for (var i = 0; i <= 5; i++) {
+        var c = levelColor(i);
+        o += '<option value="' + i + '"' + (i === sel ? ' selected' : '') + ' style="color:' + c + '">' + levelName(i) + '</option>';
+    }
     return o;
+}
+function openModal(title, bodyHtml, footHtml) {
+    document.getElementById('modalTitle').textContent = title || '';
+    document.getElementById('modalBody').innerHTML = bodyHtml || '';
+    document.getElementById('modalFoot').innerHTML = footHtml || '';
+    document.getElementById('modalRoot').classList.remove('hide');
+}
+function closeModal() {
+    document.getElementById('modalRoot').classList.add('hide');
+    document.getElementById('modalBody').innerHTML = '';
+    document.getElementById('modalFoot').innerHTML = '';
 }
 async function btnRun(btn, fn) {
     if (btn.dataset.busy) return false;
@@ -1066,7 +1165,7 @@ async function loadMe() {
     meUser = u;
     document.getElementById('pfName').textContent = u.name;
     document.getElementById('pfMail').textContent = u.email;
-    document.getElementById('pfRole').textContent = '等级: ' + levelName(u.level || 0);
+    document.getElementById('pfRole').innerHTML = lvlBadge(u.level || 0);
     document.getElementById('sideName').textContent = u.name;
     document.getElementById('sideMail').textContent = u.email;
     var canPublish = (u.level || 0) >= 4;
@@ -1249,7 +1348,7 @@ async function loadOverview() {
     ovData = ret.data;
     var u = ovData.user;
     document.getElementById('ovName').textContent = u.name;
-    document.getElementById('ovRole').textContent = levelName(u.level || 0);
+    document.getElementById('ovRole').innerHTML = lvlBadge(u.level || 0);
     document.getElementById('ovMail').textContent = u.email;
     document.getElementById('ovSkill').textContent = u.skill || '还没有填写';
     document.getElementById('ovId').textContent = u.id;
@@ -1258,23 +1357,8 @@ async function loadOverview() {
     document.getElementById('stWeek').textContent = ovData.calls.week;
     document.getElementById('stMonth').textContent = ovData.calls.month;
     document.getElementById('apikeyInput').value = ovData.apikey;
-        renderApikeyBox();
-    var ivBox = document.getElementById('inviteList');
-    if (!ovData.invites.length) {
-        ivBox.innerHTML = '<div class="empty-tip">还没有创建过邀请码</div>';
-    } else {
-        ivBox.innerHTML = ovData.invites.map(function(iv) {
-            var used = !!iv.used_at;
-            var top = '<div class="iv-top"><span class="iv-code">#' + esc(iv.code) + '</span>' +
-                (used ? '<span class="chip no">已被使用</span>' : '<span class="chip ok">未使用</span>') + '</div>';
-            var mid = used
-            ? '<div class="iv-user"><img src="/assets/yyt64x.png" alt=""><div><div class="iv-un">' + esc(iv.used_name) + '</div><div class="iv-ue">' + esc(iv.used_email) + '</div></div></div>' +
-              '<div class="iv-date">创建日期: ' + esc(iv.created_at) + '<br>使用日期: ' + esc(iv.used_at) + '</div>'
-            : '<div class="iv-date">创建日期: ' + esc(iv.created_at) + '</div>' +
-              '<div style="margin-top:10px"><button class="act-btn" style="width:100%;justify-content:center" onclick="copyText(\'' + esc(iv.code) + '\', this)">' + '复制邀请码</button></div>';
-            return '<div class="invite-box">' + top + mid + '</div>';
-        }).join('');
-    }
+    renderApikeyBox();
+    renderOvInvites(ovData.invites);
     var dvBox = document.getElementById('deviceList');
     dvBox.innerHTML = ovData.sessions.map(function(s) {
         var icon = /mobile|android|iphone/i.test(s.ua || '') ? MOBILE_SVG : DESKTOP_SVG;
@@ -1285,6 +1369,29 @@ async function loadOverview() {
             '<div class="dv-time">' + esc(s.created_at) + '</div></div>' +
             '<button class="act-btn" onclick="btnRun(this, function(){ return killSession(' + s.id + ', ' + s.is_current + ') })">' + LOGOUT_SVG + ' 登出</button></div>';
     }).join('');
+}
+function renderOvInvites(invites) {
+    var ivBox = document.getElementById('inviteList');
+    if (!invites || !invites.length) {
+        ivBox.innerHTML = '<div class="empty-tip">还没有创建过邀请码</div>';
+        return;
+    }
+    ivBox.innerHTML = invites.map(function(iv) {
+        var used = !!iv.used_at;
+        var top = '<div class="iv-top"><span class="iv-code">#' + esc(iv.code) + '</span>' +
+            (used ? '<span class="chip no">已被使用</span>' : '<span class="chip ok">未使用</span>') + '</div>';
+        var mid = used
+        ? '<div class="iv-user"><img src="/assets/yyt64x.png" alt=""><div><div class="iv-un">' + esc(iv.used_name) + '</div><div class="iv-ue">' + esc(iv.used_email) + '</div></div></div>' +
+          '<div class="iv-date">创建日期: ' + esc(iv.created_at) + '<br>使用日期: ' + esc(iv.used_at) + '</div>'
+        : '<div class="iv-date">创建日期: ' + esc(iv.created_at) + '</div>' +
+          '<div style="margin-top:10px"><button class="act-btn" style="width:100%;justify-content:center" onclick="copyText(\'' + esc(iv.code) + '\', this)">' + '复制邀请码</button></div>';
+        return '<div class="invite-box">' + top + mid + '</div>';
+    }).join('');
+}
+async function refreshOvInvite() {
+    var ret = await getJson('/api/overview');
+    ovData = ret.data;
+    renderOvInvites(ovData.invites);
 }
 function toggleEditProfile() {
     var row = document.getElementById('ovEditRow');
@@ -1495,6 +1602,20 @@ async function doLogout() {
     location.reload();
 }
 async function loadPagesConfig() {
+    try {
+        var r1 = await getJson('/api/admin_levels');
+        if (r1.code === 0 && r1.data) {
+            var lvs = r1.data.levels || [];
+            lvs.forEach(function(m) {
+                levelMeta[m.level] = { name: m.name, color: m.color };
+            });
+            var pgs = r1.data.pages || [];
+            pgs.forEach(function(p) {
+                pageAccess[p.page_key] = { min_level: p.min_level, show_in_nav: p.show_in_nav };
+            });
+            return;
+        }
+    } catch (e) {}
     var ret = await getJson('/api/pages');
     var list = ret.data || [];
     list.forEach(function(p) {
@@ -1513,24 +1634,40 @@ function applyNavFilter() {
 async function loadTeam() {
     var ru = await getJson('/api/admin_users');
     if (ru.code === 403) {
-        ['teamGroups','teamMembers','teamPages','teamInvites','teamStats','teamLogs'].forEach(function(id) {
+        ['teamGroups','teamMembers','teamInvites','teamStats','teamLogs'].forEach(function(id) {
             document.getElementById(id).innerHTML = '<div class="empty-tip">无权限访问</div>';
         });
         return;
     }
-    var users = ru.data || [];
+    ALL_USERS = ru.data || [];
     var ret = await Promise.all([
         getJson('/api/admin_invites'),
         getJson('/api/admin_stats'),
         getJson('/api/admin_logs?limit=50'),
-        getJson('/api/pages')
+        loadPagesConfig().then(function(){})
     ]);
-    renderTeamGroups(users);
-    renderTeamMembers(users);
-    renderTeamPages(ret[3].data || []);
+    applyNavFilter();
+    renderTeamGroups(ALL_USERS);
+    renderTeamMembers(ALL_USERS);
     renderTeamInvites(ret[0].data || []);
     renderTeamStats(ret[1].data || {});
     renderTeamLogs(ret[2].data || []);
+}
+async function refreshTeamInvites() {
+    var ret = await getJson('/api/admin_invites');
+    renderTeamInvites(ret.data || []);
+}
+async function loadTeamStats() {
+    var ret = await getJson('/api/admin_stats');
+    renderTeamStats(ret.data || {});
+}
+async function loadTeamLogs() {
+    var ret = await getJson('/api/admin_logs?limit=50');
+    renderTeamLogs(ret.data || []);
+}
+async function loadTeamLogsAll() {
+    var ret = await getJson('/api/admin_logs?limit=500');
+    renderTeamLogs(ret.data || []);
 }
 function renderTeamGroups(users) {
     var counts = {};
@@ -1538,9 +1675,15 @@ function renderTeamGroups(users) {
     users.forEach(function(u) { counts[u.level || 0] = (counts[u.level || 0] || 0) + 1; });
     var html = '';
     for (var i = 5; i >= 0; i--) {
-        html += '<div class="grp-card"><span class="lvl-badge">' + esc(levelName(i)) + '</span>' +
+        var c = levelColor(i);
+        html += '<div class="grp-card">' +
+            lvlBadge(i) +
             '<div class="grp-name">' + esc(levelName(i)) + '</div>' +
-            '<div class="grp-count">' + counts[i] + ' 人</div></div>';
+            '<div class="grp-count">' + counts[i] + ' 人</div>' +
+            '<div class="grp-actions">' +
+            '<button class="card-head-btn" onclick="openGroupMembers(' + i + ')">成员</button>' +
+            '<button class="card-head-btn" onclick="openGroupEdit(' + i + ')">编辑</button>' +
+            '</div></div>';
     }
     document.getElementById('teamGroups').innerHTML = html;
 }
@@ -1550,28 +1693,18 @@ function renderTeamMembers(users) {
         return;
     }
     var html = users.map(function(u) {
-        return '<div class="mrow">' +
-            '<div style="min-width:130px"><div class="m-name">' + esc(u.name) + '</div><div class="m-mail">' + esc(u.email) + '</div></div>' +
-            '<div class="m-skill"><input value="' + esc(u.skill || '') + '" placeholder="核心能力" onchange="saveUserField(' + u.id + ', \'skill\', this.value)"></div>' +
-            '<select class="select-input" onchange="saveUserField(' + u.id + ', \'level\', this.value)">' + levelOptions(u.level || 0) + '</select>' +
+        var skillTxt = u.skill ? esc(u.skill) : '<span class="empty-tip">未填写核心能力</span>';
+        return '<div class="member-bar">' +
+            '<img class="mb-ava" src="/assets/yyt64x.png" alt="">' +
+            '<div class="mb-main">' +
+            '<div class="mb-name">' + esc(u.name) + ' ' + lvlBadge(u.level || 0) + '</div>' +
+            '<div class="mb-mail">' + esc(u.email) + '</div>' +
+            '<div class="mb-skill">' + skillTxt + '</div>' +
+            '</div>' +
+            '<button class="act-btn" onclick="openMemberDetail(' + u.id + ')">编辑</button>' +
             '</div>';
     }).join('');
     document.getElementById('teamMembers').innerHTML = html;
-}
-function renderTeamPages(pages) {
-    if (!pages.length) {
-        document.getElementById('teamPages').innerHTML = '<div class="empty-tip">无页面配置</div>';
-        return;
-    }
-    var html = pages.map(function(p) {
-        var label = PAGE_LABEL[p.page_key] || p.page_key;
-        return '<div class="pg-row" data-pk="' + esc(p.page_key) + '">' +
-            '<div class="pg-name">' + esc(label) + '</div>' +
-            '<select class="select-input pg-lvl" onchange="savePageAccess(\'' + p.page_key + '\')">' + levelOptions(p.min_level || 0) + '</select>' +
-            '<label class="pg-toggle"><input type="checkbox" class="pg-nav" ' + (p.show_in_nav ? 'checked' : '') + ' onchange="savePageAccess(\'' + p.page_key + '\')"> 侧栏显示</label>' +
-            '</div>';
-    }).join('');
-    document.getElementById('teamPages').innerHTML = html;
 }
 function renderTeamInvites(invites) {
     if (!invites.length) {
@@ -1614,23 +1747,190 @@ function renderTeamLogs(logs) {
     }).join('');
     document.getElementById('teamLogs').innerHTML = html;
 }
-async function loadTeamLogsAll() {
-    var ret = await getJson('/api/admin_logs?limit=500');
-    renderTeamLogs(ret.data || []);
+async function openMemberDetail(uid) {
+    openModal('成员详情', SPIN_SVG);
+    try {
+        var ret = await getJson('/api/admin_users?id=' + uid);
+        if (ret.code !== 0 || !ret.data) {
+            closeModal();
+            return;
+        }
+        var d = ret.data;
+        var u = d.user;
+        var s = d.stats || {};
+        var pages = d.pages || [];
+        var avatarHtml = '<div class="mem-avatar-row"><img src="/assets/yyt64x.png" alt=""><div>' +
+            '<div class="ma-name">' + esc(u.name) + ' ' + lvlBadge(u.level || 0) + '</div>' +
+            '<div class="ma-mail">' + esc(u.email) + '</div></div></div>';
+        var infoHtml = '<div class="md-section"><div class="md-label">基础信息</div>' +
+            '<div class="md-row"><div class="md-k">昵称</div><div class="md-v"><input id="mm_name" value="' + esc(u.name || '') + '"></div></div>' +
+            '<div class="md-row"><div class="md-k">邮箱</div><div class="md-v">' + esc(u.email) + '</div></div>' +
+            '<div class="md-row"><div class="md-k">账号ID</div><div class="md-v">' + esc(u.id) + '</div></div>' +
+            '<div class="md-row"><div class="md-k">核心能力</div><div class="md-v"><input id="mm_skill" value="' + esc(u.skill || '') + '"></div></div>' +
+            '<div class="md-row"><div class="md-k">权限组</div><div class="md-v"><select id="mm_level">' + levelOptions(u.level || 0) + '</select></div></div>' +
+            '<div class="md-row"><div class="md-k">面板节点</div><div class="md-v"><input id="mm_host" value="' + esc(u.panel_host || '') + '"></div></div>' +
+            '<div class="md-row"><div class="md-k">注册时间</div><div class="md-v">' + esc(u.created_at || '--') + '</div></div></div>';
+        var statsHtml = '<div class="md-section"><div class="md-label">API 与访问统计</div><div class="sec-grid">' +
+            '<div class="ss"><div class="n">' + esc(s.api_total || 0) + '</div><div class="l">API总数</div></div>' +
+            '<div class="ss"><div class="n">' + esc(s.api_today || 0) + '</div><div class="l">今日API</div></div>' +
+            '<div class="ss"><div class="n">' + esc(s.api_week || 0) + '</div><div class="l">近7天</div></div>' +
+            '<div class="ss"><div class="n">' + esc(s.visits_total || 0) + '</div><div class="l">访问总数</div></div>' +
+            '<div class="ss"><div class="n">' + esc(s.visits_today || 0) + '</div><div class="l">今日访问</div></div>' +
+            '</div></div>';
+        var ses = d.sessions || [];
+        var sesHtml = '<div class="md-section"><div class="md-label">登录会话 (' + ses.length + ')</div>';
+        if (!ses.length) {
+            sesHtml += '<div class="empty-tip">无活跃会话</div>';
+        } else {
+            sesHtml += ses.map(function(si) {
+                return '<div class="dev-row">' + DESKTOP_SVG +
+                    '<div class="dv-main"><div class="dv-ip">' + esc(si.ip || '未知IP') + '</div>' +
+                    '<div class="dv-ua">' + esc(si.ua || '未知设备') + '</div>' +
+                    '<div class="dv-time">创建: ' + esc(si.created_at || '--') + ' · 到期: ' + esc(si.expire_time || '--') + '</div></div>' +
+                    '<button class="act-btn" onclick="mmKillSession(' + u.id + ',' + si.id + ',this)">' + LOGOUT_SVG + ' 踢下线</button></div>';
+            }).join('');
+        }
+        sesHtml += '</div>';
+        var inv = d.invites_created || [];
+        var invHtml = '<div class="md-section"><div class="md-label">创建的邀请码 (' + inv.length + ')</div>';
+        if (!inv.length) {
+            invHtml += '<div class="empty-tip">尚未创建邀请码</div>';
+        } else {
+            invHtml += inv.map(function(iv) {
+                var used = !!iv.used_at;
+                var tag = used ? '<span class="chip no">已使用</span>' : '<span class="chip ok">未使用</span>';
+                var ux = used ? '<div class="iv-user" style="margin-top:6px"><img src="/assets/yyt64x.png" style="width:22px;height:22px" alt=""><span>' + esc(iv.used_name || '--') + ' · ' + esc(iv.used_email || '--') + '</span></div>' : '';
+                return '<div class="invite-box" style="margin-bottom:8px"><div class="iv-top"><span class="iv-code">#' + esc(iv.code) + '</span>' + tag + '</div>' +
+                    '<div class="iv-date">创建: ' + esc(iv.created_at || '--') + (used ? '<br>使用: ' + esc(iv.used_at || '--') : '') + '</div>' + ux + '</div>';
+            }).join('');
+        }
+        if (d.invite_used) {
+            var iu = d.invite_used;
+            invHtml += '<div class="md-label" style="margin-top:14px">注册用邀请码</div><div class="invite-box"><div class="iv-top"><span class="iv-code">#' + esc(iu.code) + '</span><span class="chip ok">已使用</span></div>' +
+                '<div class="iv-date">' + (iu.creator_name ? '创建者: ' + esc(iu.creator_name) : '创建者: 系统') + '<br>创建: ' + esc(iu.created_at || '--') + '<br>使用: ' + esc(iu.used_at || '--') + '</div></div>';
+        }
+        invHtml += '</div>';
+        var pgsHtml = '<div class="md-section"><div class="md-label">页面访问权限</div>';
+        pgsHtml += pages.map(function(p) {
+            var pk = p.page_key;
+            var label = PAGE_LABEL[pk] || pk;
+            var ok = (u.level || 0) >= (p.min_level || 0);
+            return '<div class="pg-edit-row">' +
+                '<div class="pen">' + esc(label) + '</div>' +
+                '<select class="pes" disabled>' + levelOptions(p.min_level || 0) + '</select>' +
+                '<label class="pecb"><input type="checkbox" disabled ' + (p.show_in_nav ? 'checked' : '') + '> 侧栏</label>' +
+                (ok ? '<span class="chip ok">可访问</span>' : '<span class="chip no">不足权限</span>') +
+                '</div>';
+        }).join('');
+        pgsHtml += '</div>';
+        var logsHtml = '';
+        var lg = d.recent_logs || [];
+        if (lg.length) {
+            logsHtml = '<div class="md-section"><div class="md-label">最近操作日志</div><div class="mini-logs">' +
+                lg.map(function(l) {
+                    return '<div class="ml"><span class="mp">' + esc(l.path || '--') + '</span><span class="mi">' + esc(l.ip || '') + '</span><span class="mt">' + esc(l.created_at || '--') + '</span></div>';
+                }).join('') + '</div></div>';
+        }
+        var foot = '<button class="act-btn" onclick="closeModal()">关闭</button>' +
+            '<button class="add-todo-btn" onclick="mmSave(' + u.id + ')">保存修改</button>';
+        openModal('成员详情 · ' + u.name, avatarHtml + infoHtml + statsHtml + sesHtml + invHtml + pgsHtml + logsHtml, foot);
+    } catch (e) {
+        closeModal();
+    }
+}
+async function mmSave(uid) {
+    var body = {
+        id: uid,
+        name: document.getElementById('mm_name').value.trim(),
+        skill: document.getElementById('mm_skill').value.trim(),
+        level: parseInt(document.getElementById('mm_level').value) || 0,
+        panel_host: document.getElementById('mm_host').value.trim()
+    };
+    var ret = await postJson('/api/admin_users', body);
+    if (ret.code === 0) {
+        closeModal();
+        await loadTeam();
+    }
+}
+async function mmKillSession(uid, sid, btn) {
+    await postJson('/api/admin_users', { id: uid, kill_session: sid });
+    btn.closest('.dev-row').remove();
+}
+async function openGroupEdit(lv) {
+    var color = levelColor(lv);
+    var name = levelName(lv);
+    var members = ALL_USERS.filter(function(u) { return (u.level || 0) === lv; });
+    var pages = [];
+    var defKeys = Object.keys(DEFAULT_PAGE_ACCESS);
+    defKeys.forEach(function(k) {
+        var cfg = pageCfg(k);
+        pages.push({ page_key: k, min_level: cfg.min_level, show_in_nav: cfg.show_in_nav });
+    });
+    var head = '<div style="margin-bottom:18px">当前权限组: ' + lvlBadge(lv) + ' · 共 ' + members.length + ' 人</div>';
+    var basic = '<div class="md-section"><div class="md-label">基础设置</div>' +
+        '<div class="md-row"><div class="md-k">组名称</div><div class="md-v"><input id="ge_name" value="' + esc(name) + '"></div></div>' +
+        '<div class="md-row"><div class="md-k">标识颜色</div><div class="md-v"><input type="color" class="color-in" id="ge_color" value="' + esc(color) + '"></div></div>' +
+        '</div>';
+    var pgEdit = '<div class="md-section"><div class="md-label">页面访问权限</div>';
+    pgEdit += pages.map(function(p) {
+        var pk = p.page_key;
+        var label = PAGE_LABEL[pk] || pk;
+        return '<div class="pg-edit-row" data-page="' + pk + '">' +
+            '<div class="pen">' + esc(label) + '</div>' +
+            '<select class="pes" data-f="min">' + levelOptions(p.min_level || 0) + '</select>' +
+            '<label class="pecb"><input type="checkbox" data-f="nav" ' + (p.show_in_nav ? 'checked' : '') + '> 侧栏显示</label>' +
+            '</div>';
+    }).join('');
+    pgEdit += '</div>';
+    var foot = '<button class="act-btn" onclick="closeModal()">关闭</button>' +
+        '<button class="add-todo-btn" onclick="geSave(' + lv + ')">保存配置</button>';
+    openModal('编辑权限组 · ' + name, head + basic + pgEdit, foot);
+}
+async function geSave(lv) {
+    var nm = document.getElementById('ge_name').value.trim();
+    var col = document.getElementById('ge_color').value;
+    await postJson('/api/admin_levels', { level: lv, name: nm, color: col });
+    levelMeta[lv] = { name: nm, color: col };
+    var pages = {};
+    document.querySelectorAll('.pg-edit-row[data-page]').forEach(function(r) {
+        var pk = r.dataset.page;
+        var ml = parseInt(r.querySelector('[data-f="min"]').value) || 0;
+        var sn = r.querySelector('[data-f="nav"]').checked ? 1 : 0;
+        pages[pk] = { min_level: ml, show_in_nav: sn };
+        pageAccess[pk] = { min_level: ml, show_in_nav: sn };
+    });
+    await postJson('/api/admin_levels', { level: lv, pages: pages });
+    applyNavFilter();
+    closeModal();
+    await loadTeam();
+}
+async function openGroupMembers(lv) {
+    var members = ALL_USERS.filter(function(u) { return (u.level || 0) === lv; });
+    var head = '<div style="margin-bottom:10px">' + lvlBadge(lv) + ' · 共 ' + members.length + ' 人</div>';
+    var html = head + '<div class="group-members">';
+    if (!members.length) {
+        html += '<div class="empty-tip">该组暂无成员</div>';
+    } else {
+        html += members.map(function(u) {
+            return '<div class="member-bar">' +
+                '<img class="mb-ava" src="/assets/yyt64x.png" alt="">' +
+                '<div class="mb-main">' +
+                '<div class="mb-name">' + esc(u.name) + ' ' + lvlBadge(u.level || 0) + '</div>' +
+                '<div class="mb-mail">' + esc(u.email) + '</div>' +
+                '<div class="mb-skill">' + (u.skill ? esc(u.skill) : '<span class="empty-tip">未填写核心能力</span>') + '</div>' +
+                '</div>' +
+                '<button class="act-btn" onclick="openMemberDetail(' + u.id + ')">详情</button>' +
+                '</div>';
+        }).join('');
+    }
+    html += '</div>';
+    var foot = '<button class="add-todo-btn" onclick="closeModal()">关闭</button>';
+    openModal('组内成员 · ' + levelName(lv), html, foot);
 }
 async function saveUserField(id, field, value) {
     var body = { id: id };
     body[field] = value;
     await postJson('/api/admin_users', body);
-}
-async function savePageAccess(pk) {
-    var row = document.querySelector('.pg-row[data-pk="' + pk + '"]');
-    if (!row) return;
-    var lvl = parseInt(row.querySelector('.pg-lvl').value) || 0;
-    var nav = row.querySelector('.pg-nav').checked ? 1 : 0;
-    pageAccess[pk] = { min_level: lvl, show_in_nav: nav };
-    await postJson('/api/pages', { page_key: pk, min_level: lvl, show_in_nav: nav });
-    applyNavFilter();
 }
 function toggleNoticeForm() {
     document.getElementById('noticeFormBox').classList.toggle('hide');

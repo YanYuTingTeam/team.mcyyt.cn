@@ -95,3 +95,18 @@ INSERT INTO yyt_page_access (page_key, min_level, show_in_nav) VALUES
 ON DUPLICATE KEY UPDATE page_key = page_key;
 
 INSERT INTO yyt_invite (code) VALUES ('YYT-WELCOME-001');
+
+CREATE TABLE IF NOT EXISTS yyt_level_meta (
+    level INT PRIMARY KEY,
+    name VARCHAR(64) DEFAULT NULL,
+    color VARCHAR(16) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO yyt_level_meta (level, name, color) VALUES
+    (0, '待定', '#888'),
+    (1, '志愿者 | 初级', '#4caf7d'),
+    (2, '志愿者 | 中级', '#4dabf7'),
+    (3, '志愿者 | 高级', '#cc5de8'),
+    (4, '管理员', '#f59f00'),
+    (5, '服主', '#ef5777')
+ON DUPLICATE KEY UPDATE level = level;
