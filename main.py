@@ -1,6 +1,7 @@
 import importlib
 import os
 import sys
+import threading
 import traceback
 import json
 import time
@@ -18,6 +19,7 @@ application = Flask(__name__)
 app = application
 
 STORAGE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'storage')
+import_lock = threading.Lock()
 
 class EnhancedJSONEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -86,8 +88,9 @@ def todo_detail_page(tid):
 def index():
     try:
         full_module = 'index'
-        sys.modules.pop(full_module, None)
-        module = importlib.import_module(full_module)
+        with import_lock:
+            sys.modules.pop(full_module, None)
+            module = importlib.import_module(full_module)
         if not hasattr(module, 'handle'):
             return json_response("404 page not found", 404)
         
@@ -115,12 +118,12 @@ def src_router(path):
         # 动态import route
         full_module = f"src.{module_path}"
         module_parts = full_module.split('.')
-        for i in range(len(module_parts), 0, -1):
-            temp_mod = '.'.join(module_parts[:i])
-            if temp_mod in sys.modules:
-                del sys.modules[temp_mod]
-
-        module = importlib.import_module(full_module)
+        with import_lock:
+            for i in range(len(module_parts), 0, -1):
+                temp_mod = '.'.join(module_parts[:i])
+                if temp_mod in sys.modules:
+                    del sys.modules[temp_mod]
+            module = importlib.import_module(full_module)
         if not hasattr(module, 'handle'):
             return json_response("404 page not found", 404)
         

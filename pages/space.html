@@ -309,6 +309,11 @@ a { color: #ef5777; }
     border-bottom: 1px solid #1e1e21;
 }
 .trow:last-child { border-bottom: none; }
+.trow.flash { animation: flash1 1.6s ease; }
+@keyframes flash1 {
+    0% { background: rgba(239, 87, 119, .18); }
+    100% { background: transparent; }
+}
 .trow .st-icon { width: 22px; height: 22px; flex-shrink: 0; }
 .trow .st-icon.ok { color: #4caf7d; }
 .trow .st-icon.no { color: #ef8c37; }
@@ -734,6 +739,14 @@ var X_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path f
 function chipHtml(done) {
     return done ? '<span class="chip ok">Complete</span>' : '<span class="chip no">Incomplete</span>';
 }
+function isInnerTodo(href) {
+    return /^\/todos\/\d+$/.test(href || '');
+}
+function todoLinkHtml(it) {
+    var inner = isInnerTodo(it.link);
+    return '<a class="todo-link" href="' + esc(it.link) + '"' + (inner ? '' : ' target="_blank"') +
+        ' onclick="return todoLinkClick(event, this)">' + esc(it.title) + LINK_SVG + '</a>';
+}
 async function loadTodo() {
     var ret = await getJson('/api/todo');
     var homeBox = document.getElementById('todoList');
@@ -745,22 +758,51 @@ async function loadTodo() {
     }
     homeBox.innerHTML = ret.data.slice(0, 3).map(function(it) {
         return '<div class="todo-item' + (it.is_done ? ' done' : '') + '">' + CLOCK_SVG +
-            '<div class="t"><a class="todo-link" href="' + esc(it.link) + '">' + esc(it.title) + LINK_SVG + '</a></div>' + chipHtml(it.is_done) + '</div>';
+            '<div class="t">' + todoLinkHtml(it) + '</div>' + chipHtml(it.is_done) + '</div>';
     }).join('');
     pageBox.innerHTML = ret.data.map(function(it) {
-        var t = '<a class="todo-link" href="' + esc(it.link) + '">' + esc(it.title) + LINK_SVG + '</a>';
+        var t = todoLinkHtml(it);
         var btn = it.is_done
         ? '<button class="act-btn" onclick="btnRun(this, function(){ return markDone(' + it.id + ', false) })">' + UNDO_SVG + ' 撤销确认</button>'
         : '<button class="act-btn" onclick="btnRun(this, function(){ return markDone(' + it.id + ', true) })">' + CHECK_SVG + ' 我已完成</button>';
         var desc = it.content ? '<div class="t-desc">' + esc(it.content) + '</div>' : '';
         var meta = '<div class="t-meta">由 ' + esc(it.creator_name) + ' 创建 · ' + esc(it.created_at) + '</div>';
-        return '<div class="trow' + (it.is_done ? ' done' : '') + '">' + (it.is_done ? OK_SVG : NO_SVG) +
+        return '<div class="trow' + (it.is_done ? ' done' : '') + '" data-tid="' + it.id + '">' + (it.is_done ? OK_SVG : NO_SVG) +
             '<div class="t-body"><div class="t-line">' + t + chipHtml(it.is_done) + '</div>' + desc + meta + '</div>' + btn + '</div>';
     }).join('');
 }
 async function markDone(id, done) {
     await postJson('/api/todo', { id: id, done: done });
     await loadTodo();
+}
+function todoLinkClick(e, a) {
+    var href = a.getAttribute('href');
+    if (!isInnerTodo(href)) return true;
+    e.preventDefault();
+    openTodo(href.split('/')[2], a);
+    return false;
+}
+async function openTodo(tid, el) {
+    topBarOn();
+    try {
+        if (el) {
+            if (!await btnRun(el, loadTodo)) return;
+        } else {
+            await loadTodo();
+        }
+    } finally {
+        topBarOff();
+    }
+    history.pushState(null, '', '/todos/' + tid);
+    showPage('todo');
+    flashTodo(tid);
+}
+function flashTodo(tid) {
+    var row = document.querySelector('.trow[data-tid="' + tid + '"]');
+    if (!row) return;
+    row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    row.classList.add('flash');
+    setTimeout(function() { row.classList.remove('flash'); }, 1600);
 }
 var assignUsers = [];
 function resetAddTodo() {
@@ -891,6 +933,8 @@ async function doLogout() {
     } finally {
         document.getElementById('loadMask').style.display = 'none';
     }
+    var m = location.pathname.match(/^\/todos\/(\d+)$/);
+    if (m) flashTodo(m[1]);
 })();
 </script>
 </body>
