@@ -1,7 +1,7 @@
 import bcrypt
 from flask import jsonify
 from utils.db import get_db
-from utils.auth import make_token
+from utils.auth import make_token, get_client_info
 
 def handle(request):
     if request.method != 'POST':
@@ -19,9 +19,10 @@ def handle(request):
             if not user or not bcrypt.checkpw(password.encode(), user['password_hash'].encode()):
                 return {"code": 401, "message": "邮箱或密码错误"}
             token = make_token()
+            ip, ua = get_client_info(request)
             cur.execute(
-                "INSERT INTO yyt_session (token, user_id, expire_time) VALUES (%s, %s, DATE_ADD(NOW(), INTERVAL 7 DAY))",
-                (token, user['id'])
+                "INSERT INTO yyt_session (token, user_id, ip, ua, expire_time) VALUES (%s, %s, %s, %s, DATE_ADD(NOW(), INTERVAL 7 DAY))",
+                (token, user['id'], ip, ua)
             )
         db.commit()
     finally:

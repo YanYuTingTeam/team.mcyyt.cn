@@ -23,6 +23,7 @@ body {
     color: #eee;
 }
 a { color: #ef5777; }
+.hide { display: none !important; }
 #loadMask {
     position: fixed;
     inset: 0;
@@ -457,6 +458,80 @@ a { color: #ef5777; }
 .drop-row .dn { font-size: 14px; color: #eee; }
 .drop-row .de { font-size: 12px; color: #777; }
 .drop-empty { padding: 10px; color: #666; font-size: 13px; }
+.masonry { column-count: 3; column-gap: 20px; }
+@media (max-width: 1200px) { .masonry { column-count: 2; } }
+@media (max-width: 700px) { .masonry { column-count: 1; } }
+.masonry .card {
+    display: inline-block;
+    width: 100%;
+    margin-bottom: 20px;
+    break-inside: avoid;
+}
+.ov-profile { display: flex; gap: 16px; }
+.ov-profile img { width: 72px; height: 72px; border-radius: 50%; background: #fff; flex-shrink: 0; }
+.ov-profile .pv-main { flex: 1; min-width: 0; }
+.ov-profile .pv-name { font-size: 20px; font-weight: bold; }
+.ov-profile .pv-role { font-size: 12px; color: #ef5777; border: 1px solid rgba(239,87,119,.4); border-radius: 20px; padding: 1px 10px; margin-left: 8px; vertical-align: 2px; }
+.ov-profile .pv-row { font-size: 13px; color: #999; margin-top: 6px; word-break: break-all; }
+.stat-grid { display: flex; text-align: center; }
+.stat-grid .st { flex: 1; }
+.stat-grid .st .sn { font-size: 30px; font-weight: bold; color: #fff; }
+.stat-grid .st .sl { font-size: 12px; color: #999; margin-top: 4px; }
+.invite-box {
+    background: #0d0d0f;
+    border: 1px solid #222;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 12px;
+}
+.invite-box .iv-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.invite-box .iv-code { font-size: 14px; color: #fff; word-break: break-all; }
+.invite-box .iv-user { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+.invite-box .iv-user img { width: 28px; height: 28px; border-radius: 50%; background: #fff; }
+.invite-box .iv-un { font-size: 13px; color: #eee; }
+.invite-box .iv-ue { font-size: 11px; color: #777; }
+.invite-box .iv-date { font-size: 12px; color: #666; margin-top: 8px; line-height: 1.6; }
+.key-row { display: flex; gap: 8px; margin-top: 4px; }
+.key-row input {
+    flex: 1;
+    min-width: 0;
+    background: #0d0d0f;
+    border: 1px solid #2b2b2e;
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: #eee;
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+}
+.dev-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid #1e1e21;
+}
+.dev-row:last-child { border-bottom: none; }
+.dev-row .dv-icon { width: 26px; height: 26px; color: #ccc; flex-shrink: 0; }
+.dev-row .dv-main { flex: 1; min-width: 0; }
+.dev-row .dv-ip { font-size: 14px; color: #fff; }
+.dev-row .dv-ip .chip { margin-left: 6px; }
+.dev-row .dv-ua { font-size: 12px; color: #888; margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dev-row .dv-time { font-size: 11px; color: #666; margin-top: 3px; }
+.edit-row { display: flex; gap: 8px; margin-top: 10px; }
+.edit-row input {
+    flex: 1;
+    min-width: 0;
+    background: #0d0d0f;
+    border: 1px solid #2b2b2e;
+    border-radius: 8px;
+    padding: 8px 10px;
+    color: #eee;
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+}
+.edit-row input:focus { border-color: #ef5777; }
 .menu-btn { display: none; }
 @media (max-width: 800px) {
     .side-bar { position: fixed; z-index: 9; left: -240px; transition: left .2s; }
@@ -492,6 +567,7 @@ a { color: #ef5777; }
         </div>
         <div class="nav-list" id="navList">
             <div class="nav-item now" data-page="home" onclick="switchPage('home', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M5 12H3l9-9l9 9h-2M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/><path d="M9 21v-6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v6"/></g></svg> 空间首页</div>
+            <div class="nav-item" data-page="overview" onclick="switchPage('overview', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 4h4a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1m0 12h4a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-2a1 1 0 0 1 1-1m10-4h4a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1m0-8h4a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1"/></svg> 个人概览</div>
             <div class="nav-item" data-page="todo" onclick="switchPage('todo', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.5 5.5L5 7l2.5-2.5m-4 7L5 13l2.5-2.5m-4 7L5 19l2.5-2.5M11 6h9m-9 6h9m-9 6h9"/></svg> 待办事项</div>
             <div class="nav-item" data-page="notice" onclick="switchPage('notice', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3H4a4 4 0 0 0 2-3v-3a7 7 0 0 1 4-6M9 17v1a3 3 0 0 0 6 0v-1"/></svg> 通知动态</div>
             <div class="nav-item" data-page="project" onclick="switchPage('project', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 16.008V7.99a1.98 1.98 0 0 0-1-1.717l-7-4.008a2.02 2.02 0 0 0-2 0L4 6.273c-.619.355-1 1.01-1 1.718v8.018c0 .709.381 1.363 1 1.717l7 4.008a2.02 2.02 0 0 0 2 0l7-4.008c.619-.355 1-1.01 1-1.718M12 22V12m0 0l8.73-5.04m-17.46 0L12 12"/></svg> 项目展示</div>
@@ -547,6 +623,65 @@ a { color: #ef5777; }
                 <div id="projectList"></div>
             </div>
         </div>
+        </div>
+        <div class="page hide" id="pageOverview">
+            <div class="page-mini">OVERVIEW</div>
+            <div class="page-title">个人概览</div>
+            <div class="page-sub">你的账号信息、邀请码、API KEY 与登录设备都在这里.</div>
+            <div class="masonry">
+                <div class="card">
+                    <div class="card-head">PROFILE</div>
+                    <div class="ov-profile">
+                        <img src="/assets/yyt64x.png" alt="">
+                        <div class="pv-main">
+                            <div class="pv-name"><span id="ovName">--</span><span class="pv-role" id="ovRole">--</span></div>
+                            <div class="pv-row" id="ovMail">--</div>
+                            <div class="pv-row">核心能力: <span id="ovSkill">--</span></div>
+                            <div class="pv-row">账号ID: <span id="ovId">--</span></div>
+                        </div>
+                    </div>
+                    <div class="edit-row hide" id="ovEditRow">
+                        <input id="ovEditName" placeholder="昵称">
+                        <input id="ovEditSkill" placeholder="核心能力, 逗号分隔">
+                    </div>
+                    <div style="margin-top:14px;display:flex;justify-content:flex-end;gap:8px">
+                        <button class="act-btn hide" id="ovSaveBtn" onclick="btnRun(this, saveProfile)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 12l5 5L20 7"/></svg> 保存</button>
+                        <button class="act-btn" id="ovEditBtn" onclick="toggleEditProfile()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M7 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-1"/><path d="M20.385 6.585a2.1 2.1 0 0 0-2.97-2.97L9 12v3h3zM16 5l3 3"/></g></svg> 修改资料</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-head">API CALLS</div>
+                    <div style="color:#999;font-size:13px;margin-bottom:16px">API 调用次数总览.</div>
+                    <div class="stat-grid">
+                        <div class="st"><div class="sn" id="stYesterday">0</div><div class="sl">昨日</div></div>
+                        <div class="st"><div class="sn" id="stToday">0</div><div class="sl">今日</div></div>
+                        <div class="st"><div class="sn" id="stWeek">0</div><div class="sl">近7天</div></div>
+                        <div class="st"><div class="sn" id="stMonth">0</div><div class="sl">近30天</div></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-head">INVITE CODES</div>
+                    <div style="color:#999;font-size:13px;margin-bottom:12px">邀请码和使用情况概览.</div>
+                    <button class="add-todo-btn" style="width:100%;justify-content:center;margin-bottom:14px" onclick="btnRun(this, createInvite)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m-7-7h14"/></svg> 创建邀请码</button>
+                    <div id="inviteList"></div>
+                </div>
+                <div class="card">
+                    <div class="card-head">API KEY</div>
+                    <div style="color:#999;font-size:13px;margin-bottom:10px">你的个人 API KEY, 请勿泄露给他人.</div>
+                    <div class="key-row">
+                        <input id="apikeyInput" readonly value="--">
+                        <button class="act-btn" onclick="copyText(document.getElementById('apikeyInput').value, this)" title="复制"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M7 9.667A2.667 2.667 0 0 1 9.667 7h8.666A2.667 2.667 0 0 1 21 9.667v8.666A2.667 2.667 0 0 1 18.333 21H9.667A2.667 2.667 0 0 1 7 18.333z"/><path d="M4.012 16.737A2 2 0 0 1 3 15V5c0-1.1.9-2 2-2h10c.75 0 1.158.385 1.5 1"/></g></svg></button>
+                    </div>
+                    <div style="margin-top:12px;display:flex;justify-content:flex-end">
+                        <button class="act-btn" onclick="btnRun(this, resetApikey)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 11A8.1 8.1 0 0 0 4.5 9M4 5v4h4m-4 4a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg> 重新申请</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-head">DEVICES</div>
+                    <div style="color:#999;font-size:13px;margin-bottom:6px">登录过的设备.</div>
+                    <div id="deviceList"></div>
+                </div>
+            </div>
         </div>
         <div class="page hide" id="pageTodo">
             <div class="page-head">
@@ -624,9 +759,9 @@ async function postJson(url, body) {
     });
     return res.json();
 }
-var PAGE_PATH = { home: '/', todo: '/todos', notice: '/notice', project: '/projects', addtodo: '/todos/add' };
-var NAV_OF = { home: 'home', todo: 'todo', notice: 'notice', project: 'project', addtodo: 'todo' };
-var PAGE_LOADER = { home: null, todo: loadTodo, notice: loadNotice, project: loadProject, addtodo: resetAddTodo };
+var PAGE_PATH = { home: '/', overview: '/overview', todo: '/todos', notice: '/notice', project: '/projects', addtodo: '/todos/add' };
+var NAV_OF = { home: 'home', overview: 'overview', todo: 'todo', notice: 'notice', project: 'project', addtodo: 'todo' };
+var PAGE_LOADER = { home: null, overview: loadOverview, todo: loadTodo, notice: loadNotice, project: loadProject, addtodo: resetAddTodo };
 var SPIN_SVG = '<svg xmlns="http://www.w3.org/2000/svg" class="spin" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3a9 9 0 1 0 9 9"/></svg>';
 async function btnRun(btn, fn) {
     if (btn.dataset.busy) return false;
@@ -887,6 +1022,105 @@ async function submitTodo() {
         err.textContent = ret.message || '创建失败';
     }
 }
+var DESKTOP_SVG = '<svg xmlns="http://www.w3.org/2000/svg" class="dv-icon" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1zm4 15h10m-8-4v4m6-4v4"/></svg>';
+var MOBILE_SVG = '<svg xmlns="http://www.w3.org/2000/svg" class="dv-icon" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2zm5-1h2m-1 13v.01"/></svg>';
+var LOGOUT_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M14 8V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2v-2"/><path d="M9 12h12l-3-3m0 6l3-3"/></g></svg>';
+var ovData = null;
+async function loadOverview() {
+    var ret = await getJson('/api/overview');
+    ovData = ret.data;
+    var u = ovData.user;
+    document.getElementById('ovName').textContent = u.name;
+    document.getElementById('ovRole').textContent = u.role || '成员';
+    document.getElementById('ovMail').textContent = u.email;
+    document.getElementById('ovSkill').textContent = u.skill || '还没有填写';
+    document.getElementById('ovId').textContent = u.id;
+    document.getElementById('stYesterday').textContent = ovData.calls.yesterday;
+    document.getElementById('stToday').textContent = ovData.calls.today;
+    document.getElementById('stWeek').textContent = ovData.calls.week;
+    document.getElementById('stMonth').textContent = ovData.calls.month;
+    document.getElementById('apikeyInput').value = ovData.apikey;
+    var ivBox = document.getElementById('inviteList');
+    if (!ovData.invites.length) {
+        ivBox.innerHTML = '<div class="empty-tip">还没有创建过邀请码</div>';
+    } else {
+        ivBox.innerHTML = ovData.invites.map(function(iv) {
+            var used = !!iv.used_at;
+            var top = '<div class="iv-top"><span class="iv-code">#' + esc(iv.code) + '</span>' +
+                (used ? '<span class="chip no">已被使用</span>' : '<span class="chip ok">未使用</span>') + '</div>';
+            var mid = used
+            ? '<div class="iv-user"><img src="/assets/yyt64x.png" alt=""><div><div class="iv-un">' + esc(iv.used_name) + '</div><div class="iv-ue">' + esc(iv.used_email) + '</div></div></div>' +
+              '<div class="iv-date">创建日期: ' + esc(iv.created_at) + '<br>使用日期: ' + esc(iv.used_at) + '</div>'
+            : '<div class="iv-date">创建日期: ' + esc(iv.created_at) + '</div>' +
+              '<div style="margin-top:10px"><button class="act-btn" style="width:100%;justify-content:center" onclick="copyText(\'' + esc(iv.code) + '\', this)">' + '复制邀请码</button></div>';
+            return '<div class="invite-box">' + top + mid + '</div>';
+        }).join('');
+    }
+    var dvBox = document.getElementById('deviceList');
+    dvBox.innerHTML = ovData.sessions.map(function(s) {
+        var icon = /mobile|android|iphone/i.test(s.ua || '') ? MOBILE_SVG : DESKTOP_SVG;
+        var cur = s.is_current ? '<span class="chip ok">本机</span>' : '';
+        return '<div class="dev-row">' + icon +
+            '<div class="dv-main"><div class="dv-ip">' + esc(s.ip || '未知IP') + cur + '</div>' +
+            '<div class="dv-ua">' + esc(s.ua || '未知设备') + '</div>' +
+            '<div class="dv-time">' + esc(s.created_at) + '</div></div>' +
+            '<button class="act-btn" onclick="btnRun(this, function(){ return killSession(' + s.id + ', ' + s.is_current + ') })">' + LOGOUT_SVG + ' 登出</button></div>';
+    }).join('');
+}
+function toggleEditProfile() {
+    var row = document.getElementById('ovEditRow');
+    var save = document.getElementById('ovSaveBtn');
+    var opening = row.classList.contains('hide');
+    row.classList.toggle('hide', !opening);
+    save.classList.toggle('hide', !opening);
+    if (opening && ovData) {
+        document.getElementById('ovEditName').value = ovData.user.name;
+        document.getElementById('ovEditSkill').value = ovData.user.skill || '';
+    }
+}
+async function saveProfile() {
+    var name = document.getElementById('ovEditName').value.trim();
+    if (!name) return;
+    var ret = await postJson('/api/profile', {
+        name: name,
+        skill: document.getElementById('ovEditSkill').value.trim()
+    });
+    if (ret.code === 0) {
+        toggleEditProfile();
+        await Promise.all([loadOverview(), loadMe()]);
+    }
+}
+async function createInvite() {
+    var ret = await postJson('/api/invite_create', {});
+    if (ret.code === 0) await loadOverview();
+}
+async function resetApikey() {
+    var ret = await postJson('/api/apikey_reset', {});
+    if (ret.code === 0) document.getElementById('apikeyInput').value = ret.data.apikey;
+}
+async function killSession(sid, isCurrent) {
+    var ret = await postJson('/api/session_kill', { sid: sid });
+    if (ret.code !== 0) return;
+    if (isCurrent) { location.reload(); return; }
+    await loadOverview();
+}
+async function copyText(txt, btn) {
+    try {
+        await navigator.clipboard.writeText(txt);
+    } catch (e) {
+        var ta = document.createElement('textarea');
+        ta.value = txt;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        ta.remove();
+    }
+    if (btn) {
+        var old = btn.innerHTML;
+        btn.innerHTML = '已复制';
+        setTimeout(function() { btn.innerHTML = old; }, 1000);
+    }
+}
 async function loadNotice() {
     var ret = await getJson('/api/notice');
     var homeBox = document.getElementById('noticeList');
@@ -927,9 +1161,12 @@ async function doLogout() {
     location.reload();
 }
 (async function boot() {
-    showPage(pageFromPath());
+    var start = pageFromPath();
+    showPage(start);
     try {
-        await Promise.all([loadMe(), loadTodo(), loadNotice(), loadProject(), document.fonts.ready]);
+        var jobs = [loadMe(), loadTodo(), loadNotice(), loadProject(), document.fonts.ready];
+        if (start === 'overview') jobs.push(loadOverview());
+        await Promise.all(jobs);
     } finally {
         document.getElementById('loadMask').style.display = 'none';
     }

@@ -4,6 +4,11 @@ from utils.db import get_db
 def make_token():
     return secrets.token_hex(32)
 
+def get_client_info(request):
+    ip = (request.headers.get('X-Forwarded-For') or '').split(',')[0].strip() or request.remote_addr or ''
+    ua = (request.headers.get('User-Agent') or '')[:255]
+    return ip[:64], ua
+
 def check_login(request):
     token = request.cookies.get('yyt_token')
     if not token:
@@ -12,11 +17,18 @@ def check_login(request):
     try:
         with db.cursor() as cur:
             cur.execute(
-                "SELECT u.id, u.email, u.name, u.role, u.skill, u.created_at "
+                "SELECT u.id, u.email, u.name, u.role, u.skill, u.apikey, u.created_at "
                 "FROM yyt_session s JOIN yyt_user u ON s.user_id = u.id "
                 "WHERE s.token = %s AND s.expire_time > NOW()",
                 (token,)
             )
-            return cur.fetchone()
+            row = cur.fetchone()
+            if row:
+                cur.execute(
+                    "INSERT INTO yyt_api_log (user_id, path) VALUES (%s, %s)",
+                    (row['id'], request.path[:128])
+                )
+                db.commit()
+            return row
     finally:
         db.close()

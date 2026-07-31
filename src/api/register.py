@@ -2,7 +2,7 @@ import re
 import bcrypt
 from flask import jsonify
 from utils.db import get_db
-from utils.auth import make_token
+from utils.auth import make_token, get_client_info
 
 def check_pw_strong(pw):
     return (len(pw) >= 12 and re.search(r'[A-Z]', pw) and re.search(r'[a-z]', pw)
@@ -40,9 +40,10 @@ def handle(request):
                 (user_id, invite_code)
             )
             token = make_token()
+            ip, ua = get_client_info(request)
             cur.execute(
-                "INSERT INTO yyt_session (token, user_id, expire_time) VALUES (%s, %s, DATE_ADD(NOW(), INTERVAL 7 DAY))",
-                (token, user_id)
+                "INSERT INTO yyt_session (token, user_id, ip, ua, expire_time) VALUES (%s, %s, %s, %s, DATE_ADD(NOW(), INTERVAL 7 DAY))",
+                (token, user_id, ip, ua)
             )
         db.commit()
     finally:
