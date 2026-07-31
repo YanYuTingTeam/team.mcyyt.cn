@@ -174,7 +174,7 @@ a { color: #ef5777; }
     font-family: 'Orbixbeta', 'MiSans', '微软雅黑', sans-serif;
     font-feature-settings: 'ss01' 1;
     font-size: 15px;
-    letter-spacing: 1px;
+    letter-spacing: 0.75px;
     margin-bottom: 16px;
     color: #fff;
 }
@@ -290,7 +290,7 @@ a { color: #ef5777; }
     font-family: 'Orbixbeta', 'MiSans', '微软雅黑', sans-serif;
     font-feature-settings: 'ss01' 1;
     font-size: 14px;
-    letter-spacing: 1px;
+    letter-spacing: 0.75px;
     color: #fff;
 }
 .page-mini::before { font-feature-settings: 'ss01' 0; content: '/ '; color: #ef5777; }
@@ -474,7 +474,7 @@ a { color: #ef5777; }
     font-weight: bold;
     border-radius: 6px;
     padding: 3px 10px;
-    letter-spacing: 1px;
+    letter-spacing: 0.75px;
     flex-shrink: 0;
 }
 .api-method.get { color: #4caf7d; background: #0d1f15; border: 1px solid #1e4a32; }
@@ -484,7 +484,7 @@ a { color: #ef5777; }
 .api-path { font-family: 'Patika', monospace; font-size: 15px; color: #fff; word-break: break-all; }
 .api-desc { font-size: 13px; color: #999; margin-top: 10px; line-height: 1.7; }
 .api-sec { margin-top: 14px; }
-.api-sec .st-label { font-size: 12px; color: #ef5777; letter-spacing: 1px; margin-bottom: 6px; }
+.api-sec .st-label { font-size: 12px; color: #ef5777; letter-spacing: 0.75px; margin-bottom: 6px; }
 .api-table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .api-table th, .api-table td { text-align: left; padding: 7px 10px; border-bottom: 1px solid #1e1e21; vertical-align: top; }
 .api-table th { color: #888; font-weight: normal; }
@@ -613,7 +613,7 @@ a { color: #ef5777; }
 .team-scroll { max-height: 460px; overflow-y: auto; }
 .team-scroll::-webkit-scrollbar { width: 6px; }
 .team-scroll::-webkit-scrollbar-thumb { background: #2b2b2e; border-radius: 3px; }
-.mrow { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #1e1e21; }
+.mrow { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 12px 0; border-bottom: 1px solid #1e1e21; }
 .mrow:last-child { border-bottom: none; }
 .mrow .m-name { font-size: 14px; color: #fff; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mrow .m-mail { font-size: 12px; color: #777; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -624,7 +624,7 @@ a { color: #ef5777; }
 .stat-block .sb { background: #0d0d0f; border: 1px solid #222; border-radius: 10px; padding: 16px 10px; text-align: center; }
 .stat-block .sb .n { font-size: 26px; font-weight: bold; color: #fff; }
 .stat-block .sb .l { font-size: 12px; color: #999; margin-top: 4px; }
-.pg-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #1e1e21; }
+.pg-row { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 12px 0; border-bottom: 1px solid #1e1e21; }
 .pg-row:last-child { border-bottom: none; }
 .pg-row .pg-name { flex: 1; font-size: 14px; color: #eee; }
 .pg-toggle { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #999; cursor: pointer; }
@@ -893,32 +893,32 @@ a { color: #ef5777; }
             <div class="page-title">团队管理</div>
             <div class="page-sub">管理团队成员、权限组、页面访问、邀请码与站点统计. 仅服主可访问.</div>
             <div class="card-grid">
-                <div class="card" style="grid-column:1/-1">
+                <div class="card">
                     <div class="card-head">PERMISSION GROUPS</div>
                     <div style="color:#999;font-size:13px;margin-bottom:14px">团队权限组与各等级人数. 可在「成员管理」中调整成员等级.</div>
                     <div id="teamGroups"></div>
                 </div>
-                <div class="card" style="grid-column:1/-1">
+                <div class="card">
                     <div class="card-head">MEMBERS</div>
                     <div style="color:#999;font-size:13px;margin-bottom:14px">所有注册账号. 可快捷编辑核心能力与权限组.</div>
                     <div class="team-scroll" id="teamMembers"></div>
                 </div>
-                <div class="card" style="grid-column:1/-1">
+                <div class="card">
                     <div class="card-head">PAGE ACCESS</div>
                     <div style="color:#999;font-size:13px;margin-bottom:14px">管理各页面在侧栏的显示与最低访问等级.</div>
                     <div id="teamPages"></div>
                 </div>
-                <div class="card" style="grid-column:1/-1">
+                <div class="card">
                     <div class="card-head">INVITE CODES</div>
                     <div style="color:#999;font-size:13px;margin-bottom:14px">全站邀请码与使用情况.</div>
                     <div class="team-scroll" id="teamInvites"></div>
                 </div>
-                <div class="card" style="grid-column:1/-1">
+                <div class="card">
                     <div class="card-head">STATISTICS</div>
                     <div style="color:#999;font-size:13px;margin-bottom:16px">站点全局统计.</div>
                     <div id="teamStats"></div>
                 </div>
-                <div class="card" style="grid-column:1/-1">
+                <div class="card">
                     <div class="card-head">ACTIVITY LOGS</div>
                     <div style="color:#999;font-size:13px;margin-bottom:14px">最近的用户操作日志.</div>
                     <div class="team-scroll" id="teamLogs"></div>
