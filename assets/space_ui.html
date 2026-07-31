@@ -1,0 +1,334 @@
+<div id="loadMask"><svg xmlns="http://www.w3.org/2000/svg" class="spin" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3a9 9 0 1 0 9 9"/></svg></div>
+<div id="topBar"></div>
+<button class="menu-btn" onclick="document.querySelector('.side-bar').classList.toggle('open')"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+<div class="big-box">
+    <div class="side-bar">
+        <div class="side-logo"><img src="/assets/yyt_w.png" alt="烟雨庭"></div>
+        <div class="search-box">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0-14 0m18 11l-6-6"/></svg>
+            <input id="searchInput" placeholder="搜索" oninput="doSearch(this.value)">
+        </div>
+        <div class="nav-list" id="navList">
+            <div class="nav-item now" data-page="home" onclick="switchPage('home', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M5 12H3l9-9l9 9h-2M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/><path d="M9 21v-6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v6"/></g></svg> 空间首页</div>
+            <div class="nav-item" data-page="overview" onclick="switchPage('overview', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 4h4a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1m0 12h4a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-2a1 1 0 0 1 1-1m10-4h4a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1m0-8h4a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1"/></svg> 个人概览</div>
+            <div class="nav-item" data-page="todo" onclick="switchPage('todo', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.5 5.5L5 7l2.5-2.5m-4 7L5 13l2.5-2.5m-4 7L5 19l2.5-2.5M11 6h9m-9 6h9m-9 6h9"/></svg> 待办事项</div>
+            <div class="nav-item" data-page="notice" onclick="switchPage('notice', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3H4a4 4 0 0 0 2-3v-3a7 7 0 0 1 4-6M9 17v1a3 3 0 0 0 6 0v-1"/></svg> 通知动态</div>
+            <div class="nav-item" data-page="project" onclick="switchPage('project', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 16.008V7.99a1.98 1.98 0 0 0-1-1.717l-7-4.008a2.02 2.02 0 0 0-2 0L4 6.273c-.619.355-1 1.01-1 1.718v8.018c0 .709.381 1.363 1 1.717l7 4.008a2.02 2.02 0 0 0 2 0l7-4.008c.619-.355 1-1.01 1-1.718M12 22V12m0 0l8.73-5.04m-17.46 0L12 12"/></svg> 项目展示</div>
+            <div class="nav-item" data-page="apis" onclick="switchPage('apis', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 13h5m3 3V8h3a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-3m8-5v8M9 16v-5.5a2.5 2.5 0 0 0-5 0V16"/></svg> API 文档</div>
+            <div class="nav-item" data-page="mcsm" onclick="switchPage('mcsm', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1zm4 15h10m-8-4v4m6-4v4"/></svg> MCSManager</div>
+            <div class="nav-item hide" data-page="team" onclick="switchPage('team', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8a4 4 0 0 0 0 8m13 10v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg> 团队管理</div>
+        </div>
+        <div class="side-user-wrap">
+            <div class="user-menu hide" id="userMenu" onclick="event.stopPropagation()">
+                <div class="menu-row" onclick="btnRun(this, doLogout)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M14 8V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2v-2"/><path d="M9 12h12l-3-3m0 6l3-3"/></g></svg> 退出登录</div>
+            </div>
+            <div class="side-user" onclick="toggleUserMenu(event)">
+                <img src="/assets/yyt64x.png" alt="">
+                <div class="u-box">
+                    <div class="u-name" id="sideName">--</div>
+                    <div class="u-mail" id="sideMail">--</div>
+                </div>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 12a1 1 0 1 0 2 0a1 1 0 1 0-2 0m0 7a1 1 0 1 0 2 0a1 1 0 1 0-2 0m0-14a1 1 0 1 0 2 0a1 1 0 1 0-2 0"/></svg>
+            </div>
+        </div>
+    </div>
+    <div class="sky-bg"></div>
+    <div class="meteors" id="meteorsLayer"></div>
+    <div class="main-area">
+        <div class="page" id="pageHome">
+        <div class="card-grid">
+            <div class="card hero-card" id="cardHero">
+                <div class="card-head">WELCOME</div>
+                <div class="hero-text" id="heroText">嘿! 欢迎回到烟雨庭. 这里汇总了你的待办、团队通知和正在进行的项目, 一起把服务器做得更好吧.</div>
+                <img class="hero-logo" src="/assets/yyt_w.png" alt="">
+            </div>
+            <div class="card" id="cardProfile">
+                <div class="card-head">MEMBER PROFILE</div>
+                <div class="profile-name" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span id="pfName">--</span><span id="pfRole"></span></div>
+                <div class="profile-mail" id="pfMail">--</div>
+                <div class="profile-row">核心能力: <span id="pfSkill"><span class="empty-tip">还没有填写</span></span></div>
+                <div style="margin-top: 14px">
+                    <button class="small-btn" onclick="btnRun(this, loadMe)">刷新信息</button>
+                </div>
+            </div>
+            <div class="card" id="cardTodo">
+                <div class="card-head">TO-DO CHECKLIST</div>
+                <div style="color:#999;font-size:13px;margin-bottom:12px">这里会汇总你当前需要处理的事项.</div>
+                <div id="todoList"></div>
+                <div style="margin-top:14px;display:flex;justify-content:flex-end">
+                    <button class="act-btn" onclick="switchPage('todo', this)">查看全部待办 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-6 6l6-6m-6-6l6 6"/></svg></button>
+                </div>
+            </div>
+            <div class="card" id="cardNotice">
+                <div class="card-head">UPDATES</div>
+                <div style="color:#999;font-size:13px;margin-bottom:6px">团队的公告与最新动态都在这里.</div>
+                <div id="noticeList"></div>
+            </div>
+            <div class="card" id="cardProject">
+                <div class="card-head">PROJECTS</div>
+                <div style="color:#999;font-size:13px;margin-bottom:12px">团队正在进行的项目.</div>
+                <div id="projectList"></div>
+            </div>
+        </div>
+        </div>
+        <div class="page hide" id="pageOverview">
+            <div class="page-mini">OVERVIEW</div>
+            <div class="page-title">个人概览</div>
+            <div class="page-sub">你的账号信息、邀请码、API KEY 与登录设备都在这里.</div>
+            <div class="ov-cols">
+            <div class="ov-col">
+                <div class="card">
+                    <div class="card-head">PROFILE</div>
+                    <div class="ov-profile">
+                        <img src="/assets/yyt64x.png" alt="">
+                        <div class="pv-main">
+                            <div class="pv-name"><span id="ovName">--</span><span class="pv-role" id="ovRole">--</span></div>
+                            <div class="pv-row" id="ovMail">--</div>
+                            <div class="pv-row">核心能力: <span id="ovSkill">--</span></div>
+                            <div class="pv-row">账号ID: <span id="ovId">--</span></div>
+                        </div>
+                    </div>
+                    <div class="edit-row hide" id="ovEditRow">
+                        <input id="ovEditName" placeholder="昵称">
+                        <input id="ovEditSkill" placeholder="核心能力, 逗号分隔">
+                    </div>
+                    <div style="margin-top:14px;display:flex;justify-content:flex-end;gap:8px">
+                        <button class="act-btn hide" id="ovSaveBtn" onclick="btnRun(this, saveProfile)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 12l5 5L20 7"/></svg> 保存</button>
+                        <button class="act-btn" id="ovEditBtn" onclick="toggleEditProfile()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M7 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-1"/><path d="M20.385 6.585a2.1 2.1 0 0 0-2.97-2.97L9 12v3h3zM16 5l3 3"/></g></svg> 修改资料</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-head">API CALLS</div>
+                    <div style="color:#999;font-size:13px;margin-bottom:16px">API 调用次数总览.</div>
+                    <div class="stat-grid">
+                        <div class="st"><div class="sn" id="stYesterday">0</div><div class="sl">昨日</div></div>
+                        <div class="st"><div class="sn" id="stToday">0</div><div class="sl">今日</div></div>
+                        <div class="st"><div class="sn" id="stWeek">0</div><div class="sl">近7天</div></div>
+                        <div class="st"><div class="sn" id="stMonth">0</div><div class="sl">近30天</div></div>
+                    </div>
+                    <div style="margin-top:16px;display:flex;justify-content:flex-end">
+                        <button class="act-btn" onclick="switchPage('logs', this)">查看全部日志 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-6 6l6-6m-6-6l6 6"/></svg></button>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-head">API KEY</div>
+                    <div style="color:#999;font-size:13px;margin-bottom:10px">你的个人 API KEY, 仅管理员及以上可用于代理, 请勿泄露给他人.</div>
+                    <div class="key-row hide" id="apikeyHas">
+                        <input id="apikeyInput" readonly value="--">
+                        <button class="act-btn" onclick="copyText(document.getElementById('apikeyInput').value, this)" title="复制"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M7 9.667A2.667 2.667 0 0 1 9.667 7h8.666A2.667 2.667 0 0 1 21 9.667v8.666A2.667 2.667 0 0 1 18.333 21H9.667A2.667 2.667 0 0 1 7 18.333z"/><path d="M4.012 16.737A2 2 0 0 1 3 15V5c0-1.1.9-2 2-2h10c.75 0 1.158.385 1.5 1"/></g></svg></button>
+                    </div>
+                    <div class="empty-tip hide" id="apikeyNone">你还没有申请 API KEY.</div>
+                    <div style="margin-top:12px;display:flex;justify-content:flex-end">
+                        <button class="act-btn hide" id="apikeyResetBtn" onclick="btnRun(this, resetApikey)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 11A8.1 8.1 0 0 0 4.5 9M4 5v4h4m-4 4a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg> 重新申请</button>
+                        <button class="add-todo-btn hide" id="apikeyApplyBtn" onclick="btnRun(this, resetApikey)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m-7-7h14"/></svg> 申请 API KEY</button>
+                    </div>
+                </div>
+            </div>
+            <div class="ov-col">
+                <div class="card">
+                    <div class="card-head-row">
+                        <div class="card-head">INVITE CODES</div>
+                        <button class="card-head-btn" onclick="btnRun(this, refreshOvInvite)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 11A8.1 8.1 0 0 0 4.5 9M4 5v4h4m-4 4a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg> 刷新</button>
+                    </div>
+                    <div style="color:#999;font-size:13px;margin-bottom:12px">邀请码和使用情况概览.</div>
+                    <button class="add-todo-btn" style="width:100%;justify-content:center;margin-bottom:14px" onclick="btnRun(this, createInvite)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m-7-7h14"/></svg> 创建邀请码</button>
+                    <div id="inviteList"></div>
+                </div>
+                <div class="card">
+                    <div class="card-head">DEVICES</div>
+                    <div style="color:#999;font-size:13px;margin-bottom:6px">登录过的设备.</div>
+                    <div id="deviceList"></div>
+                </div>
+            </div>
+            </div>
+        </div>
+        <div class="page hide" id="pageTodo">
+            <div class="page-head">
+                <div class="htxt">
+                    <div class="page-mini">TO-DO CHECKLIST</div>
+                    <div class="page-title">待办事项</div>
+                    <div class="page-sub">在这里追踪需要你处理的事项.</div>
+                </div>
+                <button class="add-todo-btn" onclick="switchPage('addtodo', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m-7-7h14"/></svg> 添加待办</button>
+            </div>
+            <div class="panel" id="todoPageList"></div>
+        </div>
+        <div class="page hide" id="pageAddtodo">
+            <div class="back-link" onclick="switchPage('todo', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12l6 6m-6-6l6-6"/></svg> 返回上一页</div>
+            <div class="page-mini">TO-DO CHECKLIST</div>
+            <div class="page-title">添加待办</div>
+            <div class="page-sub">填写待办详情, 并选择为谁添加.</div>
+            <div class="form-box">
+                <div class="form-row">
+                    <label class="form-label"><b>*</b> 标题</label>
+                    <input class="form-input" id="atTitle" placeholder="待办标题">
+                </div>
+                <div class="form-row">
+                    <label class="form-label">URL <span style="color:#666;font-size:12px">(留空则自动分配)</span></label>
+                    <input class="form-input" id="atLink" placeholder="https://... 或留空">
+                </div>
+                <div class="form-row">
+                    <label class="form-label">内容</label>
+                    <textarea class="form-area" id="atContent" placeholder="待办的详细说明"></textarea>
+                </div>
+                <div class="form-row">
+                    <label class="form-label">为谁添加 <span style="color:#666;font-size:12px">(留空则添加给自己)</span></label>
+                    <div class="picker-wrap">
+                        <div class="picker" id="assignPicker" onclick="document.getElementById('assignInput').focus()">
+                            <input id="assignInput" placeholder="输入昵称搜索并选择" autocomplete="off" oninput="searchUser(this.value)" onkeydown="assignKey(event)">
+                        </div>
+                        <div class="picker-drop hide" id="assignDrop"></div>
+                    </div>
+                </div>
+                <div class="err-msg" id="atErr" style="color:#ff6b81;font-size:13px;min-height:18px;margin-bottom:8px"></div>
+                <button class="add-todo-btn" id="atSubmit" onclick="btnRun(this, submitTodo)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m-7-7h14"/></svg> 创建待办</button>
+            </div>
+        </div>
+        <div class="page hide" id="pageNotice">
+            <div class="page-head">
+                <div class="htxt">
+                    <div class="page-mini">UPDATES</div>
+                    <div class="page-title">通知动态</div>
+                    <div class="page-sub">团队的公告与最新动态都在这里.</div>
+                </div>
+                <button class="add-todo-btn hide" id="noticeAddBtn" onclick="toggleNoticeForm()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m-7-7h14"/></svg> 发布通知</button>
+            </div>
+            <div class="form-box hide" id="noticeFormBox" style="margin-bottom:20px">
+                <div class="form-row">
+                    <label class="form-label"><b>*</b> 标题</label>
+                    <input class="form-input" id="noticeTitle" placeholder="通知标题">
+                </div>
+                <div class="form-row">
+                    <label class="form-label">内容</label>
+                    <textarea class="form-area" id="noticeContent" placeholder="通知正文"></textarea>
+                </div>
+                <button class="add-todo-btn" onclick="btnRun(this, submitNotice)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 12l5 5L20 7"/></svg> 发布</button>
+            </div>
+            <div class="panel" id="noticePageList"></div>
+        </div>
+        <div class="page hide" id="pageProject">
+            <div class="page-head">
+                <div class="htxt">
+                    <div class="page-mini">PROJECTS</div>
+                    <div class="page-title">项目展示</div>
+                    <div class="page-sub">团队正在进行的项目.</div>
+                </div>
+                <button class="add-todo-btn hide" id="projectAddBtn" onclick="toggleProjectForm()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m-7-7h14"/></svg> 添加项目</button>
+            </div>
+            <div class="form-box hide" id="projectFormBox" style="margin-bottom:20px">
+                <div class="form-row">
+                    <label class="form-label"><b>*</b> 项目名</label>
+                    <input class="form-input" id="projectName" placeholder="项目名称">
+                </div>
+                <div class="form-row">
+                    <label class="form-label">简介</label>
+                    <input class="form-input" id="projectInfo" placeholder="一句话介绍">
+                </div>
+                <div class="form-row">
+                    <label class="form-label">链接</label>
+                    <input class="form-input" id="projectLink" placeholder="https://...">
+                </div>
+                <div class="form-row">
+                    <label class="form-label">成员</label>
+                    <input class="form-input" id="projectMembers" placeholder="成员, 逗号分隔">
+                </div>
+                <button class="add-todo-btn" onclick="btnRun(this, submitProject)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 12l5 5L20 7"/></svg> 添加</button>
+            </div>
+            <div id="projectPageList"></div>
+        </div>
+        <div class="page hide" id="pageApis">
+            <div class="page-mini">API DOCS</div>
+            <div class="page-title">API 文档</div>
+            <div class="page-sub">这里列出所有可用的 API. 请在请求头 X-API-Key 或 ?apikey= 携带你的 API KEY.</div>
+            <div id="apiList"></div>
+        </div>
+        <div class="page hide" id="pageLogs">
+            <div class="back-link" onclick="switchPage('overview', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12l6 6m-6-6l6-6"/></svg> 返回个人概览</div>
+            <div class="page-mini">REQUEST LOGS</div>
+            <div class="page-title">请求日志</div>
+            <div class="page-sub">你的 API KEY 的全部调用记录 (最近 500 条).</div>
+            <div class="panel" id="logList"></div>
+        </div>
+        <div class="page hide" id="pageMcsm">
+            <div class="page-mini">MCSMANAGER</div>
+            <div class="page-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+                <span>MCSManager</span>
+                <div style="display:flex;gap:8px" id="mcsmToolbar">
+                    <button class="card-head-btn" onclick="mcsmRefresh()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 11A8.1 8.1 0 0 0 4.5 9M4 5v4h4m-4 4a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg> 刷新</button>
+                    <button class="card-head-btn" onclick="mcsmTutorial()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> 教程</button>
+                    <button class="card-head-btn" onclick="mcsmFullscreen()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4h4m12 4V4h-4M4 16v4h4m12-4v4h-4"/></svg> 全屏</button>
+                </div>
+            </div>
+            <div class="page-sub">这里是你无远程时 唯一可以接触到面板的入口.</div>
+            <div id="mcsmBox"><div class="mcsm-tip">正在准备面板...</div></div>
+        </div>
+        <div class="page hide" id="pageTeam">
+            <div class="page-mini">TEAM ADMIN</div>
+            <div class="page-title">团队管理</div>
+            <div class="page-sub">管理团队成员、权限组、邀请码与站点统计. 仅服主可访问.</div>
+            <div class="masonry-grid">
+                <div class="card">
+                    <div class="card-head-row">
+                        <div class="card-head">PERMISSION GROUPS</div>
+                        <button class="card-head-btn" onclick="btnRun(this, loadTeam)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 11A8.1 8.1 0 0 0 4.5 9M4 5v4h4m-4 4a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg> 刷新</button>
+                    </div>
+                    <div style="color:#999;font-size:13px;margin-bottom:14px">团队权限组与各等级人数. 可编辑颜色、页面权限, 查看组内成员.</div>
+                    <div id="teamGroups"></div>
+                </div>
+                <div class="card">
+                    <div class="card-head-row">
+                        <div class="card-head">MEMBERS</div>
+                        <button class="card-head-btn" onclick="btnRun(this, loadTeam)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 11A8.1 8.1 0 0 0 4.5 9M4 5v4h4m-4 4a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg> 刷新</button>
+                    </div>
+                    <div style="color:#999;font-size:13px;margin-bottom:14px">所有注册账号. 点击右侧编辑查看详情与权限.</div>
+                    <div class="team-scroll" id="teamMembers"></div>
+                </div>
+                <div class="card">
+                    <div class="card-head-row">
+                        <div class="card-head">INVITE CODES</div>
+                        <button class="card-head-btn" onclick="btnRun(this, refreshTeamInvites)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 11A8.1 8.1 0 0 0 4.5 9M4 5v4h4m-4 4a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg> 刷新</button>
+                    </div>
+                    <div style="color:#999;font-size:13px;margin-bottom:14px">全站邀请码与使用情况.</div>
+                    <div class="team-scroll" id="teamInvites"></div>
+                </div>
+                <div class="card">
+                    <div class="card-head-row">
+                        <div class="card-head">CORE SKILLS</div>
+                        <button class="card-head-btn" onclick="btnRun(this, reloadSkills)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 11A8.1 8.1 0 0 0 4.5 9M4 5v4h4m-4 4a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg> 刷新</button>
+                    </div>
+                    <div style="color:#999;font-size:13px;margin-bottom:14px">核心能力标签. 可修改颜色、名称、统计人数, 快捷增删.</div>
+                    <div id="teamSkills"></div>
+                </div>
+                <div class="card">
+                    <div class="card-head-row">
+                        <div class="card-head">STATISTICS</div>
+                        <button class="card-head-btn" onclick="btnRun(this, loadTeamStats)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 11A8.1 8.1 0 0 0 4.5 9M4 5v4h4m-4 4a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg> 刷新</button>
+                    </div>
+                    <div style="color:#999;font-size:13px;margin-bottom:16px">站点全局统计.</div>
+                    <div id="teamStats"></div>
+                </div>
+                <div class="card">
+                    <div class="card-head-row">
+                        <div class="card-head">ACTIVITY LOGS</div>
+                        <button class="card-head-btn" onclick="btnRun(this, loadTeamLogs)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 11A8.1 8.1 0 0 0 4.5 9M4 5v4h4m-4 4a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg> 刷新</button>
+                    </div>
+                    <div style="color:#999;font-size:13px;margin-bottom:14px">最近的用户操作日志.</div>
+                    <div class="team-scroll" id="teamLogs"></div>
+                    <div style="margin-top:14px;display:flex;justify-content:flex-end">
+                        <button class="act-btn" id="teamLogsMoreBtn" onclick="btnRun(this, loadTeamLogsAll)">查看全部日志 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-6 6l6-6m-6-6l6 6"/></svg></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-mask hide" id="modalRoot" onclick="if(event.target===this) closeModal()">
+    <div class="modal-box" id="modalBox">
+        <div class="modal-head">
+            <div class="mh-title" id="modalTitle">--</div>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+        <div class="modal-foot" id="modalFoot"></div>
+    </div>
+</div>
