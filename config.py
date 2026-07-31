@@ -9,5 +9,8 @@ DB_CONFIG = {
 MCSM_CONFIG = {
     "base": "http://localhost:23333",
     "apikey": "",
-    "proxy_port": 8185
+    "proxy_port": 8185,
+    "salt": "",
+    "panel_suffix": "mcsm.mcyyt.cn",
+    "sign_window": 300
 }

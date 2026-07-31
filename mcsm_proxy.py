@@ -12,6 +12,10 @@ from utils.mcsm import proxy
 application = Flask(__name__)
 app = application
 
+@app.route('/', methods=['GET', 'POST', 'PUT', 'DELETE'])
+def forward_root():
+    return proxy(request, '')
+
 @app.route('/<path:subpath>', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def forward(subpath):
     return proxy(request, subpath)
