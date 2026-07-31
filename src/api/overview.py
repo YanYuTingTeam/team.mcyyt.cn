@@ -1,4 +1,3 @@
-import uuid
 from utils.auth import check_login
 from utils.db import get_db
 
@@ -11,9 +10,6 @@ def handle(request):
     try:
         with db.cursor() as cur:
             apikey = user['apikey']
-            if not apikey:
-                apikey = str(uuid.uuid4())
-                cur.execute("UPDATE yyt_user SET apikey = %s WHERE id = %s", (apikey, user['id']))
             cur.execute(
                 "SELECT SUM(DATE(created_at) = DATE_SUB(CURDATE(), INTERVAL 1 DAY)) AS yesterday, "
                 "SUM(DATE(created_at) = CURDATE()) AS today, "

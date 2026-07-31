@@ -13,6 +13,11 @@ def proxy(request, subpath):
             json.dumps({"status": 403, "data": None, "message": "apikey 无效或未提供"}, ensure_ascii=False),
             status=403, mimetype="application/json"
         )
+    if (user.get('level') or 0) < 1:
+        return Response(
+            json.dumps({"status": 403, "data": None, "message": "该 apikey 权限不足, 仅管理员及以上可调用"}, ensure_ascii=False),
+            status=403, mimetype="application/json"
+        )
     real_key = MCSM_CONFIG.get('apikey') or ''
     args = {k: v for k, v in request.args.items() if k != 'apikey'}
     args['apikey'] = real_key

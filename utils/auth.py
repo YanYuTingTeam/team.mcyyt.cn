@@ -17,7 +17,7 @@ def check_login(request):
     try:
         with db.cursor() as cur:
             cur.execute(
-                "SELECT u.id, u.email, u.name, u.role, u.skill, u.apikey, u.created_at "
+                "SELECT u.id, u.email, u.name, u.role, u.level, u.skill, u.apikey, u.created_at "
                 "FROM yyt_session s JOIN yyt_user u ON s.user_id = u.id "
                 "WHERE s.token = %s AND s.expire_time > NOW()",
                 (token,)
@@ -34,7 +34,7 @@ def check_apikey(request):
     try:
         with db.cursor() as cur:
             cur.execute(
-                "SELECT id, email, name, role, skill, apikey, created_at FROM yyt_user WHERE apikey = %s",
+                "SELECT id, email, name, role, level, skill, apikey, created_at FROM yyt_user WHERE apikey = %s",
                 (key,)
             )
             row = cur.fetchone()
