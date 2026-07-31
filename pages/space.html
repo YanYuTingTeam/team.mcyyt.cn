@@ -689,6 +689,8 @@ a { color: #ef5777; }
 .pg-edit-row .pecb { flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: #888; cursor: pointer; }
 .pg-edit-row .pecb input { width: 14px; height: 14px; accent-color: #ef5777; }
 .group-members { max-height: 240px; overflow-y: auto; margin-top: 10px; }
+.masonry-grid { column-width: 330px; column-gap: 20px; }
+.masonry-grid .card { break-inside: avoid; margin-bottom: 20px; display: inline-block; width: 100%; }
 </style>
 </head>
 <body>
@@ -952,7 +954,7 @@ a { color: #ef5777; }
             <div class="page-mini">TEAM ADMIN</div>
             <div class="page-title">团队管理</div>
             <div class="page-sub">管理团队成员、权限组、邀请码与站点统计. 仅服主可访问.</div>
-            <div class="card-grid">
+            <div class="masonry-grid">
                 <div class="card">
                     <div class="card-head-row">
                         <div class="card-head">PERMISSION GROUPS</div>
