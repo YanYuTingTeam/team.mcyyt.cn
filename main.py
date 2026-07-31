@@ -7,7 +7,7 @@ import json
 import time
 import mimetypes
 from datetime import datetime, date
-from flask import Flask, request, Response, send_from_directory, send_file
+from flask import Flask, request, Response, send_from_directory, send_file, redirect
 from io import BytesIO
 from PIL import Image
 
@@ -15,11 +15,51 @@ sys.stdout.reconfigure(encoding='utf-8')
 sys.stderr.reconfigure(encoding='utf-8')
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+from utils.security import (
+    check_ban, rate_tick, is_ajax_api, check_auth_ban
+)
+from utils.auth import check_login
+from utils.db import get_db
+import traceback as _tb
+
 application = Flask(__name__)
 app = application
 
 STORAGE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'storage')
 import_lock = threading.Lock()
+
+PUBLIC_PATHS = {
+    '/', '/login', '/register', '/space.html', '/login.html',
+    '/api/login', '/api/register',
+}
+
+def _is_public(path):
+    if path in PUBLIC_PATHS:
+        return True
+    if path.startswith('/assets/') or path.startswith('/amusource/') or path.startswith('/storage/'):
+        return True
+    return False
+
+@app.before_request
+def security_guard():
+    path = request.path or '/'
+    banned, btype, exp, seg = check_ban(request, 'any')
+    if banned:
+        if is_ajax_api(request):
+            return json_response("404 page not found", 404)
+        return Response(
+            f"<html><body style='background:#000;color:#eee;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0'><div style='text-align:center'><h2 style='color:#ef5777'>访问被拒绝</h2><p>{msg}</p></div></body></html>",
+            status=404, mimetype='text/html'
+        )
+    is_logged_in = bool(request.cookies.get('yyt_token') and check_login(request))
+    if not is_logged_in and not _is_public(path):
+        r_banned, r_type, r_exp = rate_tick(request)
+        if r_banned:
+            return redirect('/')
+        if is_ajax_api(request):
+            return json_response("401 auth required", 401)
+        if path != '/':
+            return redirect('/')
 
 class EnhancedJSONEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -113,7 +153,7 @@ def src_router(path):
         module_path = '.'.join(parts)
         
         if parts[0] == 'storage':
-            return json_response("404 page not found", 403)
+            return json_response("404 page not found", 404)
 
         # 动态import route
         full_module = f"src.{module_path}"

@@ -110,3 +110,23 @@ INSERT INTO yyt_level_meta (level, name, color) VALUES
     (4, '管理员', '#f59f00'),
     (5, '服主', '#ef5777')
 ON DUPLICATE KEY UPDATE level = level;
+
+CREATE TABLE IF NOT EXISTS yyt_sec_ban (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    target VARCHAR(96) NOT NULL COMMENT '单个IP或IP段如192.168.1.0/24',
+    ban_type VARCHAR(16) NOT NULL DEFAULT 'any' COMMENT 'any=全局 auth=登录注册 rate=限流',
+    expire_at DATETIME NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_ban (target, ban_type),
+    KEY idx_expire (expire_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS yyt_sec_counter (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    c_key VARCHAR(255) NOT NULL COMMENT '限流/计数key',
+    c_count INT DEFAULT 0,
+    expire_at DATETIME DEFAULT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_key (c_key),
+    KEY idx_expire (expire_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

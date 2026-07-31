@@ -3,12 +3,18 @@ import bcrypt
 from flask import jsonify
 from utils.db import get_db
 from utils.auth import make_token, get_client_info
+from utils.security import (
+    check_auth_ban, register_attempt_incr, register_attempt_remaining
+)
 
 def check_pw_strong(pw):
     return (len(pw) >= 12 and re.search(r'[A-Z]', pw) and re.search(r'[a-z]', pw)
             and re.search(r'\d', pw) and re.search(r'[^A-Za-z0-9]', pw))
 
 def handle(request):
+    banned, btype, exp, _ = check_auth_ban(request)
+    if banned:
+        return {"code": 429, "message": f"badly request"}
     if request.method != 'POST':
         return {"code": 405, "message": "method not allow"}
     data = request.get_json(silent=True) or {}
@@ -17,18 +23,25 @@ def handle(request):
     name = (data.get('name') or '').strip()
     invite_code = (data.get('invite_code') or '').strip()
     if not email or not password or not name or not invite_code:
-        return {"code": 400, "message": "请把信息填完整"}
+        return {"code": 400, "message": "badly param"}
     if not check_pw_strong(password):
-        return {"code": 400, "message": "密码不符合要求: 至少 12 位, 含大小写字母、数字和符号"}
+        return {"code": 400, "message": "badly param"}
+    remain_before = register_attempt_remaining(request)
     db = get_db()
     try:
         with db.cursor() as cur:
             cur.execute("SELECT code FROM yyt_invite WHERE code = %s AND used_by IS NULL", (invite_code,))
-            if not cur.fetchone():
-                return {"code": 403, "message": "邀请码无效或已被使用"}
+            invite_ok = cur.fetchone()
             cur.execute("SELECT id FROM yyt_user WHERE email = %s", (email,))
-            if cur.fetchone():
-                return {"code": 409, "message": "该邮箱已注册"}
+            dup_email = cur.fetchone()
+            ok = bool(invite_ok and not dup_email)
+            _, banned_now = register_attempt_incr(request, ok)
+            if banned_now:
+                return {"code": 429, "message": "badly request"}
+            if not invite_ok:
+                return {"code": 403, "message": f"邀请码无效或已被使用"}
+            if dup_email:
+                return {"code": 409, "message": f"该邮箱已注册"}
             pw_hash = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
             cur.execute(
                 "INSERT INTO yyt_user (email, password_hash, name) VALUES (%s, %s, %s)",

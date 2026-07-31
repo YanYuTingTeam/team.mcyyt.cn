@@ -2,22 +2,33 @@ import bcrypt
 from flask import jsonify
 from utils.db import get_db
 from utils.auth import make_token, get_client_info
+from utils.security import (
+    check_auth_ban, login_attempt_incr, login_attempt_remaining, ATTEMPT_MAX
+)
 
 def handle(request):
+    banned, btype, exp, _ = check_auth_ban(request)
+    if banned:
+        return {"code": 429, "message": "badly request"}
     if request.method != 'POST':
         return {"code": 405, "message": "method not allow"}
     data = request.get_json(silent=True) or {}
     email = (data.get('email') or '').strip()
     password = data.get('password') or ''
     if not email or not password:
-        return {"code": 400, "message": "邮箱或密码不能为空"}
+        return {"code": 400, "message": "badly param"}
+    remain_before = login_attempt_remaining(request)
     db = get_db()
     try:
         with db.cursor() as cur:
             cur.execute("SELECT * FROM yyt_user WHERE email = %s", (email,))
             user = cur.fetchone()
-            if not user or not bcrypt.checkpw(password.encode(), user['password_hash'].encode()):
-                return {"code": 401, "message": "邮箱或密码错误"}
+            ok = bool(user and bcrypt.checkpw(password.encode(), user['password_hash'].encode()))
+            _, banned_now = login_attempt_incr(request, ok)
+            if banned_now:
+                return {"code": 429, "message": "badly request"}
+            if not ok:
+                return {"code": 401, "message": f"邮箱或密码错误"}
             token = make_token()
             ip, ua = get_client_info(request)
             cur.execute(
