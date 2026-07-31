@@ -597,29 +597,38 @@ function mcsmTutorial() {
     var foot = '<button class="add-todo-btn" onclick="closeModal()">知道了</button>';
     openModal('MCSManager 使用教程', body, foot);
 }
-var __mcsmFsUrl = '';
+var __mcsmFsWrap = null;
 function mcsmFullscreen() {
     var iframe = document.querySelector('#mcsmBox iframe');
     if (!iframe) return;
-    __mcsmFsUrl = iframe.src;
+    __mcsmFsWrap = iframe.parentNode;
     var overlay = document.createElement('div');
     overlay.className = 'mcsm-fs-overlay';
     overlay.id = 'mcsmFsOverlay';
     overlay.innerHTML =
         '<div class="mcsm-fs-top">@team - YanYuTing / MCSManager</div>' +
-        '<div class="mcsm-fs-frame"><iframe src="' + __mcsmFsUrl + '"></iframe></div>' +
+        '<div class="mcsm-fs-frame" id="mcsmFsFrame"></div>' +
         '<div class="mcsm-fs-bottom"><button class="mcsm-fs-exit" onclick="mcsmExitFullscreen()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 9H5V5m10 4h4V5M9 15H5v4m10-4h4v4"/></svg> 退出全屏</button></div>';
     document.body.appendChild(overlay);
+    document.getElementById('mcsmFsFrame').appendChild(iframe);
     document.body.style.overflow = 'hidden';
 }
 function mcsmExitFullscreen() {
     var overlay = document.getElementById('mcsmFsOverlay');
     if (!overlay) return;
+    var iframe = overlay.querySelector('iframe');
+    if (iframe && __mcsmFsWrap) __mcsmFsWrap.appendChild(iframe);
+    __mcsmFsWrap = null;
     overlay.classList.add('closing');
     document.body.style.overflow = '';
     setTimeout(function() {
         if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
     }, 180);
+}
+function mcsmOpenExternal() {
+    var iframe = document.querySelector('#mcsmBox iframe');
+    if (!iframe || !iframe.src) return;
+    window.open(iframe.src, '_blank');
 }
 async function killSession(sid, isCurrent) {
     var ret = await postJson('/api/session_kill', { sid: sid });
