@@ -1,0 +1,14 @@
+{
+  "apis": [
+    {
+      "method": "GET",
+      "path": "/testAPI",
+      "title": "这里是API标题",
+      "desc": "api desc",
+      "params": [
+        {"name": "paramName", "type": "bool", "required": false, "desc": "参数desc" }
+      ],
+      "example": {"success": true, "number": 114514}
+    }
+  ]
+}

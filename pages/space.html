@@ -458,6 +458,50 @@ a { color: #ef5777; }
 .drop-row .dn { font-size: 14px; color: #eee; }
 .drop-row .de { font-size: 12px; color: #777; }
 .drop-empty { padding: 10px; color: #666; font-size: 13px; }
+.api-card {
+    background: #101012;
+    border: 1px solid #232326;
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin-bottom: 16px;
+}
+.api-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.api-method {
+    font-size: 12px;
+    font-weight: bold;
+    border-radius: 6px;
+    padding: 3px 10px;
+    letter-spacing: 1px;
+    flex-shrink: 0;
+}
+.api-method.get { color: #4caf7d; background: #0d1f15; border: 1px solid #1e4a32; }
+.api-method.post { color: #d8b877; background: #241c0c; border: 1px solid #4a3a1e; }
+.api-method.put { color: #6ba3ef; background: #0c1524; border: 1px solid #1e2f4a; }
+.api-method.delete { color: #ef5777; background: #23161b; border: 1px solid rgba(239,87,119,.4); }
+.api-path { font-family: 'Patika', monospace; font-size: 15px; color: #fff; word-break: break-all; }
+.api-desc { font-size: 13px; color: #999; margin-top: 10px; line-height: 1.7; }
+.api-sec { margin-top: 14px; }
+.api-sec .st-label { font-size: 12px; color: #ef5777; letter-spacing: 1px; margin-bottom: 6px; }
+.api-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.api-table th, .api-table td { text-align: left; padding: 7px 10px; border-bottom: 1px solid #1e1e21; vertical-align: top; }
+.api-table th { color: #888; font-weight: normal; }
+.api-table td { color: #ccc; word-break: break-all; }
+.api-table td .pn { color: #fff; }
+.api-table td .pt { color: #6ba3ef; font-size: 12px; }
+.api-table td .pr { color: #ef5777; font-size: 11px; }
+.api-example {
+    background: #060607;
+    border: 1px solid #232326;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-family: monospace;
+    font-size: 12px;
+    color: #cfcfcf;
+    white-space: pre-wrap;
+    word-break: break-all;
+    line-height: 1.6;
+    margin-top: 6px;
+}
 .masonry { column-count: 3; column-gap: 20px; }
 @media (max-width: 1200px) { .masonry { column-count: 2; } }
 @media (max-width: 700px) { .masonry { column-count: 1; } }
@@ -571,6 +615,7 @@ a { color: #ef5777; }
             <div class="nav-item" data-page="todo" onclick="switchPage('todo', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.5 5.5L5 7l2.5-2.5m-4 7L5 13l2.5-2.5m-4 7L5 19l2.5-2.5M11 6h9m-9 6h9m-9 6h9"/></svg> 待办事项</div>
             <div class="nav-item" data-page="notice" onclick="switchPage('notice', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3H4a4 4 0 0 0 2-3v-3a7 7 0 0 1 4-6M9 17v1a3 3 0 0 0 6 0v-1"/></svg> 通知动态</div>
             <div class="nav-item" data-page="project" onclick="switchPage('project', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 16.008V7.99a1.98 1.98 0 0 0-1-1.717l-7-4.008a2.02 2.02 0 0 0-2 0L4 6.273c-.619.355-1 1.01-1 1.718v8.018c0 .709.381 1.363 1 1.717l7 4.008a2.02 2.02 0 0 0 2 0l7-4.008c.619-.355 1-1.01 1-1.718M12 22V12m0 0l8.73-5.04m-17.46 0L12 12"/></svg> 项目展示</div>
+            <div class="nav-item" data-page="apis" onclick="switchPage('apis', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 13h5m3 3V8h3a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-3m8-5v8M9 16v-5.5a2.5 2.5 0 0 0-5 0V16"/></svg> API 文档</div>
         </div>
         <div class="side-user-wrap">
             <div class="user-menu hide" id="userMenu" onclick="event.stopPropagation()">
@@ -737,6 +782,12 @@ a { color: #ef5777; }
             <div class="page-sub">团队正在进行的项目.</div>
             <div id="projectPageList"></div>
         </div>
+        <div class="page hide" id="pageApis">
+            <div class="page-mini">API DOCS</div>
+            <div class="page-title">API 文档</div>
+            <div class="page-sub">这里列出所有可用的 API. 请在请求头 X-API-Key 或 ?apikey= 携带你的 API KEY.</div>
+            <div id="apiList"></div>
+        </div>
     </div>
 </div>
 <script>
@@ -759,9 +810,9 @@ async function postJson(url, body) {
     });
     return res.json();
 }
-var PAGE_PATH = { home: '/', overview: '/overview', todo: '/todos', notice: '/notice', project: '/projects', addtodo: '/todos/add' };
-var NAV_OF = { home: 'home', overview: 'overview', todo: 'todo', notice: 'notice', project: 'project', addtodo: 'todo' };
-var PAGE_LOADER = { home: null, overview: loadOverview, todo: loadTodo, notice: loadNotice, project: loadProject, addtodo: resetAddTodo };
+var PAGE_PATH = { home: '/', overview: '/overview', todo: '/todos', notice: '/notice', project: '/projects', apis: '/apis', addtodo: '/todos/add' };
+var NAV_OF = { home: 'home', overview: 'overview', todo: 'todo', notice: 'notice', project: 'project', apis: 'apis', addtodo: 'todo' };
+var PAGE_LOADER = { home: null, overview: loadOverview, todo: loadTodo, notice: loadNotice, project: loadProject, apis: loadApis, addtodo: resetAddTodo };
 var SPIN_SVG = '<svg xmlns="http://www.w3.org/2000/svg" class="spin" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3a9 9 0 1 0 9 9"/></svg>';
 async function btnRun(btn, fn) {
     if (btn.dataset.busy) return false;
@@ -1121,6 +1172,33 @@ async function copyText(txt, btn) {
         setTimeout(function() { btn.innerHTML = old; }, 1000);
     }
 }
+async function loadApis() {
+    var ret = await getJson('/api/api_list');
+    var box = document.getElementById('apiList');
+    var list = ret.data || [];
+    if (!list.length) {
+        box.innerHTML = '<div class="empty-tip">还没有配置任何 API</div>';
+        return;
+    }
+    box.innerHTML = list.map(function(a) {
+        var method = (a.method || 'GET').toLowerCase();
+        var html = '<div class="api-card"><div class="api-top"><span class="api-method ' + esc(method) + '">' + esc((a.method || 'GET').toUpperCase()) + '</span><span class="api-path">' + esc(a.path || '') + '</span></div>';
+        if (a.title) html += '<div class="api-desc" style="color:#eee;margin-top:8px">' + esc(a.title) + '</div>';
+        if (a.desc) html += '<div class="api-desc">' + esc(a.desc) + '</div>';
+        if (a.params && a.params.length) {
+            html += '<div class="api-sec"><div class="st-label">PARAMS</div><table class="api-table"><tr><th>参数</th><th>类型</th><th>说明</th></tr>';
+            a.params.forEach(function(p) {
+                html += '<tr><td><span class="pn">' + esc(p.name || '') + '</span>' + (p.required ? ' <span class="pr">*必填</span>' : '') + '</td><td><span class="pt">' + esc(p.type || '') + '</span></td><td>' + esc(p.desc || '') + '</td></tr>';
+            });
+            html += '</table></div>';
+        }
+        if (a.example) {
+            var ex = typeof a.example === 'string' ? a.example : JSON.stringify(a.example, null, 2);
+            html += '<div class="api-sec"><div class="st-label">EXAMPLE</div><div class="api-example">' + esc(ex) + '</div></div>';
+        }
+        return html + '</div>';
+    }).join('');
+}
 async function loadNotice() {
     var ret = await getJson('/api/notice');
     var homeBox = document.getElementById('noticeList');
@@ -1166,6 +1244,7 @@ async function doLogout() {
     try {
         var jobs = [loadMe(), loadTodo(), loadNotice(), loadProject(), document.fonts.ready];
         if (start === 'overview') jobs.push(loadOverview());
+        if (start === 'apis') jobs.push(loadApis());
         await Promise.all(jobs);
     } finally {
         document.getElementById('loadMask').style.display = 'none';

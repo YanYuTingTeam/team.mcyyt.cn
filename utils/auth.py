@@ -22,6 +22,21 @@ def check_login(request):
                 "WHERE s.token = %s AND s.expire_time > NOW()",
                 (token,)
             )
+            return cur.fetchone()
+    finally:
+        db.close()
+
+def check_apikey(request):
+    key = request.headers.get('X-API-Key') or request.args.get('apikey')
+    if not key:
+        return None
+    db = get_db()
+    try:
+        with db.cursor() as cur:
+            cur.execute(
+                "SELECT id, email, name, role, skill, apikey, created_at FROM yyt_user WHERE apikey = %s",
+                (key,)
+            )
             row = cur.fetchone()
             if row:
                 cur.execute(
