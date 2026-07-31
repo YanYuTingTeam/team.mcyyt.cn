@@ -620,7 +620,7 @@ a { color: #ef5777; }
 .ov-profile img { width: 72px; height: 72px; border-radius: 50%; background: #fff; flex-shrink: 0; }
 .ov-profile .pv-main { flex: 1; min-width: 0; }
 .ov-profile .pv-name { font-size: 20px; font-weight: bold; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
-.ov-profile .pv-role { display: inline-flex; align-items: center; font-size: 11px; border-radius: 20px; padding: 2px 10px; border: 1px solid; white-space: nowrap; line-height: 1.4; }
+/** .ov-profile .pv-role { display: inline-flex; align-items: center; font-size: 11px; border-radius: 20px; padding: 2px 10px; border: 1px solid; white-space: nowrap; line-height: 1.4; } **/
 .ov-profile .pv-row { font-size: 13px; color: #999; margin-top: 6px; word-break: break-all; }
 .stat-grid { display: flex; text-align: center; }
 .stat-grid .st { flex: 1; }
