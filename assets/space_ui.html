@@ -39,7 +39,7 @@
         <div class="card-grid">
             <div class="card hero-card" id="cardHero">
                 <div class="card-head">WELCOME</div>
-                <div class="hero-text" id="heroText">嘿! 欢迎回到烟雨庭. 这里汇总了你的待办、团队通知和正在进行的项目, 一起把服务器做得更好吧.</div>
+                <div class="hero-text" id="heroText">嘿! 欢迎回到@team. 准备好迎接新的一天吧 ~</div>
                 <img class="hero-logo" src="/assets/yyt_w.png" alt="">
             </div>
             <div class="card" id="cardProfile">
@@ -53,7 +53,7 @@
             </div>
             <div class="card" id="cardTodo">
                 <div class="card-head">TO-DO CHECKLIST</div>
-                <div style="color:#999;font-size:13px;margin-bottom:12px">这里会汇总你当前需要处理的事项.</div>
+                <div style="color:#999;font-size:13px;margin-bottom:12px">在这里追踪 YanYuTing @Team 中你需要处理的事项</div>
                 <div id="todoList"></div>
                 <div style="margin-top:14px;display:flex;justify-content:flex-end">
                     <button class="act-btn" onclick="switchPage('todo', this)">查看全部待办 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-6 6l6-6m-6-6l6 6"/></svg></button>
@@ -61,12 +61,12 @@
             </div>
             <div class="card" id="cardNotice">
                 <div class="card-head">UPDATES</div>
-                <div style="color:#999;font-size:13px;margin-bottom:6px">团队的公告与最新动态都在这里.</div>
+                <div style="color:#999;font-size:13px;margin-bottom:6px">公告与最新动态</div>
                 <div id="noticeList"></div>
             </div>
             <div class="card" id="cardProject">
                 <div class="card-head">PROJECTS</div>
-                <div style="color:#999;font-size:13px;margin-bottom:12px">团队正在进行的项目.</div>
+                <div style="color:#999;font-size:13px;margin-bottom:12px">正在进行的项目</div>
                 <div id="projectList"></div>
             </div>
         </div>
@@ -74,7 +74,7 @@
         <div class="page hide" id="pageOverview">
             <div class="page-mini">OVERVIEW</div>
             <div class="page-title">个人概览</div>
-            <div class="page-sub">你的账号信息、邀请码、API KEY 与登录设备都在这里.</div>
+            <div class="page-sub">欢迎回来. 开始新一天的工作吧 ~</div>
             <div class="ov-cols">
             <div class="ov-col">
                 <div class="card">
@@ -84,8 +84,8 @@
                         <div class="pv-main">
                             <div class="pv-name"><span id="ovName">--</span><span class="pv-role" id="ovRole">--</span></div>
                             <div class="pv-row" id="ovMail">--</div>
-                            <div class="pv-row">核心能力: <span id="ovSkill">--</span></div>
-                            <div class="pv-row">账号ID: <span id="ovId">--</span></div>
+                            <div class="pv-row">核心能力  <span id="ovSkill">--</span></div>
+                            <div class="pv-row">账号ID  <span id="ovId">--</span></div>
                         </div>
                     </div>
                     <div class="edit-row hide" id="ovEditRow">
@@ -99,7 +99,7 @@
                 </div>
                 <div class="card">
                     <div class="card-head">API CALLS</div>
-                    <div style="color:#999;font-size:13px;margin-bottom:16px">API 调用次数总览.</div>
+                    <div style="color:#999;font-size:13px;margin-bottom:16px">API 调用次数总览</div>
                     <div class="stat-grid">
                         <div class="st"><div class="sn" id="stYesterday">0</div><div class="sl">昨日</div></div>
                         <div class="st"><div class="sn" id="stToday">0</div><div class="sl">今日</div></div>
@@ -112,12 +112,12 @@
                 </div>
                 <div class="card">
                     <div class="card-head">API KEY</div>
-                    <div style="color:#999;font-size:13px;margin-bottom:10px">你的个人 API KEY, 仅管理员及以上可用于代理, 请勿泄露给他人.</div>
+                    <div style="color:#999;font-size:13px;margin-bottom:10px">你的专属APIkey, 请勿泄露给他人</div>
                     <div class="key-row hide" id="apikeyHas">
                         <input id="apikeyInput" readonly value="--">
                         <button class="act-btn" onclick="copyText(document.getElementById('apikeyInput').value, this)" title="复制"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M7 9.667A2.667 2.667 0 0 1 9.667 7h8.666A2.667 2.667 0 0 1 21 9.667v8.666A2.667 2.667 0 0 1 18.333 21H9.667A2.667 2.667 0 0 1 7 18.333z"/><path d="M4.012 16.737A2 2 0 0 1 3 15V5c0-1.1.9-2 2-2h10c.75 0 1.158.385 1.5 1"/></g></svg></button>
                     </div>
-                    <div class="empty-tip hide" id="apikeyNone">你还没有申请 API KEY.</div>
+                    <div class="empty-tip hide" id="apikeyNone">你还没有申请APIkey</div>
                     <div style="margin-top:12px;display:flex;justify-content:flex-end">
                         <button class="act-btn hide" id="apikeyResetBtn" onclick="btnRun(this, resetApikey)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 11A8.1 8.1 0 0 0 4.5 9M4 5v4h4m-4 4a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg> 重新申请</button>
                         <button class="add-todo-btn hide" id="apikeyApplyBtn" onclick="btnRun(this, resetApikey)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m-7-7h14"/></svg> 申请 API KEY</button>
@@ -130,13 +130,13 @@
                         <div class="card-head">INVITE CODES</div>
                         <button class="card-head-btn" onclick="btnRun(this, refreshOvInvite)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 11A8.1 8.1 0 0 0 4.5 9M4 5v4h4m-4 4a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg> 刷新</button>
                     </div>
-                    <div style="color:#999;font-size:13px;margin-bottom:12px">邀请码和使用情况概览.</div>
+                    <div style="color:#999;font-size:13px;margin-bottom:12px">在这里创建邀请码 以邀请同事注册</div>
                     <button class="add-todo-btn" style="width:100%;justify-content:center;margin-bottom:14px" onclick="btnRun(this, createInvite)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m-7-7h14"/></svg> 创建邀请码</button>
                     <div id="inviteList"></div>
                 </div>
                 <div class="card">
                     <div class="card-head">DEVICES</div>
-                    <div style="color:#999;font-size:13px;margin-bottom:6px">登录过的设备.</div>
+                    <div style="color:#999;font-size:13px;margin-bottom:6px">登录过的设备</div>
                     <div id="deviceList"></div>
                 </div>
             </div>
@@ -147,7 +147,7 @@
                 <div class="htxt">
                     <div class="page-mini">TO-DO CHECKLIST</div>
                     <div class="page-title">待办事项</div>
-                    <div class="page-sub">在这里追踪需要你处理的事项.</div>
+                    <div class="page-sub">在这里追踪 YanYuTing @Team 中你需要处理的事项</div>
                 </div>
                 <button class="add-todo-btn" onclick="switchPage('addtodo', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m-7-7h14"/></svg> 添加待办</button>
             </div>
@@ -157,7 +157,7 @@
             <div class="back-link" onclick="switchPage('todo', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12l6 6m-6-6l6-6"/></svg> 返回上一页</div>
             <div class="page-mini">TO-DO CHECKLIST</div>
             <div class="page-title">添加待办</div>
-            <div class="page-sub">填写待办详情, 并选择为谁添加.</div>
+            <div class="page-sub">填写待办详情, 并选择为谁添加</div>
             <div class="form-box">
                 <div class="form-row">
                     <label class="form-label"><b>*</b> 标题</label>
@@ -169,7 +169,7 @@
                 </div>
                 <div class="form-row">
                     <label class="form-label">内容</label>
-                    <textarea class="form-area" id="atContent" placeholder="待办的详细说明"></textarea>
+                    <textarea class="form-area" id="atContent" placeholder="详细说明"></textarea>
                 </div>
                 <div class="form-row">
                     <label class="form-label">为谁添加 <span style="color:#666;font-size:12px">(留空则添加给自己)</span></label>
@@ -189,7 +189,7 @@
                 <div class="htxt">
                     <div class="page-mini">UPDATES</div>
                     <div class="page-title">通知动态</div>
-                    <div class="page-sub">团队的公告与最新动态都在这里.</div>
+                    <div class="page-sub">公告与最新动态</div>
                 </div>
                 <button class="add-todo-btn hide" id="noticeAddBtn" onclick="toggleNoticeForm()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m-7-7h14"/></svg> 发布通知</button>
             </div>
@@ -211,7 +211,7 @@
                 <div class="htxt">
                     <div class="page-mini">PROJECTS</div>
                     <div class="page-title">项目展示</div>
-                    <div class="page-sub">团队正在进行的项目.</div>
+                    <div class="page-sub">正在进行的项目</div>
                 </div>
                 <button class="add-todo-btn hide" id="projectAddBtn" onclick="toggleProjectForm()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m-7-7h14"/></svg> 添加项目</button>
             </div>
@@ -239,14 +239,14 @@
         <div class="page hide" id="pageApis">
             <div class="page-mini">API DOCS</div>
             <div class="page-title">API 文档</div>
-            <div class="page-sub">这里列出所有可用的 API. 请在请求头 X-API-Key 或 ?apikey= 携带你的 API KEY.</div>
+            <div class="page-sub">这里列出所有可用的 API. 请在请求头 X-API-Key 或 ?apikey= 携带你的APIkey</div>
             <div id="apiList"></div>
         </div>
         <div class="page hide" id="pageLogs">
             <div class="back-link" onclick="switchPage('overview', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12l6 6m-6-6l6-6"/></svg> 返回个人概览</div>
             <div class="page-mini">REQUEST LOGS</div>
             <div class="page-title">请求日志</div>
-            <div class="page-sub">你的 API KEY 的全部调用记录 (最近 500 条).</div>
+            <div class="page-sub">你的 API KEY 的全部调用记录 (最近 500 条)</div>
             <div class="panel" id="logList"></div>
         </div>
         <div class="page hide" id="pageMcsm">
@@ -265,14 +265,14 @@
         <div class="page hide" id="pageTeam">
             <div class="page-mini">TEAM ADMIN</div>
             <div class="page-title">团队管理</div>
-            <div class="page-sub">管理团队成员、权限组、邀请码与站点统计. 仅服主可访问.</div>
+            <div class="page-sub">YanYuTing @team DASHBOARD</div>
             <div class="masonry-grid">
                 <div class="card">
                     <div class="card-head-row">
                         <div class="card-head">PERMISSION GROUPS</div>
                         <button class="card-head-btn" onclick="btnRun(this, loadTeam)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 11A8.1 8.1 0 0 0 4.5 9M4 5v4h4m-4 4a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg> 刷新</button>
                     </div>
-                    <div style="color:#999;font-size:13px;margin-bottom:14px">团队权限组与各等级人数. 可编辑颜色、页面权限, 查看组内成员.</div>
+                    <div style="color:#999;font-size:13px;margin-bottom:14px">权限组</div>
                     <div id="teamGroups"></div>
                 </div>
                 <div class="card">
@@ -280,7 +280,7 @@
                         <div class="card-head">MEMBERS</div>
                         <button class="card-head-btn" onclick="btnRun(this, loadTeam)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 11A8.1 8.1 0 0 0 4.5 9M4 5v4h4m-4 4a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg> 刷新</button>
                     </div>
-                    <div style="color:#999;font-size:13px;margin-bottom:14px">所有注册账号. 点击右侧编辑查看详情与权限.</div>
+                    <div style="color:#999;font-size:13px;margin-bottom:14px">团队成员</div>
                     <div class="team-scroll" id="teamMembers"></div>
                 </div>
                 <div class="card">
@@ -288,7 +288,7 @@
                         <div class="card-head">INVITE CODES</div>
                         <button class="card-head-btn" onclick="btnRun(this, refreshTeamInvites)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 11A8.1 8.1 0 0 0 4.5 9M4 5v4h4m-4 4a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg> 刷新</button>
                     </div>
-                    <div style="color:#999;font-size:13px;margin-bottom:14px">全站邀请码与使用情况.</div>
+                    <div style="color:#999;font-size:13px;margin-bottom:14px">邀请码</div>
                     <div class="team-scroll" id="teamInvites"></div>
                 </div>
                 <div class="card">
@@ -296,7 +296,7 @@
                         <div class="card-head">CORE SKILLS</div>
                         <button class="card-head-btn" onclick="btnRun(this, reloadSkills)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 11A8.1 8.1 0 0 0 4.5 9M4 5v4h4m-4 4a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg> 刷新</button>
                     </div>
-                    <div style="color:#999;font-size:13px;margin-bottom:14px">核心能力标签. 可修改颜色、名称、统计人数, 快捷增删.</div>
+                    <div style="color:#999;font-size:13px;margin-bottom:14px">核心能力</div>
                     <div id="teamSkills"></div>
                 </div>
                 <div class="card">
@@ -304,7 +304,7 @@
                         <div class="card-head">STATISTICS</div>
                         <button class="card-head-btn" onclick="btnRun(this, loadTeamStats)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 11A8.1 8.1 0 0 0 4.5 9M4 5v4h4m-4 4a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg> 刷新</button>
                     </div>
-                    <div style="color:#999;font-size:13px;margin-bottom:16px">站点全局统计.</div>
+                    <div style="color:#999;font-size:13px;margin-bottom:16px">站点统计</div>
                     <div id="teamStats"></div>
                 </div>
                 <div class="card">
@@ -312,7 +312,7 @@
                         <div class="card-head">ACTIVITY LOGS</div>
                         <button class="card-head-btn" onclick="btnRun(this, loadTeamLogs)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 11A8.1 8.1 0 0 0 4.5 9M4 5v4h4m-4 4a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg> 刷新</button>
                     </div>
-                    <div style="color:#999;font-size:13px;margin-bottom:14px">最近的用户操作日志.</div>
+                    <div style="color:#999;font-size:13px;margin-bottom:14px">用户操作日志</div>
                     <div class="team-scroll" id="teamLogs"></div>
                     <div style="margin-top:14px;display:flex;justify-content:flex-end">
                         <button class="act-btn" id="teamLogsMoreBtn" onclick="btnRun(this, loadTeamLogsAll)">查看全部日志 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-6 6l6-6m-6-6l6 6"/></svg></button>
