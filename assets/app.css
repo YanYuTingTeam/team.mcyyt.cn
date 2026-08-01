@@ -274,6 +274,8 @@ a { color: #ef5777; }
 }
 .card-head::before { font-feature-settings: 'ss01' 0; content: '/ '; color: #ef5777; }
 .hero-card {
+    column-span: all;
+    -webkit-column-span: all;
     grid-column: 1 / -1;
     background: linear-gradient(115deg, #d9436b 0%, #ef5777 55%, #f07a93 100%);
     border: none;
@@ -619,20 +621,11 @@ a { color: #ef5777; }
     line-height: 1.6;
     margin-top: 6px;
 }
-.ov-cols { column-count: 3; column-gap: 20px; }
+.ov-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; align-items: start; }
 .ov-col { display: contents; }
-.ov-cols > .ov-col > .card,
-.ov-cols .card {
-    break-inside: avoid;
-    page-break-inside: avoid;
-    -webkit-column-break-inside: avoid;
-    display: inline-block;
-    width: 100%;
-    margin: 0 0 20px 0;
-}
-.ov-cols .card:last-child { margin-bottom: 0; }
-@media (max-width: 1100px) { .ov-cols { column-count: 2; } }
-@media (max-width: 720px) { .ov-cols { column-count: 1; } }
+.ov-cols .card { margin: 0; }
+@media (max-width: 1100px) { .ov-cols { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 720px) { .ov-cols { grid-template-columns: 1fr; } }
 #inviteList, #deviceList { max-height: 360px; overflow-y: auto; }
 #inviteList::-webkit-scrollbar, #deviceList::-webkit-scrollbar { width: 6px; }
 #inviteList::-webkit-scrollbar-thumb, #deviceList::-webkit-scrollbar-thumb { background: #2b2b2e; border-radius: 3px; }
