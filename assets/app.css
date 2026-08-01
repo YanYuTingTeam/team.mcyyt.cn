@@ -812,10 +812,11 @@ input.input-error, select.input-error, textarea.input-error { border-color: #ef5
 .gp-close:hover { color: #ef5777; }
 .pg-edit-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #1e1e21; }
 .pg-edit-row:last-child { border-bottom: none; }
-.pg-edit-row .pen { flex: 1; font-size: 13px; color: #eee; min-width: 0; }
+.pg-edit-row .pen { flex: 1; font-size: 13px; color: #eee; min-width: 0; display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .pg-edit-row .pes { flex-shrink: 0; width: 100px; background: #0d0d0f; border: 1px solid #2b2b2e; border-radius: 8px; padding: 5px 8px; color: #eee; font-size: 12px; font-family: inherit; outline: none; }
 .pg-edit-row .pecb { flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: #888; cursor: pointer; }
 .pg-edit-row .pecb input { width: 14px; height: 14px; accent-color: #ef5777; }
+.pf-tag { display: inline-block; font-size: 11px; padding: 1px 7px; border-radius: 4px; color: #8b5cf6; background: rgba(139,92,246,.14); border: 1px solid rgba(139,92,246,.45); }
 .group-members { max-height: 240px; overflow-y: auto; margin-top: 10px; }
 .masonry-grid {
     column-count: 3;

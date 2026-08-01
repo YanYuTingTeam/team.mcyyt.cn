@@ -59,9 +59,11 @@ var DEFAULT_PAGE_ACCESS = {
     home: { min_level: 0, show_in_nav: 1 }, overview: { min_level: 0, show_in_nav: 1 },
     todo: { min_level: 1, show_in_nav: 1 }, notice: { min_level: 1, show_in_nav: 1 },
     project: { min_level: 1, show_in_nav: 1 }, apis: { min_level: 1, show_in_nav: 1 },
-    mcsm: { min_level: 4, show_in_nav: 1 }, team: { min_level: 5, show_in_nav: 1 }
+    mcsm: { min_level: 4, show_in_nav: 1 }, team: { min_level: 5, show_in_nav: 1 },
+    invite_create: { min_level: 4, show_in_nav: 0 }
 };
-var PAGE_LABEL = { home: '空间首页', overview: '个人概览', todo: '待办事项', notice: '通知动态', project: '项目展示', apis: 'API 文档', mcsm: 'MCSManager', team: '团队管理' };
+var PAGE_LABEL = { home: '空间首页', overview: '个人概览', todo: '待办事项', notice: '通知动态', project: '项目展示', apis: 'API 文档', mcsm: 'MCSManager', team: '团队管理', invite_create: '生成邀请码' };
+var PAGE_KIND = { invite_create: 'feature' };
 var meUser = null;
 var pageAccess = {};
 function hexA(hex, a) {
@@ -418,6 +420,8 @@ async function loadOverview() {
     document.getElementById('ovMail').textContent = u.email;
     document.getElementById('ovSkill').innerHTML = renderSkillHtml(u.skill);
     document.getElementById('ovId').textContent = u.id;
+    var bt = document.getElementById('ovCreateInviteBtn');
+    if (bt) bt.classList.toggle('hide', !canAccess('invite_create'));
     document.getElementById('stYesterday').textContent = ovData.calls.yesterday;
     document.getElementById('stToday').textContent = ovData.calls.today;
     document.getElementById('stWeek').textContent = ovData.calls.week;
@@ -1027,18 +1031,29 @@ async function openMemberDetail(uid) {
         }
         invHtml += '</div>';
         var pgsHtml = '<div class="md-section"><div class="md-label">页面访问权限</div>';
-        pgsHtml += pages.map(function(p) {
+        var ftrHtml = '';
+        pages.forEach(function(p) {
             var pk = p.page_key;
             var label = PAGE_LABEL[pk] || pk;
             var ok = (u.level || 0) >= (p.min_level || 0);
-            return '<div class="pg-edit-row">' +
-                '<div class="pen">' + esc(label) + '</div>' +
-                '<select class="pes" disabled>' + levelOptions(p.min_level || 0) + '</select>' +
-                '<label class="pecb"><input type="checkbox" disabled ' + (p.show_in_nav ? 'checked' : '') + '> 侧栏</label>' +
-                (ok ? '<span class="chip ok">可访问</span>' : '<span class="chip no">不足权限</span>') +
-                '</div>';
-        }).join('');
+            var chip = ok ? '<span class="chip ok">可访问</span>' : '<span class="chip no">不足权限</span>';
+            var kind = PAGE_KIND[pk] || 'page';
+            var row;
+            if (kind === 'feature') {
+                row = '<div class="pg-edit-row"><div class="pen"><span class="pf-tag">功能</span>' + esc(label) + '</div>' +
+                    '<select class="pes" disabled>' + levelOptions(p.min_level || 0) + '</select>' + chip + '</div>';
+                ftrHtml += row;
+            } else {
+                row = '<div class="pg-edit-row"><div class="pen">' + esc(label) + '</div>' +
+                    '<select class="pes" disabled>' + levelOptions(p.min_level || 0) + '</select>' +
+                    '<label class="pecb"><input type="checkbox" disabled ' + (p.show_in_nav ? 'checked' : '') + '> 侧栏</label>' + chip + '</div>';
+                pgsHtml += row;
+            }
+        });
         pgsHtml += '</div>';
+        if (ftrHtml) {
+            pgsHtml += '<div class="md-section" style="margin-top:14px"><div class="md-label">功能操作权限</div>' + ftrHtml + '</div>';
+        }
         var logsHtml = '';
         var lg = d.recent_logs || [];
         if (lg.length) {
@@ -1202,16 +1217,29 @@ async function openGroupEdit(lv) {
         '<div class="md-row"><div class="md-k">标识颜色</div><div class="md-v"><input type="color" class="color-in" id="ge_color" value="' + esc(color) + '"></div></div>' +
         '</div>';
     var pgEdit = '<div class="md-section"><div class="md-label">页面访问权限</div>';
-    pgEdit += pages.map(function(p) {
+    var ftrEdit = '';
+    pages.forEach(function(p) {
         var pk = p.page_key;
         var label = PAGE_LABEL[pk] || pk;
-        return '<div class="pg-edit-row" data-page="' + pk + '">' +
-            '<div class="pen">' + esc(label) + '</div>' +
-            '<select class="pes" data-f="min">' + levelOptions(p.min_level || 0) + '</select>' +
-            '<label class="pecb"><input type="checkbox" data-f="nav" ' + (p.show_in_nav ? 'checked' : '') + '> 侧栏显示</label>' +
-            '</div>';
-    }).join('');
+        var kind = PAGE_KIND[pk] || 'page';
+        if (kind === 'feature') {
+            ftrEdit += '<div class="pg-edit-row" data-page="' + pk + '">' +
+                '<div class="pen"><span class="pf-tag">功能</span>' + esc(label) + '</div>' +
+                '<select class="pes" data-f="min">' + levelOptions(p.min_level || 0) + '</select>' +
+                '<div style="width:92px"></div>' + // 占位对齐侧栏 checkbox 列
+                '</div>';
+        } else {
+            pgEdit += '<div class="pg-edit-row" data-page="' + pk + '">' +
+                '<div class="pen">' + esc(label) + '</div>' +
+                '<select class="pes" data-f="min">' + levelOptions(p.min_level || 0) + '</select>' +
+                '<label class="pecb"><input type="checkbox" data-f="nav" ' + (p.show_in_nav ? 'checked' : '') + '> 侧栏显示</label>' +
+                '</div>';
+        }
+    });
     pgEdit += '</div>';
+    if (ftrEdit) {
+        pgEdit += '<div class="md-section" style="margin-top:14px"><div class="md-label">功能操作权限</div>' + ftrEdit + '</div>';
+    }
     var foot = '<button class="act-btn" onclick="closeModal()">关闭</button>' +
         '<button class="add-todo-btn" onclick="btnRun(this, function(btn){ return geSave(' + lv + ',btn); })">保存配置</button>';
     openModal('编辑权限组 · ' + name, head + basic + pgEdit, foot);
@@ -1226,7 +1254,8 @@ async function geSave(lv, btn) {
     document.querySelectorAll('.pg-edit-row[data-page]').forEach(function(r) {
         var pk = r.dataset.page;
         var ml = parseInt(r.querySelector('[data-f="min"]').value) || 0;
-        var sn = r.querySelector('[data-f="nav"]').checked ? 1 : 0;
+        var navBox = r.querySelector('[data-f="nav"]');
+        var sn = navBox && navBox.checked ? 1 : 0;
         pages[pk] = { min_level: ml, show_in_nav: sn };
         pageAccess[pk] = { min_level: ml, show_in_nav: sn };
     });
