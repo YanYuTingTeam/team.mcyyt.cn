@@ -17,7 +17,7 @@ def _build_html(code, purpose_label):
 <table width="420" cellpadding="0" cellspacing="0" style="background:#0f0f10;border:1px solid #2b2b2e;border-radius:14px;overflow:hidden">
 <tr><td style="padding:28px 32px 0">
 <div style="font-size:20px;font-weight:bold;color:#eee;letter-spacing:1px">@team / YanYuTing</div>
-<div style="font-size:13px;color:#ef5777;margin-top:4px">Adventure Passport</div>
+<div style="font-size:13px;color:#ef5777;margin-top:4px">YanYuTing Passport</div>
 </td></tr>
 <tr><td style="padding:20px 32px">
 <div style="height:1px;background:#2b2b2e;margin-bottom:20px"></div>
