@@ -1498,3 +1498,91 @@ function initMeteors() {
     }
     for (var i = 0; i < total; i++) spawnOnce(i);
 }
+function pathToPage(p) {
+    if (p === '/todos/add') return 'addtodo';
+    if (p === '/todos' || p.indexOf('/todos/') === 0) return 'todo';
+    for (var k in PAGE_PATH) { if (PAGE_PATH[k] === p) return k; }
+    return null;
+}
+var TOAST_DEFAULT_ICON = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3H4a4 4 0 0 0 2-3v-3a7 7 0 0 1 4-6M9 17v1a3 3 0 0 0 6 0v-1"/></svg>';
+function flipToast(items, firstPos) {
+    items.forEach(function(c, i) {
+        var last = c.getBoundingClientRect().top;
+        var delta = last - firstPos[i];
+        if (delta !== 0) {
+            c.style.transform = 'translateY(' + (-delta) + 'px)';
+            c.style.transition = 'none';
+            requestAnimationFrame(function() {
+                c.style.transition = 'transform .35s cubic-bezier(.21,1.02,.73,1)';
+                c.style.transform = '';
+            });
+        }
+    });
+}
+function notify(icon, title, message, duration, link, inApp) {
+    duration = Math.max(0, Number(duration) || 0);
+    var msg = String(message || '');
+    if (msg.length > 100) msg = msg.slice(0, 100) + '…';
+    var box = document.getElementById('toastBox');
+    var existing = Array.prototype.filter.call(box.children, function(c) { return !c.dataset.closing; });
+    var firstPos = existing.map(function(c) { return c.getBoundingClientRect().top; });
+    var el = document.createElement('div');
+    el.className = 'toast' + (link ? ' clickable' : '');
+    el.innerHTML =
+        '<div class="toast-icon">' + (icon || TOAST_DEFAULT_ICON) + '</div>' +
+        '<div class="toast-body">' +
+            '<div class="toast-title">' + esc(title || '') + '</div>' +
+            '<div class="toast-msg">' + esc(msg) + '</div>' +
+        '</div>' +
+        '<button class="toast-close" title="关闭">' + X_SVG + '</button>' +
+        (duration > 0 ? '<div class="toast-bar"><div class="toast-bar-fill"></div></div>' : '');
+    if (link) {
+        el.addEventListener('click', function(e) {
+            if (e.target.closest('.toast-close')) return;
+            if (inApp && link.charAt(0) === '/') {
+                var pg = pathToPage(link);
+                if (pg) { switchPage(pg); }
+                else { history.pushState(null, '', link); showPage(pageFromPath()); }
+            } else {
+                window.open(link, '_blank');
+            }
+            dismissToast(el);
+        });
+    }
+    el.querySelector('.toast-close').addEventListener('click', function(e) {
+        e.stopPropagation();
+        dismissToast(el);
+    });
+    box.prepend(el);
+    flipToast(existing, firstPos);
+    if (duration > 0) {
+        var bar = el.querySelector('.toast-bar-fill');
+        requestAnimationFrame(function() {
+            requestAnimationFrame(function() {
+                bar.style.transition = 'width ' + duration + 'ms linear';
+                bar.style.width = '0%';
+            });
+        });
+        el._toastTimer = setTimeout(function() { dismissToast(el); }, duration);
+    }
+    return el;
+}
+function dismissToast(el) {
+    if (!el || el.dataset.closing) return;
+    el.dataset.closing = '1';
+    if (el._toastTimer) clearTimeout(el._toastTimer);
+    var box = el.parentNode;
+    if (!box) return;
+    var siblings = Array.prototype.filter.call(box.children, function(c) {
+        return c !== el && !c.dataset.closing;
+    });
+    var firstPos = siblings.map(function(c) { return c.getBoundingClientRect().top; });
+    el.style.animation = 'none';
+    el.style.transition = 'transform .28s ease, opacity .28s ease';
+    el.style.transform = 'translateX(120%)';
+    el.style.opacity = '0';
+    setTimeout(function() {
+        if (el.parentNode) el.parentNode.removeChild(el);
+        flipToast(siblings, firstPos);
+    }, 280);
+}
