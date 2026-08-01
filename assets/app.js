@@ -757,9 +757,9 @@ async function loadMcsm() {
     var ret = await getJson('/api/mcsm_info');
     var d = ret.data || {};
     if (!d.is_admin) { box.innerHTML = '<div class="mcsm-tip">仅管理员及以上可访问 MCSManager 面板.</div>'; return; }
-    if (!d.token || !d.panel_host) { box.innerHTML = '<div class="mcsm-tip">请先在「个人概览」申请 API KEY (会同时分配你的专属面板入口) 后再访问.</div>'; return; }
+    if (!d.sec || !d.panel_host) { box.innerHTML = '<div class="mcsm-tip">请先在「个人概览」申请 API KEY (会同时分配你的专属面板入口) 后再访问.</div>'; return; }
     if (!d.panel_suffix) { box.innerHTML = '<div class="mcsm-tip">管理员尚未配置面板域名后缀.</div>'; return; }
-    var url = 'https://' + d.panel_host + '.' + d.panel_suffix + '/?token=' + encodeURIComponent(d.token);
+    var url = 'https://' + d.panel_host + '.' + d.panel_suffix + '/?sec=' + encodeURIComponent(d.sec);
     box.innerHTML = '<div class="mcsm-frame-wrap"><iframe src="' + url + '"></iframe></div>';
 }
 async function mcsmRefresh() {
@@ -804,8 +804,8 @@ function mcsmExitFullscreen() {
 async function mcsmOpenExternal() {
     var ret = await getJson('/api/mcsm_info');
     var d = ret.data || {};
-    if (!d.token || !d.panel_host || !d.panel_suffix) return;
-    var url = 'https://' + d.panel_host + '.' + d.panel_suffix + '/?token=' + encodeURIComponent(d.token);
+    if (!d.sec || !d.panel_host || !d.panel_suffix) return;
+    var url = 'https://' + d.panel_host + '.' + d.panel_suffix + '/?sec=' + encodeURIComponent(d.sec);
     window.open(url, '_blank');
 }
 async function killSession(sid, isCurrent) {

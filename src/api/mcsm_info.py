@@ -67,6 +67,6 @@ def handle(request):
     return {"code": 0, "data": {
         "panel_suffix": MCSM_CONFIG.get('panel_suffix', ''),
         "panel_host": user.get('panel_host'),
-        "token": issue_token(user),
+        "sec": issue_token(user),
         "is_admin": (user.get('level') or 0) >= 1
     }}

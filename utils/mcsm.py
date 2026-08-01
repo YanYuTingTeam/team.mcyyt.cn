@@ -11,7 +11,7 @@ from utils.auth import verify_sign, log_api_call
 PANEL_SESSIONS = {}
 SESSION_TTL = 6 * 3600
 SKIP_REQ_HEADERS = {'host', 'a', 'b', 'x-api-key', 'content-length', 'connection'}
-_STRIP_QUERY = {'token', 'apikey', 'a', 'b'}
+_STRIP_QUERY = {'sec', 'apikey', 'a', 'b'}
 
 def _deny(msg):
     return Response(
@@ -65,11 +65,11 @@ def proxy_api(request, subpath):
     sid = request.cookies.get('mcsm_sid')
     if sid and PANEL_SESSIONS.get(sid, 0) > time.time():
         return _forward(request, subpath)
-    token = request.args.get('token')
-    if token:
+    sec = request.args.get('sec')
+    if sec:
         from src.api.mcsm_info import consume_token
-        data = consume_token(token)
-        print(f"[MCSM] api token={token} db_hit={bool(data)}", flush=True)
+        data = consume_token(sec)
+        print(f"[MCSM] api sec={sec} db_hit={bool(data)}", flush=True)
         if data:
             new_sid = secrets.token_hex(16)
             PANEL_SESSIONS[new_sid] = time.time() + SESSION_TTL
@@ -86,17 +86,17 @@ def proxy_panel(request, subpath):
     sid = request.cookies.get('mcsm_sid')
     if sid and PANEL_SESSIONS.get(sid, 0) > time.time():
         return _forward(request, subpath)
-    token = request.args.get('token')
-    if token:
+    sec = request.args.get('sec')
+    if sec:
         from src.api.mcsm_info import consume_token
-        data = consume_token(token)
-        print(f"[MCSM] token={token} db_hit={bool(data)}", flush=True)
+        data = consume_token(sec)
+        print(f"[MCSM] sec={sec} db_hit={bool(data)}", flush=True)
         if not data:
-            return _deny("")
+            return _deny("令牌无效或已过期")
         host_prefix = (request.host or '').split(':')[0].split('.')[0]
         if not data['panel_host'] or host_prefix != data['panel_host']:
-            print(f"[MCSM] host_mismatch req={host_prefix} token_host={data['panel_host']}", flush=True)
-            return _deny("")
+            print(f"[MCSM] host_mismatch req={host_prefix} sec_host={data['panel_host']}", flush=True)
+            return _deny("该入口不属于此令牌")
         print(f"[MCSM] auth_ok host={data['panel_host']}", flush=True)
         new_sid = secrets.token_hex(16)
         PANEL_SESSIONS[new_sid] = time.time() + SESSION_TTL
