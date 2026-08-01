@@ -77,7 +77,6 @@
             <div class="page-title">个人概览</div>
             <div class="page-sub">欢迎回来. 开始新一天的工作吧 ~</div>
             <div class="ov-cols">
-            <div class="ov-col">
                 <div class="card">
                     <div class="card-head">PROFILE</div>
                     <div class="ov-profile">
@@ -97,6 +96,15 @@
                     <div style="margin-top:14px;display:flex;justify-content:flex-end;gap:8px">
                         <button class="act-btn" id="ovEditBtn" onclick="openProfileModal()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M7 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-1"/><path d="M20.385 6.585a2.1 2.1 0 0 0-2.97-2.97L9 12v3h3zM16 5l3 3"/></g></svg> 修改资料</button>
                     </div>
+                </div>
+                <div class="card">
+                    <div class="card-head-row">
+                        <div class="card-head">INVITE CODES</div>
+                        <button class="card-head-btn" onclick="btnRun(this, refreshOvInvite)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 11A8.1 8.1 0 0 0 4.5 9M4 5v4h4m-4 4a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg> 刷新</button>
+                    </div>
+                    <div style="color:#999;font-size:13px;margin-bottom:12px">在这里创建邀请码 以邀请同事注册</div>
+                    <button class="add-todo-btn" id="ovCreateInviteBtn" style="width:100%;justify-content:center;margin-bottom:14px" onclick="btnRun(this, createInvite)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m-7-7h14"/></svg> 创建邀请码</button>
+                    <div id="inviteList"></div>
                 </div>
                 <div class="card">
                     <div class="card-head">API CALLS</div>
@@ -124,23 +132,11 @@
                         <button class="add-todo-btn hide" id="apikeyApplyBtn" onclick="btnRun(this, resetApikey)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m-7-7h14"/></svg> 申请 API KEY</button>
                     </div>
                 </div>
-            </div>
-            <div class="ov-col">
-                <div class="card">
-                    <div class="card-head-row">
-                        <div class="card-head">INVITE CODES</div>
-                        <button class="card-head-btn" onclick="btnRun(this, refreshOvInvite)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 11A8.1 8.1 0 0 0 4.5 9M4 5v4h4m-4 4a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg> 刷新</button>
-                    </div>
-                    <div style="color:#999;font-size:13px;margin-bottom:12px">在这里创建邀请码 以邀请同事注册</div>
-                    <button class="add-todo-btn" id="ovCreateInviteBtn" style="width:100%;justify-content:center;margin-bottom:14px" onclick="btnRun(this, createInvite)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m-7-7h14"/></svg> 创建邀请码</button>
-                    <div id="inviteList"></div>
-                </div>
                 <div class="card">
                     <div class="card-head">DEVICES</div>
                     <div style="color:#999;font-size:13px;margin-bottom:6px">登录过的设备</div>
                     <div id="deviceList"></div>
                 </div>
-            </div>
             </div>
         </div>
         <div class="page hide" id="pageTodo">
