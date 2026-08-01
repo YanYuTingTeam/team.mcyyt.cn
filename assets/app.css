@@ -377,6 +377,7 @@ a { color: #ef5777; }
 .chip { font-size: 11px; border-radius: 20px; padding: 2px 10px; flex-shrink: 0; }
 .chip.no { color: #d8b877; background: #241c0c; border: 1px solid #4a3a1e; }
 .chip.ok { color: #4caf7d; background: #0d1f15; border: 1px solid #1e4a32; }
+.chip.global-tag { color: #8b5cf6; background: rgba(139,92,246,.12); border: 1px solid rgba(139,92,246,.4); margin-right: 6px; }
 .page-mini {
     font-family: 'Orbixbeta', 'MiSans', '微软雅黑', sans-serif;
     font-feature-settings: 'ss01' 1;

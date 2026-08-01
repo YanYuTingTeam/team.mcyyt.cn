@@ -1,26 +1,63 @@
 from utils.auth import check_login
 from utils.db import get_db
 
+_col_ensured = False
+def _ensure_col(db):
+    global _col_ensured
+    if _col_ensured:
+        return
+    try:
+        with db.cursor() as cur:
+            cur.execute("SHOW COLUMNS FROM yyt_todo LIKE 'is_global'")
+            if not cur.fetchone():
+                cur.execute("ALTER TABLE yyt_todo ADD COLUMN is_global TINYINT DEFAULT 0 AFTER content")
+                cur.execute("ALTER TABLE yyt_todo ADD KEY idx_global (is_global)")
+                db.commit()
+    except Exception:
+        pass
+    _col_ensured = True
+
 def handle(request):
     user = check_login(request)
     if not user:
         return {"code": 401, "message": "未登录"}
     db = get_db()
     try:
+        _ensure_col(db)
         if request.method == 'POST':
             data = request.get_json(silent=True) or {}
             with db.cursor() as cur:
                 if 'id' in data:
-                    if data.get('done'):
-                        cur.execute(
-                            "UPDATE yyt_todo_assign SET is_done = 1, done_at = NOW() WHERE todo_id = %s AND user_id = %s",
-                            (data['id'], user['id'])
-                        )
+                    todo_id = int(data['id'])
+                    is_done = 1 if data.get('done') else 0
+                    # 对于全局待办, 用户可能还没有 assign 记录, 需要先创建
+                    cur.execute(
+                        "SELECT id FROM yyt_todo_assign WHERE todo_id = %s AND user_id = %s",
+                        (todo_id, user['id'])
+                    )
+                    row = cur.fetchone()
+                    if row:
+                        if is_done:
+                            cur.execute(
+                                "UPDATE yyt_todo_assign SET is_done = 1, done_at = NOW() WHERE id = %s",
+                                (row['id'],)
+                            )
+                        else:
+                            cur.execute(
+                                "UPDATE yyt_todo_assign SET is_done = 0, done_at = NULL WHERE id = %s",
+                                (row['id'],)
+                            )
                     else:
-                        cur.execute(
-                            "UPDATE yyt_todo_assign SET is_done = 0, done_at = NULL WHERE todo_id = %s AND user_id = %s",
-                            (data['id'], user['id'])
-                        )
+                        if is_done:
+                            cur.execute(
+                                "INSERT INTO yyt_todo_assign (todo_id, user_id, is_done, done_at) VALUES (%s, %s, 1, NOW())",
+                                (todo_id, user['id'])
+                            )
+                        else:
+                            cur.execute(
+                                "INSERT INTO yyt_todo_assign (todo_id, user_id, is_done, done_at) VALUES (%s, %s, 0, NULL)",
+                                (todo_id, user['id'])
+                            )
                     db.commit()
                     return {"code": 0, "message": "ok"}
                 title = (data.get('title') or '').strip()
@@ -28,9 +65,10 @@ def handle(request):
                     return {"code": 400, "message": "事项标题不能为空"}
                 link = (data.get('link') or '').strip()
                 content = (data.get('content') or '').strip()
+                is_global = 1 if data.get('is_global') else 0
                 cur.execute(
-                    "INSERT INTO yyt_todo (creator_id, title, link, content) VALUES (%s, %s, %s, %s)",
-                    (user['id'], title, link or None, content or None)
+                    "INSERT INTO yyt_todo (creator_id, title, link, content, is_global) VALUES (%s, %s, %s, %s, %s)",
+                    (user['id'], title, link or None, content or None, is_global)
                 )
                 new_id = cur.lastrowid
                 if not link:
@@ -38,31 +76,34 @@ def handle(request):
                         "UPDATE yyt_todo SET link = %s WHERE id = %s",
                         ('/todos/' + str(new_id), new_id)
                     )
-                assignees = data.get('assignees') or []
-                clean_ids = []
-                for a in assignees:
-                    try:
-                        clean_ids.append(int(a))
-                    except (ValueError, TypeError):
-                        pass
-                if not clean_ids:
-                    clean_ids = [user['id']]
-                clean_ids = list(dict.fromkeys(clean_ids))
-                for uid in clean_ids:
-                    cur.execute(
-                        "INSERT INTO yyt_todo_assign (todo_id, user_id) VALUES (%s, %s)",
-                        (new_id, uid)
-                    )
+                if not is_global:
+                    assignees = data.get('assignees') or []
+                    clean_ids = []
+                    for a in assignees:
+                        try:
+                            clean_ids.append(int(a))
+                        except (ValueError, TypeError):
+                            pass
+                    if not clean_ids:
+                        clean_ids = [user['id']]
+                    clean_ids = list(dict.fromkeys(clean_ids))
+                    for uid in clean_ids:
+                        cur.execute(
+                            "INSERT INTO yyt_todo_assign (todo_id, user_id) VALUES (%s, %s)",
+                            (new_id, uid)
+                        )
             db.commit()
             return {"code": 0, "message": "ok"}
         with db.cursor() as cur:
             cur.execute(
-                "SELECT t.id, t.title, t.link, t.content, t.created_at, a.is_done, u.name AS creator_name "
-                "FROM yyt_todo_assign a "
-                "JOIN yyt_todo t ON a.todo_id = t.id "
+                "SELECT t.id, t.title, t.link, t.content, t.created_at, t.is_global, "
+                "COALESCE(a.is_done, 0) AS is_done, u.name AS creator_name "
+                "FROM yyt_todo t "
                 "JOIN yyt_user u ON t.creator_id = u.id "
-                "WHERE a.user_id = %s ORDER BY a.is_done ASC, t.id DESC",
-                (user['id'],)
+                "LEFT JOIN yyt_todo_assign a ON a.todo_id = t.id AND a.user_id = %s "
+                "WHERE t.is_global = 1 OR a.user_id = %s "
+                "ORDER BY COALESCE(a.is_done, 0) ASC, t.id DESC",
+                (user['id'], user['id'])
             )
             rows = cur.fetchall()
         return {"code": 0, "data": rows}

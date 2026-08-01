@@ -172,6 +172,12 @@
                     <textarea class="form-area" id="atContent" placeholder="详细说明"></textarea>
                 </div>
                 <div class="form-row">
+                    <label class="form-label" style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none">
+                        <input type="checkbox" id="atGlobal" onchange="toggleGlobalTodo()" style="width:16px;height:16px;accent-color:#ef5777">
+                        全局待办 <span style="color:#666;font-size:12px">(选中后所有有权限的成员都会收到此待办)</span>
+                    </label>
+                </div>
+                <div class="form-row" id="assignRow">
                     <label class="form-label">为谁添加 <span style="color:#666;font-size:12px">(留空则添加给自己)</span></label>
                     <div class="picker-wrap">
                         <div class="picker" id="assignPicker" onclick="document.getElementById('assignInput').focus()">

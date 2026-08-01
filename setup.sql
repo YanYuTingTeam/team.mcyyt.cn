@@ -45,8 +45,10 @@ CREATE TABLE IF NOT EXISTS yyt_todo (
     title VARCHAR(255) NOT NULL,
     link VARCHAR(255) DEFAULT NULL,
     content TEXT,
+    is_global TINYINT DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    KEY idx_creator (creator_id)
+    KEY idx_creator (creator_id),
+    KEY idx_global (is_global)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS yyt_todo_assign (

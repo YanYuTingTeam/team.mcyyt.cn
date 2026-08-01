@@ -259,7 +259,8 @@ async function loadTodo() {
         ? '<button class="act-btn" onclick="btnRun(this, function(){ return markDone(' + it.id + ', false) })">' + UNDO_SVG + ' 撤销确认</button>'
         : '<button class="act-btn" onclick="btnRun(this, function(){ return markDone(' + it.id + ', true) })">' + CHECK_SVG + ' 我已完成</button>';
         var desc = it.content ? '<div class="t-desc">' + esc(it.content) + '</div>' : '';
-        var meta = '<div class="t-meta">由 ' + esc(it.creator_name) + ' 创建 · ' + esc(it.created_at) + '</div>';
+        var gTag = it.is_global ? '<span class="chip global-tag">全局</span>' : '';
+        var meta = '<div class="t-meta">' + gTag + '由 ' + esc(it.creator_name) + ' 创建 · ' + esc(it.created_at) + '</div>';
         return '<div class="trow' + (it.is_done ? ' done' : '') + '" data-tid="' + it.id + '">' + (it.is_done ? OK_SVG : NO_SVG) +
             '<div class="t-body"><div class="t-line">' + t + chipHtml(it.is_done) + '</div>' + desc + meta + '</div>' + btn + '</div>';
     }).join('');
@@ -298,6 +299,10 @@ function flashTodo(tid) {
     setTimeout(function() { row.classList.remove('flash'); }, 1600);
 }
 var assignUsers = [];
+function toggleGlobalTodo() {
+    var isGlobal = document.getElementById('atGlobal').checked;
+    document.getElementById('assignRow').classList.toggle('hide', isGlobal);
+}
 function resetAddTodo() {
     document.getElementById('atTitle').value = '';
     document.getElementById('atLink').value = '';
@@ -305,6 +310,8 @@ function resetAddTodo() {
     document.getElementById('atErr').textContent = '';
     document.getElementById('assignInput').value = '';
     document.getElementById('assignDrop').classList.add('hide');
+    document.getElementById('atGlobal').checked = false;
+    document.getElementById('assignRow').classList.remove('hide');
     assignUsers = [];
     renderChips();
 }
@@ -367,12 +374,17 @@ async function submitTodo() {
     err.textContent = '';
     var title = document.getElementById('atTitle').value.trim();
     if (!title) { err.textContent = '标题不能为空'; return; }
-    var ret = await postJson('/api/todo', {
+    var isGlobal = document.getElementById('atGlobal').checked;
+    var body = {
         title: title,
         link: document.getElementById('atLink').value.trim(),
         content: document.getElementById('atContent').value.trim(),
-        assignees: assignUsers.map(function(u) { return u.id; })
-    });
+        is_global: isGlobal
+    };
+    if (!isGlobal) {
+        body.assignees = assignUsers.map(function(u) { return u.id; });
+    }
+    var ret = await postJson('/api/todo', body);
     if (ret.code === 0) {
         resetAddTodo();
         await switchPage('todo');
