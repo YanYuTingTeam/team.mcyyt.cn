@@ -3,7 +3,7 @@ from utils.auth import check_login
 from utils.db import get_db
 from config import MCSM_CONFIG
 
-_TOKEN_TTL = 30
+_TOKEN_TTL = 20
 _ensured = False
 
 def _ensure_table():
@@ -56,11 +56,7 @@ def consume_token(token):
                 "WHERE token = %s AND expire_time > NOW()",
                 (token,)
             )
-            row = cur.fetchone()
-            if row:
-                cur.execute("DELETE FROM yyt_mcsm_token WHERE token = %s", (token,))
-                db.commit()
-            return row
+            return cur.fetchone()
     finally:
         db.close()
 
