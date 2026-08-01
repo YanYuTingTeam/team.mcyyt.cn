@@ -762,15 +762,8 @@ async function loadMcsm() {
     var url = 'https://' + d.panel_host + '.' + d.panel_suffix + '/?token=' + encodeURIComponent(d.token);
     box.innerHTML = '<div class="mcsm-frame-wrap"><iframe src="' + url + '"></iframe></div>';
 }
-function mcsmRefresh() {
-    var iframe = document.querySelector('#mcsmBox iframe');
-    if (iframe) {
-        btnRun(document.querySelector('#mcsmToolbar button'), async function() {
-            iframe.src = iframe.src;
-        });
-    } else {
-        loadMcsm();
-    }
+async function mcsmRefresh() {
+    await loadMcsm();
 }
 function mcsmTutorial() {
     var body = '<div style="text-align:center">' +

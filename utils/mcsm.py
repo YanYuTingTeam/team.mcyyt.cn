@@ -78,11 +78,14 @@ def proxy_panel(request, subpath):
     if token:
         from src.api.mcsm_info import consume_token
         data = consume_token(token)
+        print(f"[MCSM] token={token} db_hit={bool(data)}", flush=True)
         if not data:
             return _deny("令牌无效或已过期")
         host_prefix = (request.host or '').split(':')[0].split('.')[0]
         if not data['panel_host'] or host_prefix != data['panel_host']:
+            print(f"[MCSM] host_mismatch req={host_prefix} token_host={data['panel_host']}", flush=True)
             return _deny("该入口不属于此令牌")
+        print(f"[MCSM] auth_ok host={data['panel_host']}", flush=True)
         new_sid = secrets.token_hex(16)
         PANEL_SESSIONS[new_sid] = time.time() + SESSION_TTL
         cookie = 'mcsm_sid=' + new_sid + '; Path=/; Max-Age=' + str(SESSION_TTL) + '; HttpOnly; SameSite=Lax; Secure'
