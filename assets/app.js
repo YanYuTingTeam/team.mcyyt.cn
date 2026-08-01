@@ -539,7 +539,7 @@ function renderOvInvites(invites) {
         var top = '<div class="iv-top"><span class="iv-code">#' + esc(iv.code) + '</span>' +
             (used ? '<span class="chip no">已被使用</span>' : '<span class="chip ok">未使用</span>') + '</div>';
         var mid = used
-        ? '<div class="iv-user"><img src="' + avatarUrl({avatar: iv.used_avatar}) + '" alt=""><div><div class="iv-un">' + esc(iv.used_name) + '</div><div class="iv-ue">' + esc(iv.used_email) + '</div></div></div>' +
+        ? '<div class="iv-user"><img src="' + avatarUrl({name: iv.used_name, avatar: iv.used_avatar}) + '" alt=""><div><div class="iv-un">' + esc(iv.used_name) + '</div><div class="iv-ue">' + esc(iv.used_email) + '</div></div></div>' +
           '<div class="iv-date">创建日期: ' + esc(iv.created_at) + '<br>使用日期: ' + esc(iv.used_at) + '</div>'
         : '<div class="iv-date">创建日期: ' + esc(iv.created_at) + '</div>' +
           '<div style="margin-top:10px"><button class="act-btn" style="width:100%;justify-content:center" onclick="copyText(\'' + esc(iv.code) + '\', this)">' + '复制邀请码</button></div>';
@@ -574,11 +574,21 @@ function openProfileModal() {
 function syncAvatars() {
     if (!meUser) return;
     var url = avatarUrl(meUser);
-    var els = ['sideAvatar', 'ovAvatar', 'pfAvatar'];
+    var els = ['sideAvatar', 'ovAvatar', 'pmAvatar'];
     els.forEach(function(id) {
         var el = document.getElementById(id);
         if (el) el.src = url;
     });
+    var uploadWrap = document.getElementById('avatarUpload');
+    if (uploadWrap) {
+        var img = uploadWrap.querySelector('img');
+        if (img) img.src = url;
+    }
+    var pmWrap = document.getElementById('pmAvatarUpload');
+    if (pmWrap) {
+        var img2 = pmWrap.querySelector('img');
+        if (img2) img2.src = url;
+    }
 }
 async function uploadModalAvatar(input) {
     var file = input.files && input.files[0];
@@ -1111,7 +1121,7 @@ function renderTeamInvites(invites) {
             (used ? '<span class="chip no">已被使用</span>' : '<span class="chip ok">未使用</span>') + '</div>';
         var creator = iv.creator_name ? '创建者: ' + esc(iv.creator_name) : '创建者: 系统';
         var mid = used
-            ? '<div class="iv-user"><img src="' + avatarUrl({avatar: iv.used_avatar}) + '" alt=""><div><div class="iv-un">' + esc(iv.used_name || '--') + '</div><div class="iv-ue">' + esc(iv.used_email || '--') + '</div></div></div>' +
+            ? '<div class="iv-user"><img src="' + avatarUrl({name: iv.used_name, avatar: iv.used_avatar}) + '" alt=""><div><div class="iv-un">' + esc(iv.used_name || '--') + '</div><div class="iv-ue">' + esc(iv.used_email || '--') + '</div></div></div>' +
               '<div class="iv-date">' + creator + '<br>创建: ' + esc(iv.created_at) + '<br>使用: ' + esc(iv.used_at) + '</div>'
             : '<div class="iv-date">' + creator + '<br>创建: ' + esc(iv.created_at) + '</div>' +
               '<div style="margin-top:10px"><button class="act-btn" style="width:100%;justify-content:center" onclick="copyText(\'' + esc(iv.code) + '\', this)">复制邀请码</button></div>';
@@ -1194,7 +1204,7 @@ async function openMemberDetail(uid) {
             invHtml += inv.map(function(iv) {
                 var used = !!iv.used_at;
                 var tag = used ? '<span class="chip no">已使用</span>' : '<span class="chip ok">未使用</span>';
-                var ux = used ? '<div class="iv-user" style="margin-top:6px"><img src="' + avatarUrl({avatar: iv.used_avatar}) + '" style="width:22px;height:22px" alt=""><span>' + esc(iv.used_name || '--') + ' · ' + esc(iv.used_email || '--') + '</span></div>' : '';
+                var ux = used ? '<div class="iv-user" style="margin-top:6px"><img src="' + avatarUrl({name: iv.used_name, avatar: iv.used_avatar}) + '" style="width:22px;height:22px" alt=""><span>' + esc(iv.used_name || '--') + ' · ' + esc(iv.used_email || '--') + '</span></div>' : '';
                 return '<div class="invite-box" style="margin-bottom:8px"><div class="iv-top"><span class="iv-code">#' + esc(iv.code) + '</span>' + tag + '</div>' +
                     '<div class="iv-date">创建: ' + esc(iv.created_at || '--') + (used ? '<br>使用: ' + esc(iv.used_at || '--') : '') + '</div>' + ux + '</div>';
             }).join('');

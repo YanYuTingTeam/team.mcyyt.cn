@@ -97,7 +97,7 @@ def handle(request):
         with db.cursor() as cur:
             cur.execute(
                 "SELECT t.id, t.title, t.link, t.content, t.created_at, t.is_global, "
-                "COALESCE(a.is_done, 0) AS is_done, u.name AS creator_name "
+                "COALESCE(a.is_done, 0) AS is_done, u.name AS creator_name, u.avatar AS creator_avatar "
                 "FROM yyt_todo t "
                 "JOIN yyt_user u ON t.creator_id = u.id "
                 "LEFT JOIN yyt_todo_assign a ON a.todo_id = t.id AND a.user_id = %s "
