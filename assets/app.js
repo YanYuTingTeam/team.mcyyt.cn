@@ -601,7 +601,7 @@ async function uploadModalAvatar(input) {
         fd.append('avatar', file);
         var res = await fetch('/api/avatar_upload', { method: 'POST', body: fd });
         var ret = await res.json();
-        if (ret.code === 0) {
+        if (ret.code === 0 && ret.data && ret.data.avatar) {
             var url = ret.data.avatar;
             if (meUser) meUser.avatar = url;
             syncAvatars();
@@ -609,10 +609,11 @@ async function uploadModalAvatar(input) {
             if (img) img.src = url;
             notify(null, '头像更新成功', '点击「保存修改」以应用', 3000, '', false);
         } else {
-            notify(null, '上传失败', ret.message || '服务器错误', 4000, '', false);
+            notify(null, '上传失败', (ret && ret.message) || '服务器错误', 4000, '', false);
         }
     } catch (e) {
-        notify(null, '上传失败', '网络错误，请重试', 4000, '', false);
+        console.error('uploadModalAvatar error:', e);
+        notify(null, '上传失败', '网络错误: ' + (e && e.message ? e.message : '未知'), 4000, '', false);
     } finally {
         if (btn) { btn.style.cursor = ''; btn.innerHTML = oldHtml; }
     }
@@ -652,22 +653,19 @@ async function uploadAvatar(input) {
         fd.append('avatar', file);
         var res = await fetch('/api/avatar_upload', { method: 'POST', body: fd });
         var ret = await res.json();
-        if (ret.code === 0) {
+        if (ret.code === 0 && ret.data && ret.data.avatar) {
             var url = ret.data.avatar;
             if (meUser) meUser.avatar = url;
             syncAvatars();
             notify(null, '头像更新成功', '你的新头像已生效', 3000, '', false);
         } else {
-            notify(null, '上传失败', ret.message || '服务器错误', 4000, '', false);
+            notify(null, '上传失败', (ret && ret.message) || '服务器错误', 4000, '', false);
         }
     } catch (e) {
-        notify(null, '上传失败', '网络错误，请重试', 4000, '', false);
+        console.error('uploadAvatar error:', e);
+        notify(null, '上传失败', '网络错误: ' + (e && e.message ? e.message : '未知'), 4000, '', false);
     } finally {
-        if (btn) {
-            btn.style.cursor = '';
-            btn.innerHTML = oldHtml;
-            if (meUser) document.getElementById('ovAvatar').src = avatarUrl(meUser);
-        }
+        if (btn) { btn.style.cursor = ''; btn.innerHTML = oldHtml; }
     }
 }
 async function createInvite() {

@@ -4,7 +4,7 @@ from utils.auth import check_login
 from config import MCSM_CONFIG
 
 _MCSM_TOKENS = {}
-_TOKEN_TTL = 120
+_TOKEN_TTL = 30
 
 def issue_token(user):
     token = secrets.token_hex(24)
