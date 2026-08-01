@@ -9,7 +9,7 @@ def _one(cur, sql, args=None):
 def _detail(db, uid):
     with db.cursor() as cur:
         cur.execute(
-            "SELECT id, email, name, role, level, skill, apikey, panel_host, avatar, created_at "
+            "SELECT id, email, name, role, level, skill, apikey, panel_host, avatar, bio, created_at "
             "FROM yyt_user WHERE id = %s", (uid,)
         )
         user = cur.fetchone()
@@ -92,6 +92,9 @@ def handle(request):
                 if 'panel_host' in data:
                     ph = (data.get('panel_host') or '').strip()
                     cur.execute("UPDATE yyt_user SET panel_host = %s WHERE id = %s", (ph or None, uid))
+                if 'bio' in data:
+                    bo = (data.get('bio') or '').strip()
+                    cur.execute("UPDATE yyt_user SET bio = %s WHERE id = %s", (bo or None, uid))
                 if 'kill_session' in data:
                     cur.execute("DELETE FROM yyt_session WHERE id = %s AND user_id = %s", (data['kill_session'], uid))
             db.commit()
@@ -105,7 +108,7 @@ def handle(request):
             return {"code": 0, "data": d}
         with db.cursor() as cur:
             cur.execute(
-                "SELECT id, email, name, role, level, skill, apikey, panel_host, avatar, created_at "
+                "SELECT id, email, name, role, level, skill, apikey, panel_host, avatar, bio, created_at "
                 "FROM yyt_user ORDER BY level DESC, id ASC"
             )
             rows = cur.fetchall()

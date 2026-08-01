@@ -5,6 +5,28 @@ import time
 from utils.db import get_db
 from config import MCSM_CONFIG
 
+_avatar_col_ensured = False
+def _ensure_avatar_col():
+    global _avatar_col_ensured
+    if _avatar_col_ensured:
+        return
+    try:
+        db = get_db()
+        try:
+            with db.cursor() as cur:
+                cur.execute("SHOW COLUMNS FROM yyt_user LIKE 'avatar'")
+                if not cur.fetchone():
+                    cur.execute("ALTER TABLE yyt_user ADD COLUMN avatar VARCHAR(512) DEFAULT NULL AFTER panel_host")
+                cur.execute("SHOW COLUMNS FROM yyt_user LIKE 'bio'")
+                if not cur.fetchone():
+                    cur.execute("ALTER TABLE yyt_user ADD COLUMN bio TEXT DEFAULT NULL AFTER avatar")
+                db.commit()
+        finally:
+            db.close()
+    except Exception:
+        pass
+    _avatar_col_ensured = True
+
 def make_token():
     return secrets.token_hex(32)
 
@@ -21,11 +43,12 @@ def check_login(request):
     token = request.cookies.get('yyt_token')
     if not token:
         return None
+    _ensure_avatar_col()
     db = get_db()
     try:
         with db.cursor() as cur:
             cur.execute(
-                "SELECT u.id, u.email, u.name, u.role, u.level, u.skill, u.apikey, u.panel_host, u.avatar, u.created_at "
+                "SELECT u.id, u.email, u.name, u.role, u.level, u.skill, u.apikey, u.panel_host, u.avatar, u.bio, u.created_at "
                 "FROM yyt_session s JOIN yyt_user u ON s.user_id = u.id "
                 "WHERE s.token = %s AND s.expire_time > NOW()",
                 (token,)
@@ -55,7 +78,7 @@ def verify_sign(request):
     try:
         with db.cursor() as cur:
             cur.execute(
-                "SELECT id, email, name, role, level, skill, apikey, panel_host, avatar, created_at FROM yyt_user WHERE apikey = %s",
+                "SELECT id, email, name, role, level, skill, apikey, panel_host, avatar, bio, created_at FROM yyt_user WHERE apikey = %s",
                 (apikey,)
             )
             row = cur.fetchone()

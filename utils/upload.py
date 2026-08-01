@@ -32,6 +32,9 @@ class OSSUploader:
 
     def __init__(self, ccw_token=None, user_id=None, login_id=None, password=None):
         self.session = requests.Session()
+        self.session.headers.update({
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        })
         self.ccw_token = ccw_token or CCW_CONFIG.get('token')
         self.user_id = user_id or CCW_CONFIG.get('user_id')
         self._creds = None

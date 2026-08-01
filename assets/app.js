@@ -4,7 +4,15 @@ function esc(s) {
     return d.innerHTML;
 }
 function avatarUrl(u) {
-    return (u && u.avatar) ? u.avatar : '/assets/yyt64x.png';
+    if (u && u.avatar) return u.avatar;
+    var name = (u && u.name) || '?';
+    var ch = name.charAt(0).toUpperCase();
+    var palette = ['#ef5777', '#4dabf7', '#4caf7d', '#cc5de8', '#f59f00', '#ff6b6b', '#748ffc', '#098b78', '#f06595', '#7048e8'];
+    var hash = 0;
+    for (var i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    var color = palette[Math.abs(hash) % palette.length];
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="64" height="64" rx="32" fill="' + color + '"/><text x="32" y="34" text-anchor="middle" dominant-baseline="central" font-size="30" fill="#fff" font-family="sans-serif" font-weight="bold">' + esc(ch) + '</text></svg>';
+    return 'data:image/svg+xml,' + encodeURIComponent(svg);
 }
 function escAttr(s) { return String(s == null ? '' : s).replace(/\"/g, '&quot;').replace(/'/g, '&#39;').replace(/\\/g, '\\\\'); }
 function markErr(input, msg) {
@@ -349,29 +357,30 @@ function assignKey(e) {
 }
 var searchTimer = null;
 function searchUser(kw) {
-    kw = kw.trim();
+    kw = (kw || '').trim();
     var drop = document.getElementById('assignDrop');
     if (searchTimer) clearTimeout(searchTimer);
-    if (!kw) { drop.classList.add('hide'); return; }
     searchTimer = setTimeout(async function() {
-        var ret = await getJson('/api/user_search?q=' + encodeURIComponent(kw));
-        var list = (ret.data || []).filter(function(u) {
-            return !assignUsers.some(function(x) { return x.id === u.id; });
-        });
-        if (!list.length) {
-            drop.innerHTML = '<div class="drop-empty">没有匹配的用户</div>';
-        } else {
-            drop.innerHTML = '';
-            list.forEach(function(u) {
-                var row = document.createElement('div');
-                row.className = 'drop-row';
-                row.innerHTML = '<img src="' + avatarUrl(u) + '" alt=""><div><div class="dn">' + esc(u.name) + '</div><div class="de">' + esc(u.email) + '</div></div>';
-                row.onclick = function() { addChip({ id: u.id, name: u.name }); };
-                drop.appendChild(row);
+        try {
+            var ret = await getJson('/api/user_search?q=' + encodeURIComponent(kw));
+            var list = (ret.data || []).filter(function(u) {
+                return !assignUsers.some(function(x) { return x.id === u.id; });
             });
-        }
-        drop.classList.remove('hide');
-    }, 200);
+            if (!list.length) {
+                drop.innerHTML = '<div class="drop-empty">没有匹配的用户</div>';
+            } else {
+                drop.innerHTML = '';
+                list.forEach(function(u) {
+                    var row = document.createElement('div');
+                    row.className = 'drop-row';
+                    row.innerHTML = '<img src="' + avatarUrl(u) + '" alt=""><div><div class="dn">' + esc(u.name) + '</div><div class="de">' + esc(u.email) + '</div></div>';
+                    row.onclick = function() { addChip({ id: u.id, name: u.name }); };
+                    drop.appendChild(row);
+                });
+            }
+            drop.classList.remove('hide');
+        } catch (e) {}
+    }, kw ? 160 : 0);
 }
 async function submitTodo() {
     var err = document.getElementById('atErr');
@@ -436,6 +445,7 @@ async function loadOverview() {
     document.getElementById('ovMail').textContent = u.email;
     document.getElementById('ovAvatar').src = avatarUrl(u);
     document.getElementById('ovSkill').innerHTML = renderSkillHtml(u.skill);
+    document.getElementById('ovBio').textContent = u.bio || '未填写';
     document.getElementById('ovId').textContent = u.id;
     var bt = document.getElementById('ovCreateInviteBtn');
     if (bt) bt.classList.toggle('hide', !canAccess('invite_create'));
@@ -480,27 +490,74 @@ async function refreshOvInvite() {
     ovData = ret.data;
     renderOvInvites(ovData.invites);
 }
-function toggleEditProfile() {
-    var row = document.getElementById('ovEditRow');
-    var save = document.getElementById('ovSaveBtn');
-    var opening = row.classList.contains('hide');
-    row.classList.toggle('hide', !opening);
-    save.classList.toggle('hide', !opening);
-    if (opening && ovData) {
-        document.getElementById('ovEditName').value = ovData.user.name;
-        document.getElementById('ovEditSkill').value = ovData.user.skill || '';
+function openProfileModal() {
+    if (!ovData) return;
+    var u = ovData.user;
+    var avatarHtml = '<div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">' +
+        '<div class="avatar-upload" id="pmAvatarUpload" onclick="document.getElementById(\'pmAvatarInput\').click()" style="width:80px;height:80px">' +
+        '<img id="pmAvatar" src="' + avatarUrl(u) + '" alt="">' +
+        '<div class="avatar-overlay"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h4l2-3h6l2 3h4v13H3z"/><circle cx="12" cy="13" r="4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg><span>更换头像</span></div>' +
+        '</div>' +
+        '<input type="file" id="pmAvatarInput" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none" onchange="uploadModalAvatar(this)">' +
+        '<div style="color:#888;font-size:13px">点击头像上传新图片<br>支持 jpg / png / webp / gif</div></div>';
+    var formHtml = '<div class="md-section">' +
+        '<div class="md-row"><div class="md-k">昵称</div><div class="md-v"><input id="pmName" value="' + esc(u.name || '') + '"></div></div>' +
+        '<div class="md-row"><div class="md-k">核心能力</div><div class="md-v"><div class="picker-wrap"><div class="picker" id="pfSkillPicker" onclick="document.getElementById(\'pfSkillInput\').focus()"><input id="pfSkillInput" placeholder="选择核心能力" autocomplete="off" onfocus="skillPickerSearch(this.value,\'pf\')" oninput="skillPickerSearch(this.value,\'pf\')" onkeydown="skillPickerKey(event,\'pf\')"></div><div class="picker-drop hide" id="pfSkillDrop"></div></div></div></div>' +
+        '<div class="md-row"><div class="md-k">个人简介</div><div class="md-v"><textarea id="pmBio" placeholder="介绍一下自己..." style="resize:vertical;min-height:60px;max-height:160px">' + esc(u.bio || '') + '</textarea></div></div>' +
+        '</div>';
+    var foot = '<button class="act-btn" onclick="closeModal()">取消</button>' +
+        '<button class="add-todo-btn" onclick="btnRun(this, saveProfileModal)">保存修改</button>';
+    openModal('修改个人资料', avatarHtml + formHtml, foot);
+    setTimeout(function() { initSkillPicker('pf', u.skill || ''); }, 0);
+}
+async function uploadModalAvatar(input) {
+    var file = input.files && input.files[0];
+    if (!file) return;
+    input.value = '';
+    var allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (allowed.indexOf(file.type) < 0) {
+        notify(null, '格式不支持', '仅支持 jpg / png / webp / gif 格式', 4000, '', false);
+        return;
+    }
+    var btn = document.getElementById('pmAvatarUpload');
+    var oldHtml = '';
+    if (btn) {
+        oldHtml = btn.innerHTML;
+        btn.innerHTML = '<img src="' + (meUser ? avatarUrl(meUser) : '/assets/yyt64x.png') + '" alt="" style="opacity:.3"><div class="avatar-overlay" style="opacity:1">' + SPIN_SVG + '</div>';
+        btn.style.cursor = 'wait';
+    }
+    try {
+        var fd = new FormData();
+        fd.append('avatar', file);
+        var res = await fetch('/api/avatar_upload', { method: 'POST', body: fd });
+        var ret = await res.json();
+        if (ret.code === 0) {
+            var url = ret.data.avatar;
+            var img = document.getElementById('pmAvatar');
+            if (img) img.src = url;
+            if (meUser) meUser.avatar = url;
+            notify(null, '头像更新成功', '点击「保存修改」以应用', 3000, '', false);
+        } else {
+            notify(null, '上传失败', ret.message || '服务器错误', 4000, '', false);
+        }
+    } catch (e) {
+        notify(null, '上传失败', '网络错误，请重试', 4000, '', false);
+    } finally {
+        if (btn) { btn.style.cursor = ''; btn.innerHTML = oldHtml; }
     }
 }
-async function saveProfile() {
-    var name = document.getElementById('ovEditName').value.trim();
-    if (!name) return;
+async function saveProfileModal(btn) {
+    var name = document.getElementById('pmName').value.trim();
+    if (!name) { markErr(document.getElementById('pmName'), '昵称不能为空'); return; }
     var ret = await postJson('/api/profile', {
         name: name,
-        skill: document.getElementById('ovEditSkill').value.trim()
+        skill: getSkillPickerValues('pf'),
+        bio: document.getElementById('pmBio').value.trim()
     });
     if (ret.code === 0) {
-        toggleEditProfile();
+        closeModal();
         await Promise.all([loadOverview(), loadMe()]);
+        notify(null, '资料已更新', '你的个人资料已保存', 3000, '', false);
     }
 }
 async function uploadAvatar(input) {
@@ -513,9 +570,10 @@ async function uploadAvatar(input) {
         return;
     }
     var btn = document.getElementById('avatarUpload');
+    var oldHtml = '';
     if (btn) {
-        var oldHtml = btn.innerHTML;
-        btn.innerHTML = '<img src="/assets/yyt64x.png" alt="" style="opacity:.4">' + SPIN_SVG;
+        oldHtml = btn.innerHTML;
+        btn.innerHTML = '<img src="' + (meUser ? avatarUrl(meUser) : '/assets/yyt64x.png') + '" alt="" style="opacity:.3"><div class="avatar-overlay" style="opacity:1">' + SPIN_SVG + '</div>';
         btn.style.cursor = 'wait';
     }
     try {
@@ -537,6 +595,7 @@ async function uploadAvatar(input) {
     } finally {
         if (btn) {
             btn.style.cursor = '';
+            btn.innerHTML = oldHtml;
             if (meUser) document.getElementById('ovAvatar').src = avatarUrl(meUser);
         }
     }
@@ -1041,7 +1100,7 @@ async function openMemberDetail(uid) {
             '<div class="md-row"><div class="md-k">昵称</div><div class="md-v"><input id="mm_name" value="' + esc(u.name || '') + '"></div></div>' +
             '<div class="md-row"><div class="md-k">邮箱</div><div class="md-v">' + esc(u.email) + '</div></div>' +
             '<div class="md-row"><div class="md-k">账号ID</div><div class="md-v">' + esc(u.id) + '</div></div>' +
-            '<div class="md-row"><div class="md-k">核心能力</div><div class="md-v"><div class="picker-wrap"><div class="picker" id="mmSkillPicker" onclick="document.getElementById(\'mmSkillInput\').focus()"><input id="mmSkillInput" placeholder="输入添加或从下拉选择" autocomplete="off" oninput="skillPickerSearch(this.value,\'mm\')" onkeydown="skillPickerKey(event,\'mm\')"></div><div class="picker-drop hide" id="mmSkillDrop"></div></div></div></div>' +
+            '<div class="md-row"><div class="md-k">核心能力</div><div class="md-v"><div class="picker-wrap"><div class="picker" id="mmSkillPicker" onclick="document.getElementById(\'mmSkillInput\').focus()"><input id="mmSkillInput" placeholder="选择核心能力" autocomplete="off" onfocus="skillPickerSearch(this.value,\'mm\')" oninput="skillPickerSearch(this.value,\'mm\')" onkeydown="skillPickerKey(event,\'mm\')"></div><div class="picker-drop hide" id="mmSkillDrop"></div></div></div></div>' +
             '<div class="md-row"><div class="md-k">权限组</div><div class="md-v"><select id="mm_level">' + levelOptions(u.level || 0) + '</select></div></div>' +
             '<div class="md-row"><div class="md-k">面板节点</div><div class="md-v"><input id="mm_host" value="' + esc(u.panel_host || '') + '"></div></div>' +
             '<div class="md-row"><div class="md-k">注册时间</div><div class="md-v">' + esc(u.created_at || '--') + '</div></div></div>';
@@ -1120,30 +1179,34 @@ async function openMemberDetail(uid) {
         var foot = '<button class="act-btn" onclick="closeModal()">关闭</button>' +
             '<button class="add-todo-btn" onclick="btnRun(this, function(btn){ return mmSave(' + u.id + ',btn); })">保存修改</button>';
         openModal('成员详情 · ' + u.name, avatarHtml + infoHtml + statsHtml + sesHtml + invHtml + pgsHtml + logsHtml, foot);
-        setTimeout(function() { initSkillPicker(u.skill || ''); }, 0);
+        setTimeout(function() { initSkillPicker('mm', u.skill || ''); }, 0);
     } catch (e) {
         closeModal();
     }
 }
-var __mmSkills = [];
-function initSkillPicker(skillRaw) {
+var __skillCtx = {};
+function initSkillPicker(ctx, skillRaw) {
     var list = String(skillRaw || '').split(/[,，]/).map(function(x) { return x.trim(); }).filter(Boolean);
-    __mmSkills = [];
+    var arr = [];
     var meta = window.__SKILL_META || {};
     list.forEach(function(nm) {
         var hit = null;
         for (var k in meta) { if (meta[k].name === nm) { hit = meta[k]; break; } }
-        __mmSkills.push(hit ? { id: hit.id, name: hit.name, color: hit.color } : { id: 0, name: nm, color: '#ef5777' });
+        if (hit) arr.push({ id: hit.id, name: hit.name, color: hit.color });
     });
-    renderSkillPickerChips();
-    document.getElementById('mmSkillDrop').classList.add('hide');
+    __skillCtx[ctx] = { skills: arr };
+    renderSkillPickerChips(ctx);
+    var drop = document.getElementById(ctx + 'SkillDrop');
+    if (drop) drop.classList.add('hide');
 }
-function renderSkillPickerChips() {
-    var pk = document.getElementById('mmSkillPicker');
+function renderSkillPickerChips(ctx) {
+    var c = __skillCtx[ctx];
+    if (!c) return;
+    var pk = document.getElementById(ctx + 'SkillPicker');
     if (!pk) return;
-    pk.querySelectorAll('.u-chip.skill').forEach(function(c) { c.remove(); });
-    var input = document.getElementById('mmSkillInput');
-    __mmSkills.forEach(function(s, idx) {
+    pk.querySelectorAll('.u-chip.skill').forEach(function(el) { el.remove(); });
+    var input = document.getElementById(ctx + 'SkillInput');
+    c.skills.forEach(function(s, idx) {
         var chip = document.createElement('span');
         chip.className = 'u-chip skill';
         chip.style.color = s.color;
@@ -1153,91 +1216,74 @@ function renderSkillPickerChips() {
         chip.querySelector('.rm').onclick = function(e) {
             e.stopPropagation();
             var i = parseInt(this.dataset.idx || '0');
-            __mmSkills.splice(i, 1);
-            renderSkillPickerChips();
+            c.skills.splice(i, 1);
+            renderSkillPickerChips(ctx);
         };
         pk.insertBefore(chip, input);
     });
 }
 var __skillSearchTimer = null;
 function skillPickerSearch(kw, ctx) {
-    kw = kw.trim();
-    var drop = document.getElementById('mmSkillDrop');
+    var c = __skillCtx[ctx];
+    if (!c) return;
+    kw = (kw || '').trim();
+    var drop = document.getElementById(ctx + 'SkillDrop');
     if (!drop) return;
     if (__skillSearchTimer) clearTimeout(__skillSearchTimer);
-    if (!kw) {
-        __skillSearchTimer = setTimeout(function() {
-            var meta = window.__SKILL_META || {};
-            var arr = [];
-            for (var k in meta) arr.push(meta[k]);
-            _renderSkillDrop(arr.filter(function(x) { return !__mmSkills.some(function(y) { return y.name === x.name; }); }));
-        }, 30);
-        return;
-    }
     __skillSearchTimer = setTimeout(function() {
         var meta = window.__SKILL_META || {};
-        var arr = [];
-        for (var k in meta) arr.push(meta[k]);
-        var matched = arr.filter(function(x) { return x.name.indexOf(kw) !== -1; }).filter(function(x) { return !__mmSkills.some(function(y) { return y.name === x.name; }); });
-        _renderSkillDrop(matched, kw);
-    }, 120);
+        var all = [];
+        for (var k in meta) all.push(meta[k]);
+        var filtered = all.filter(function(x) {
+            return !c.skills.some(function(y) { return y.name === x.name; });
+        });
+        if (kw) filtered = filtered.filter(function(x) { return x.name.indexOf(kw) !== -1; });
+        _renderSkillDrop(ctx, filtered, kw);
+    }, kw ? 120 : 30);
 }
-function _renderSkillDrop(arr, kw) {
-    var drop = document.getElementById('mmSkillDrop');
+function _renderSkillDrop(ctx, arr, kw) {
+    var drop = document.getElementById(ctx + 'SkillDrop');
     if (!drop) return;
-    if (!arr.length && !kw) { drop.classList.add('hide'); return; }
-    var html = '';
-    if (kw) {
-        html += '<div class="drop-row" onclick="addFreeSkill(\'' + escAttr(kw) + '\')"><div style="padding:2px 8px"><div class="dn">+ 添加「' + esc(kw) + '」为新能力</div><div class="de">当前下拉中未找到匹配, 按名称新增</div></div></div>';
-    }
-    if (!arr.length && kw) {
-        drop.innerHTML = html || '<div class="drop-empty">没有匹配的能力</div>';
+    if (!arr.length) {
+        drop.innerHTML = '<div class="drop-empty">' + (kw ? '没有匹配的能力' : '暂无可选能力') + '</div>';
         drop.classList.remove('hide');
         return;
     }
-    arr.forEach(function(x) {
-        html += '<div class="drop-row" onclick="addMetaSkill(' + x.id + ',\'' + escAttr(x.name) + '\',\'' + escAttr(x.color || '#ef5777') + '\')"><div style="display:flex;align-items:center;gap:8px"><span class="skill-tag sm" style="color:' + x.color + ';border-color:' + hexA(x.color,.45) + ';background:' + hexA(x.color,.08) + '">' + esc(x.name) + '</span><div class="de">' + esc(x.name) + '</div></div></div>';
-    });
+    var html = arr.map(function(x) {
+        return '<div class="drop-row" onclick="addMetaSkill(\'' + ctx + '\',' + x.id + ',\'' + escAttr(x.name) + '\',\'' + escAttr(x.color || '#ef5777') + '\')"><div style="display:flex;align-items:center;gap:8px"><span class="skill-tag sm" style="color:' + x.color + ';border-color:' + hexA(x.color,.45) + ';background:' + hexA(x.color,.08) + '">' + esc(x.name) + '</span><div class="de">' + esc(x.name) + '</div></div></div>';
+    }).join('');
     drop.innerHTML = html;
     drop.classList.remove('hide');
 }
 function skillPickerKey(e, ctx) {
-    if (e.key === 'Backspace' && !e.target.value && __mmSkills.length) {
-        __mmSkills.pop();
-        renderSkillPickerChips();
+    var c = __skillCtx[ctx];
+    if (!c) return;
+    if (e.key === 'Backspace' && !e.target.value && c.skills.length) {
+        c.skills.pop();
+        renderSkillPickerChips(ctx);
     }
-    if (e.key === 'Enter') {
-        e.preventDefault();
-        var kw = e.target.value.trim();
-        if (kw) addFreeSkill(kw);
-    }
+    if (e.key === 'Enter') { e.preventDefault(); }
 }
-function addMetaSkill(id, name, color) {
-    if (__mmSkills.some(function(x) { return x.name === name; })) return;
-    __mmSkills.push({ id: id, name: name, color: color || '#ef5777' });
-    renderSkillPickerChips();
-    var inp = document.getElementById('mmSkillInput');
+function addMetaSkill(ctx, id, name, color) {
+    var c = __skillCtx[ctx];
+    if (!c) return;
+    if (c.skills.some(function(x) { return x.name === name; })) return;
+    c.skills.push({ id: id, name: name, color: color || '#ef5777' });
+    renderSkillPickerChips(ctx);
+    var inp = document.getElementById(ctx + 'SkillInput');
     if (inp) { inp.value = ''; inp.focus(); }
-    document.getElementById('mmSkillDrop').classList.add('hide');
+    var drop = document.getElementById(ctx + 'SkillDrop');
+    if (drop) drop.classList.add('hide');
 }
-function addFreeSkill(nm) {
-    nm = (nm || '').trim();
-    if (!nm) return;
-    if (__mmSkills.some(function(x) { return x.name === nm; })) return;
-    var meta = window.__SKILL_META || {};
-    var c = '#ef5777';
-    for (var k in meta) { if (meta[k].name === nm) { c = meta[k].color || c; break; } }
-    __mmSkills.push({ id: 0, name: nm, color: c });
-    renderSkillPickerChips();
-    var inp = document.getElementById('mmSkillInput');
-    if (inp) { inp.value = ''; inp.focus(); }
-    document.getElementById('mmSkillDrop').classList.add('hide');
+function getSkillPickerValues(ctx) {
+    var c = __skillCtx[ctx];
+    return c ? c.skills.map(function(x) { return x.name; }).join(',') : '';
 }
 async function mmSave(uid, btn) {
     var body = {
         id: uid,
         name: document.getElementById('mm_name').value.trim(),
-        skill: __mmSkills.map(function(x) { return x.name; }).join(','),
+        skill: getSkillPickerValues('mm'),
         level: parseInt(document.getElementById('mm_level').value) || 0,
         panel_host: document.getElementById('mm_host').value.trim()
     };
@@ -1328,7 +1374,7 @@ async function openGroupMembers(lv) {
     var head = '<div style="margin-bottom:10px">' + lvlBadge(lv) + ' · 共 <span id="gmCount">' + members.length + '</span> 人</div>';
     var addBox = '<div style="margin-bottom:16px;padding:12px 14px;border:1px dashed #2b2b2e;border-radius:10px;background:#0d0d0f">' +
         '<div style="font-size:12px;color:#777;margin-bottom:8px">添加成员到该组 (输入昵称搜索)</div>' +
-        '<div class="picker-wrap"><div class="picker" id="gmPicker" onclick="document.getElementById(\'gmInput\').focus()"><input id="gmInput" placeholder="搜索或选择用户" autocomplete="off" oninput="gmSearch(this.value)" onkeydown="gmKey(event)"></div><div class="picker-drop hide" id="gmDrop"></div></div>' +
+        '<div class="picker-wrap"><div class="picker" id="gmPicker" onclick="document.getElementById(\'gmInput\').focus()"><input id="gmInput" placeholder="搜索或选择用户" autocomplete="off" onfocus="gmSearch(this.value)" oninput="gmSearch(this.value)" onkeydown="gmKey(event)"></div><div class="picker-drop hide" id="gmDrop"></div></div>' +
         '<div style="margin-top:10px;display:flex;gap:10px;align-items:center">' +
         '<button class="add-todo-btn" style="margin:0" onclick="btnRun(this, gmAddLevel)">把所选成员加入该组</button>' +
         '<button class="act-btn" style="margin:0" onclick="gmClear()">清空选择</button>' +

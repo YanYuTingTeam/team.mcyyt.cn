@@ -90,16 +90,12 @@
                             <div class="pv-name"><span id="ovName">--</span><span class="pv-role" id="ovRole">--</span></div>
                             <div class="pv-row" id="ovMail">--</div>
                             <div class="pv-row">核心能力  <span id="ovSkill">--</span></div>
+                            <div class="pv-row">个人简介  <span id="ovBio" style="color:#ccc">--</span></div>
                             <div class="pv-row">账号ID  <span id="ovId">--</span></div>
                         </div>
                     </div>
-                    <div class="edit-row hide" id="ovEditRow">
-                        <input id="ovEditName" placeholder="昵称">
-                        <input id="ovEditSkill" placeholder="核心能力, 逗号分隔">
-                    </div>
                     <div style="margin-top:14px;display:flex;justify-content:flex-end;gap:8px">
-                        <button class="act-btn hide" id="ovSaveBtn" onclick="btnRun(this, saveProfile)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 12l5 5L20 7"/></svg> 保存</button>
-                        <button class="act-btn" id="ovEditBtn" onclick="toggleEditProfile()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M7 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-1"/><path d="M20.385 6.585a2.1 2.1 0 0 0-2.97-2.97L9 12v3h3zM16 5l3 3"/></g></svg> 修改资料</button>
+                        <button class="act-btn" id="ovEditBtn" onclick="openProfileModal()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M7 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-1"/><path d="M20.385 6.585a2.1 2.1 0 0 0-2.97-2.97L9 12v3h3zM16 5l3 3"/></g></svg> 修改资料</button>
                     </div>
                 </div>
                 <div class="card">
@@ -186,7 +182,7 @@
                     <label class="form-label">为谁添加 <span style="color:#666;font-size:12px">(留空则添加给自己)</span></label>
                     <div class="picker-wrap">
                         <div class="picker" id="assignPicker" onclick="document.getElementById('assignInput').focus()">
-                            <input id="assignInput" placeholder="输入昵称搜索并选择" autocomplete="off" oninput="searchUser(this.value)" onkeydown="assignKey(event)">
+                            <input id="assignInput" placeholder="输入昵称搜索并选择" autocomplete="off" onfocus="searchUser(this.value)" oninput="searchUser(this.value)" onkeydown="assignKey(event)">
                         </div>
                         <div class="picker-drop hide" id="assignDrop"></div>
                     </div>
