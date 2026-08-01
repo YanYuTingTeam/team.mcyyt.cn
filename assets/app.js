@@ -58,9 +58,9 @@ async function postJson(url, body) {
     });
     return res.json();
 }
-var PAGE_PATH = { home: '/', overview: '/overview', todo: '/todos', notice: '/notice', project: '/projects', apis: '/apis', logs: '/logs', mcsm: '/mcsmanager', team: '/team', addtodo: '/todos/add' };
-var NAV_OF = { home: 'home', overview: 'overview', todo: 'todo', notice: 'notice', project: 'project', apis: 'apis', logs: 'overview', mcsm: 'mcsm', team: 'team', addtodo: 'todo' };
-var PAGE_LOADER = { home: null, overview: loadOverview, todo: loadTodo, notice: loadNotice, project: loadProject, apis: loadApis, logs: loadLogs, mcsm: loadMcsm, team: loadTeam, addtodo: resetAddTodo };
+var PAGE_PATH = { home: '/', overview: '/overview', todo: '/todos', notice: '/notice', project: '/projects', apis: '/apis', logs: '/logs', mcsm: '/mcsmanager', team: '/team', addtodo: '/todos/add', tododetail: '/todos' };
+var NAV_OF = { home: 'home', overview: 'overview', todo: 'todo', notice: 'notice', project: 'project', apis: 'apis', logs: 'overview', mcsm: 'mcsm', team: 'team', addtodo: 'todo', tododetail: 'todo' };
+var PAGE_LOADER = { home: null, overview: loadOverview, todo: loadTodo, notice: loadNotice, project: loadProject, apis: loadApis, logs: loadLogs, mcsm: loadMcsm, team: loadTeam, addtodo: resetAddTodo, tododetail: null };
 var SPIN_SVG = '<svg xmlns="http://www.w3.org/2000/svg" class="spin" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3a9 9 0 1 0 9 9"/></svg>';
 var LEVEL_NAME = { 0: '待定', 1: '志愿者 | 初级', 2: '志愿者 | 中级', 3: '志愿者 | 高级', 4: '管理员', 5: '服主' };
 var LEVEL_COLOR = { 0: '#888', 1: '#4caf7d', 2: '#4dabf7', 3: '#cc5de8', 4: '#f59f00', 5: '#ef5777' };
@@ -179,6 +179,7 @@ function showPage(name) {
     document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.toggle('now', n.dataset.page === navName); });
     document.querySelectorAll('.page').forEach(function(p) { p.classList.add('hide'); });
     var pageId = 'page' + name.charAt(0).toUpperCase() + name.slice(1);
+    if (name === 'tododetail') pageId = 'pageTodoDetail';
     document.getElementById(pageId).classList.remove('hide');
     window.scrollTo({ top: 0 });
 }
@@ -204,13 +205,21 @@ async function switchPage(name, el) {
 function pageFromPath() {
     var p = location.pathname;
     if (p === '/todos/add') return 'addtodo';
+    if (/^\/todos\/\d+$/.test(p)) return 'tododetail';
     if (p === '/todos' || p.indexOf('/todos/') === 0) return 'todo';
     for (var k in PAGE_PATH) {
         if (PAGE_PATH[k] === p) return k;
     }
     return 'home';
 }
-window.addEventListener('popstate', function() { showPage(pageFromPath()); });
+window.addEventListener('popstate', function() {
+    var p = pageFromPath();
+    showPage(p);
+    if (p === 'tododetail') {
+        var m = location.pathname.match(/^\/todos\/(\d+)$/);
+        if (m) loadTodoDetail(m[1]);
+    }
+});
 function doSearch(kw) {
     kw = kw.trim().toLowerCase();
     document.querySelectorAll('.card').forEach(function(c) {
@@ -285,30 +294,82 @@ function todoLinkClick(e, a) {
     var href = a.getAttribute('href');
     if (!isInnerTodo(href)) return true;
     e.preventDefault();
-    openTodo(href.split('/')[2], a);
+    openTodo(href.split('/')[2]);
     return false;
 }
+var __todoDetailId = null;
 async function openTodo(tid, el) {
-    topBarOn();
-    try {
-        if (el) {
-            if (!await btnRun(el, loadTodo)) return;
-        } else {
-            await loadTodo();
-        }
-    } finally {
-        topBarOff();
+    if (el) {
+        topBarOn();
+        try { if (!await btnRun(el, function() { return loadTodoDetail(tid); })) return; } finally { topBarOff(); }
+    } else {
+        topBarOn();
+        try { await loadTodoDetail(tid); } finally { topBarOff(); }
     }
     history.pushState(null, '', '/todos/' + tid);
-    showPage('todo');
-    flashTodo(tid);
+    showPage('tododetail');
 }
-function flashTodo(tid) {
-    var row = document.querySelector('.trow[data-tid="' + tid + '"]');
-    if (!row) return;
-    row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    row.classList.add('flash');
-    setTimeout(function() { row.classList.remove('flash'); }, 1600);
+async function loadTodoDetail(tid) {
+    __todoDetailId = tid;
+    var box = document.getElementById('todoDetailBox');
+    box.innerHTML = '<div style="text-align:center;padding:40px">' + SPIN_SVG + '</div>';
+    try {
+        var ret = await getJson('/api/todo_detail?id=' + tid);
+        if (ret.code !== 0) {
+            box.innerHTML = '<div class="empty-tip">' + esc(ret.message || '加载失败') + '</div>';
+            return;
+        }
+        renderTodoDetail(ret.data);
+    } catch (e) {
+        box.innerHTML = '<div class="empty-tip">网络错误, 请重试</div>';
+    }
+}
+function renderTodoDetail(d) {
+    var t = d.todo;
+    var icon = d.my_done ? OK_SVG : NO_SVG;
+    var gTag = t.is_global ? '<span class="chip global-tag">全局</span>' : '';
+    var head = '<div class="td-head">' + icon + '<span class="td-title">#' + esc(t.id) + ' · ' + esc(t.title) + '</span>' + gTag + '</div>';
+    var creator = { id: t.creator_id, name: t.creator_name, avatar: t.creator_avatar };
+    var creatorLine = '<div class="td-meta">' +
+        '<img class="td-ava" src="' + avatarUrl(creator) + '" alt="">' +
+        '<span class="td-name">' + esc(t.creator_name) + '</span>' +
+        '<span class="td-sep">|</span>' +
+        '<span class="td-time">创建时间 ' + esc(t.created_at) + '</span>' +
+        '</div>';
+    var assigneeHtml = '';
+    if (t.is_global) {
+        assigneeHtml = '<div class="td-section"><div class="td-label">目标</div><div class="td-assignees"><span class="chip global-tag">全体成员</span></div></div>';
+    } else if (d.assignees && d.assignees.length) {
+        var chips = d.assignees.map(function(u) {
+            return '<div class="td-person"><img src="' + avatarUrl(u) + '" alt=""><span>' + esc(u.name) + '</span></div>';
+        }).join('');
+        assigneeHtml = '<div class="td-section"><div class="td-label">目标</div><div class="td-assignees">' + chips + '</div></div>';
+    }
+    var contentHtml = t.content ? '<div class="td-section"><div class="td-label">内容</div><div class="td-content">' + esc(t.content) + '</div></div>' : '';
+    var doneHtml = '';
+    if (d.done_users && d.done_users.length) {
+        var doneChips = d.done_users.map(function(u) {
+            return '<div class="td-person done"><img src="' + avatarUrl(u) + '" alt=""><span>' + esc(u.name) + '</span>' + CHECK_SVG + '</div>';
+        }).join('');
+        doneHtml = '<div class="td-section"><div class="td-label">已完成的用户</div><div class="td-assignees">' + doneChips + '</div></div>';
+    }
+    var actionHtml = '';
+    if (d.my_done) {
+        actionHtml = '<div class="td-actions">' +
+            '<button class="act-btn" onclick="btnRun(this, function(){ return markTodoDetailDone(false) })">' + UNDO_SVG + ' 撤销确认</button>' +
+            '<span class="td-my-done">你已于 ' + esc(d.my_done_at) + ' 完成</span>' +
+            '</div>';
+    } else {
+        actionHtml = '<div class="td-actions">' +
+            '<button class="add-todo-btn" onclick="btnRun(this, function(){ return markTodoDetailDone(true) })">' + CHECK_SVG + ' 我已完成</button>' +
+            '</div>';
+    }
+    document.getElementById('todoDetailBox').innerHTML = '<div class="card td-card">' + head + creatorLine + assigneeHtml + contentHtml + doneHtml + actionHtml + '</div>';
+}
+async function markTodoDetailDone(done) {
+    if (!__todoDetailId) return;
+    await postJson('/api/todo', { id: parseInt(__todoDetailId), done: done });
+    await loadTodoDetail(__todoDetailId);
 }
 var assignUsers = [];
 function toggleGlobalTodo() {
@@ -510,6 +571,15 @@ function openProfileModal() {
     openModal('修改个人资料', avatarHtml + formHtml, foot);
     setTimeout(function() { initSkillPicker('pf', u.skill || ''); }, 0);
 }
+function syncAvatars() {
+    if (!meUser) return;
+    var url = avatarUrl(meUser);
+    var els = ['sideAvatar', 'ovAvatar', 'pfAvatar'];
+    els.forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.src = url;
+    });
+}
 async function uploadModalAvatar(input) {
     var file = input.files && input.files[0];
     if (!file) return;
@@ -533,9 +603,10 @@ async function uploadModalAvatar(input) {
         var ret = await res.json();
         if (ret.code === 0) {
             var url = ret.data.avatar;
+            if (meUser) meUser.avatar = url;
+            syncAvatars();
             var img = document.getElementById('pmAvatar');
             if (img) img.src = url;
-            if (meUser) meUser.avatar = url;
             notify(null, '头像更新成功', '点击「保存修改」以应用', 3000, '', false);
         } else {
             notify(null, '上传失败', ret.message || '服务器错误', 4000, '', false);
@@ -583,9 +654,8 @@ async function uploadAvatar(input) {
         var ret = await res.json();
         if (ret.code === 0) {
             var url = ret.data.avatar;
-            document.getElementById('ovAvatar').src = url;
-            document.getElementById('sideAvatar').src = url;
             if (meUser) meUser.avatar = url;
+            syncAvatars();
             notify(null, '头像更新成功', '你的新头像已生效', 3000, '', false);
         } else {
             notify(null, '上传失败', ret.message || '服务器错误', 4000, '', false);
@@ -689,11 +759,9 @@ async function loadMcsm() {
     var ret = await getJson('/api/mcsm_info');
     var d = ret.data || {};
     if (!d.is_admin) { box.innerHTML = '<div class="mcsm-tip">仅管理员及以上可访问 MCSManager 面板.</div>'; return; }
-    if (!d.apikey || !d.panel_host) { box.innerHTML = '<div class="mcsm-tip">请先在「个人概览」申请 API KEY (会同时分配你的专属面板入口) 后再访问.</div>'; return; }
+    if (!d.token || !d.panel_host) { box.innerHTML = '<div class="mcsm-tip">请先在「个人概览」申请 API KEY (会同时分配你的专属面板入口) 后再访问.</div>'; return; }
     if (!d.panel_suffix) { box.innerHTML = '<div class="mcsm-tip">管理员尚未配置面板域名后缀.</div>'; return; }
-    var a = String(Date.now());
-    var b = hmacMd5(d.salt, d.apikey + a + '/');
-    var url = 'https://' + d.panel_host + '.' + d.panel_suffix + '/?apikey=' + encodeURIComponent(d.apikey) + '&a=' + a + '&b=' + b;
+    var url = 'https://' + d.panel_host + '.' + d.panel_suffix + '/?token=' + encodeURIComponent(d.token);
     box.innerHTML = '<div class="mcsm-frame-wrap"><iframe src="' + url + '"></iframe></div>';
 }
 function mcsmRefresh() {
@@ -742,10 +810,12 @@ function mcsmExitFullscreen() {
         if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
     }, 180);
 }
-function mcsmOpenExternal() {
-    var iframe = document.querySelector('#mcsmBox iframe');
-    if (!iframe || !iframe.src) return;
-    window.open(iframe.src, '_blank');
+async function mcsmOpenExternal() {
+    var ret = await getJson('/api/mcsm_info');
+    var d = ret.data || {};
+    if (!d.token || !d.panel_host || !d.panel_suffix) return;
+    var url = 'https://' + d.panel_host + '.' + d.panel_suffix + '/?token=' + encodeURIComponent(d.token);
+    window.open(url, '_blank');
 }
 async function killSession(sid, isCurrent) {
     var ret = await postJson('/api/session_kill', { sid: sid });
@@ -1563,7 +1633,7 @@ async function submitProject() {
         document.getElementById('loadMask').style.display = 'none';
     }
     var m = location.pathname.match(/^\/todos\/(\d+)$/);
-    if (m) flashTodo(m[1]);
+    if (m) { await loadTodoDetail(m[1]); showPage('tododetail'); }
 })();
 function initMeteors() {
     var layer = document.getElementById('meteorsLayer');

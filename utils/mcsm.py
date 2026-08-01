@@ -3,6 +3,7 @@ import time
 import secrets
 import urllib.request
 import urllib.error
+from urllib.parse import parse_qsl, urlencode
 from flask import Response
 from config import MCSM_CONFIG
 from utils.auth import verify_sign, log_api_call
@@ -10,6 +11,7 @@ from utils.auth import verify_sign, log_api_call
 PANEL_SESSIONS = {}
 SESSION_TTL = 6 * 3600
 SKIP_REQ_HEADERS = {'host', 'a', 'b', 'x-api-key', 'content-length', 'connection'}
+_STRIP_QUERY = {'token', 'apikey', 'a', 'b'}
 
 def _deny(msg):
     return Response(
@@ -26,7 +28,10 @@ def _forward(request, subpath, extra_set_cookie=None):
     base = MCSM_CONFIG['base'].rstrip('/')
     target = base + '/' + subpath
     if request.query_string:
-        target += '?' + request.query_string.decode('utf-8', 'ignore')
+        pairs = parse_qsl(request.query_string.decode('utf-8', 'ignore'), keep_blank_values=True)
+        filtered = [(k, v) for k, v in pairs if k not in _STRIP_QUERY]
+        if filtered:
+            target += '?' + urlencode(filtered)
     body = request.get_data() if request.method in ('POST', 'PUT', 'DELETE') else None
     req = urllib.request.Request(target, data=body, method=request.method)
     for k, v in request.headers.items():
@@ -69,6 +74,19 @@ def proxy_panel(request, subpath):
     sid = request.cookies.get('mcsm_sid')
     if sid and PANEL_SESSIONS.get(sid, 0) > time.time():
         return _forward(request, subpath)
+    token = request.args.get('token')
+    if token:
+        from src.api.mcsm_info import consume_token
+        data = consume_token(token)
+        if not data:
+            return _deny("令牌无效或已过期")
+        host_prefix = (request.host or '').split(':')[0].split('.')[0]
+        if not data['panel_host'] or host_prefix != data['panel_host']:
+            return _deny("该入口不属于此令牌")
+        new_sid = secrets.token_hex(16)
+        PANEL_SESSIONS[new_sid] = time.time() + SESSION_TTL
+        cookie = 'mcsm_sid=' + new_sid + '; Path=/; Max-Age=' + str(SESSION_TTL) + '; HttpOnly; SameSite=Lax; Secure'
+        return _forward(request, subpath, extra_set_cookie=cookie)
     user = verify_sign(request)
     if not user:
         return _deny("签名无效、已过期或权限不足")

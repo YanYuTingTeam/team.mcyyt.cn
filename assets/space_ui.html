@@ -154,6 +154,10 @@
             </div>
             <div class="panel" id="todoPageList"></div>
         </div>
+        <div class="page hide" id="pageTodoDetail">
+            <div class="back-link" onclick="switchPage('todo', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12l6 6m-6-6l6-6"/></svg> 返回待办列表</div>
+            <div id="todoDetailBox"></div>
+        </div>
         <div class="page hide" id="pageAddtodo">
             <div class="back-link" onclick="switchPage('todo', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12l6 6m-6-6l6-6"/></svg> 返回上一页</div>
             <div class="page-mini">TO-DO CHECKLIST</div>
@@ -264,7 +268,7 @@
                     <button class="card-head-btn" onclick="mcsmRefresh()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 11A8.1 8.1 0 0 0 4.5 9M4 5v4h4m-4 4a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg> 刷新</button>
                     <button class="card-head-btn" onclick="mcsmTutorial()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> 教程</button>
                     <button class="card-head-btn" onclick="mcsmFullscreen()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4h4m12 4V4h-4M4 16v4h4m12-4v4h-4"/></svg> 全屏</button>
-                    <button class="card-head-btn" onclick="mcsmOpenExternal()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6M14 4h6m0 0v6m0-6L10 14"/></svg> 外链打开</button>
+                    <button class="card-head-btn" onclick="btnRun(this, mcsmOpenExternal)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6M14 4h6m0 0v6m0-6L10 14"/></svg> 外链打开</button>
                 </div>
             </div>
             <div class="page-sub">这里是你无远程时 唯一可以接触到面板的入口.</div>

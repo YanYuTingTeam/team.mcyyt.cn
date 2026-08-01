@@ -276,7 +276,8 @@ a { color: #ef5777; }
 .hero-card {
     column-span: all;
     -webkit-column-span: all;
-    grid-column: 1 / -1;
+    display: block;
+    width: 100%;
     background: linear-gradient(115deg, #d9436b 0%, #ef5777 55%, #f07a93 100%);
     border: none;
     color: #fff;
@@ -576,7 +577,7 @@ a { color: #ef5777; }
 .mcsm-fs-exit { display: inline-flex; align-items: center; gap: 6px; background: #1d1d20; border: 1px solid #333; color: #bbb; border-radius: 8px; padding: 7px 18px; font-size: 13px; font-family: inherit; cursor: pointer; transition: all .15s; }
 .mcsm-fs-exit:hover { border-color: #ef5777; color: #ef5777; }
 .mcsm-fs-exit svg { width: 14px; height: 14px; }
-.mcsm-tut-video { width: 100%; max-width: 640px; aspect-ratio: 16/9; background: #0d0d0f; border: 1px solid #2b2b2e; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #555; font-size: 14px; }
+.mcsm-tut-video { width: 100%; max-width: 640px; margin: 0 auto; aspect-ratio: 16/9; background: #0d0d0f; border: 1px solid #2b2b2e; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #555; font-size: 14px; }
 .api-card {
     background: #101012;
     border: 1px solid #232326;
@@ -621,11 +622,12 @@ a { color: #ef5777; }
     line-height: 1.6;
     margin-top: 6px;
 }
-.ov-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; align-items: start; }
+.ov-cols { column-count: 3; column-gap: 20px; }
 .ov-col { display: contents; }
-.ov-cols .card { margin: 0; }
-@media (max-width: 1100px) { .ov-cols { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 720px) { .ov-cols { grid-template-columns: 1fr; } }
+.ov-cols .card { break-inside: avoid; page-break-inside: avoid; -webkit-column-break-inside: avoid; display: inline-block; width: 100%; margin: 0 0 20px 0; }
+.ov-cols .card:last-child { margin-bottom: 0; }
+@media (max-width: 1100px) { .ov-cols { column-count: 2; } }
+@media (max-width: 720px) { .ov-cols { column-count: 1; } }
 #inviteList, #deviceList { max-height: 360px; overflow-y: auto; }
 #inviteList::-webkit-scrollbar, #deviceList::-webkit-scrollbar { width: 6px; }
 #inviteList::-webkit-scrollbar-thumb, #deviceList::-webkit-scrollbar-thumb { background: #2b2b2e; border-radius: 3px; }
@@ -861,6 +863,27 @@ input.input-error, select.input-error, textarea.input-error { border-color: #ef5
 @media (max-width: 720px) {
     .masonry-grid { column-count: 1; }
 }
+.td-card { max-width: 760px; }
+.td-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+.td-head .st-icon { width: 22px; height: 22px; flex-shrink: 0; }
+.td-head .st-icon.ok { color: #4caf7d; }
+.td-head .st-icon.no { color: #f59f00; }
+.td-title { font-size: 20px; font-weight: bold; color: #fff; }
+.td-meta { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #999; padding-bottom: 14px; border-bottom: 1px solid #1e1e21; margin-bottom: 14px; flex-wrap: wrap; }
+.td-ava { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; }
+.td-name { color: #ddd; font-weight: 500; }
+.td-sep { color: #444; }
+.td-time { color: #777; }
+.td-section { margin-bottom: 18px; }
+.td-label { font-size: 12px; color: #ef5777; margin-bottom: 8px; font-family: 'Orbixbeta', 'MiSans', sans-serif; }
+.td-assignees { display: flex; flex-wrap: wrap; gap: 10px; }
+.td-person { display: flex; align-items: center; gap: 6px; background: #0d0d0f; border: 1px solid #222; border-radius: 20px; padding: 4px 12px 4px 4px; font-size: 13px; color: #ccc; }
+.td-person img { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; }
+.td-person.done { border-color: #2d4a3a; }
+.td-person.done svg { width: 14px; height: 14px; color: #4caf7d; }
+.td-content { font-size: 14px; line-height: 1.8; color: #ccc; background: #0d0d0f; border: 1px solid #222; border-radius: 10px; padding: 14px 16px; white-space: pre-wrap; word-break: break-word; }
+.td-actions { display: flex; align-items: center; gap: 14px; margin-top: 20px; padding-top: 16px; border-top: 1px solid #1e1e21; }
+.td-my-done { font-size: 13px; color: #4caf7d; }
 #toastBox {
     position: fixed;
     top: 20px;
