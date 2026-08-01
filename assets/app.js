@@ -1457,6 +1457,7 @@ async function submitProject() {
         });
     });
     try {
+        await loadSkillsMeta();
         var jobs = [loadMe(), loadPagesConfig(), loadTodo(), loadNotice(), loadProject(), document.fonts.ready];
         if (start === 'overview') jobs.push(loadOverview());
         if (start === 'apis') jobs.push(loadApis());

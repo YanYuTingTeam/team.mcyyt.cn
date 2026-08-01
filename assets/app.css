@@ -241,11 +241,20 @@ a { color: #ef5777; }
 .main-area { flex: 1; padding: 34px 34px 60px; min-width: 0; }
 .page.hide { display: none; }
 .card-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
-    gap: 20px;
-    align-items: start;
+    column-count: 3;
+    column-gap: 20px;
 }
+.card-grid > .card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    -webkit-column-break-inside: avoid;
+    display: inline-block;
+    width: 100%;
+    margin: 0 0 20px 0;
+}
+.card-grid > .card:last-child { margin-bottom: 0; }
+@media (max-width: 1100px) { .card-grid { column-count: 2; } }
+@media (max-width: 720px) { .card-grid { column-count: 1; } }
 .card {
     background: radial-gradient(95% 95% at 18% 115%, rgba(239, 87, 119, .17) 0%, rgba(239, 87, 119, .05) 38%, rgba(18, 18, 20, 0) 62%), #121214;
     border: 1px solid #232326;
@@ -610,13 +619,23 @@ a { color: #ef5777; }
     line-height: 1.6;
     margin-top: 6px;
 }
-.ov-cols { display: flex; gap: 20px; align-items: flex-start; }
-.ov-col { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
-@media (max-width: 820px) { .ov-cols { flex-direction: column; } }
+.ov-cols { column-count: 3; column-gap: 20px; }
+.ov-col { display: contents; }
+.ov-cols > .ov-col > .card,
+.ov-cols .card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    -webkit-column-break-inside: avoid;
+    display: inline-block;
+    width: 100%;
+    margin: 0 0 20px 0;
+}
+.ov-cols .card:last-child { margin-bottom: 0; }
+@media (max-width: 1100px) { .ov-cols { column-count: 2; } }
+@media (max-width: 720px) { .ov-cols { column-count: 1; } }
 #inviteList, #deviceList { max-height: 360px; overflow-y: auto; }
 #inviteList::-webkit-scrollbar, #deviceList::-webkit-scrollbar { width: 6px; }
 #inviteList::-webkit-scrollbar-thumb, #deviceList::-webkit-scrollbar-thumb { background: #2b2b2e; border-radius: 3px; }
-.ov-col .card { width: 100%; }
 .ov-profile { display: flex; gap: 16px; align-items: flex-start; }
 .ov-profile img { width: 72px; height: 72px; border-radius: 50%; background: #fff; flex-shrink: 0; }
 .ov-profile .pv-main { flex: 1; min-width: 0; }
@@ -741,13 +760,13 @@ a { color: #ef5777; }
 .pg-row .pg-name { flex: 1; font-size: 14px; color: #eee; }
 .pg-toggle { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #999; cursor: pointer; }
 .pg-toggle input { width: 15px; height: 15px; accent-color: #ef5777; }
-.grp-card { background: #0d0d0f; border: 1px solid #222; border-radius: 10px; padding: 14px; margin-bottom: 12px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-.grp-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-@media (max-width: 720px) { .grp-grid { grid-template-columns: 1fr; } }
-.grp-card .grp-name { font-size: 15px; color: #fff; flex: 1 1 120px; min-width: 0; word-break: break-all; }
-.grp-card .grp-count { font-size: 13px; color: #999; flex-shrink: 0; }
-.grp-card .grp-actions { display: flex; gap: 8px; width: 100%; justify-content: flex-end; }
-@media (min-width: 720px) { .grp-card .grp-actions { width: auto; } }
+.grp-card { background: #0d0d0f; border: 1px solid #222; border-radius: 10px; padding: 12px; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; overflow: hidden; }
+.grp-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+.grp-grid > .grp-card { flex: 1 1 200px; min-width: 0; max-width: 100%; margin: 0; }
+.grp-card .grp-name { font-size: 14px; color: #fff; flex: 1 1 100px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.grp-card .grp-count { font-size: 12px; color: #999; flex-shrink: 0; }
+.grp-card .grp-actions { display: flex; gap: 6px; width: 100%; justify-content: flex-end; flex-wrap: wrap; }
+@media (min-width: 600px) { .grp-card .grp-actions { width: auto; } }
 .card-head-btn.danger { color: #ef5777; }
 .card-head-btn.danger:hover { border-color: #ef5777; background: rgba(239, 87, 119, .08); }
 input.input-error, select.input-error, textarea.input-error { border-color: #ef5777 !important; box-shadow: 0 0 0 2px rgba(239, 87, 119, .18) !important; animation: shakeInp .28s ease 1; }
