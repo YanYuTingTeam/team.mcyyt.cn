@@ -24,7 +24,7 @@
                 <div class="menu-row" onclick="btnRun(this, doLogout)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M14 8V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2v-2"/><path d="M9 12h12l-3-3m0 6l3-3"/></g></svg> 退出登录</div>
             </div>
             <div class="side-user" onclick="toggleUserMenu(event)">
-                <img src="/assets/yyt64x.png" alt="">
+                <img id="sideAvatar" src="/assets/yyt64x.png" alt="">
                 <div class="u-box">
                     <div class="u-name" id="sideName">--</div>
                     <div class="u-mail" id="sideMail">--</div>
@@ -81,7 +81,11 @@
                 <div class="card">
                     <div class="card-head">PROFILE</div>
                     <div class="ov-profile">
-                        <img src="/assets/yyt64x.png" alt="">
+                        <div class="avatar-upload" id="avatarUpload" onclick="document.getElementById('avatarInput').click()">
+                            <img id="ovAvatar" src="/assets/yyt64x.png" alt="">
+                            <div class="avatar-overlay"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h4l2-3h6l2 3h4v13H3z"/><circle cx="12" cy="13" r="4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg><span>更换头像</span></div>
+                        </div>
+                        <input type="file" id="avatarInput" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none" onchange="uploadAvatar(this)">
                         <div class="pv-main">
                             <div class="pv-name"><span id="ovName">--</span><span class="pv-role" id="ovRole">--</span></div>
                             <div class="pv-row" id="ovMail">--</div>

@@ -25,7 +25,7 @@ def check_login(request):
     try:
         with db.cursor() as cur:
             cur.execute(
-                "SELECT u.id, u.email, u.name, u.role, u.level, u.skill, u.apikey, u.panel_host, u.created_at "
+                "SELECT u.id, u.email, u.name, u.role, u.level, u.skill, u.apikey, u.panel_host, u.avatar, u.created_at "
                 "FROM yyt_session s JOIN yyt_user u ON s.user_id = u.id "
                 "WHERE s.token = %s AND s.expire_time > NOW()",
                 (token,)
@@ -55,7 +55,7 @@ def verify_sign(request):
     try:
         with db.cursor() as cur:
             cur.execute(
-                "SELECT id, email, name, role, level, skill, apikey, panel_host, created_at FROM yyt_user WHERE apikey = %s",
+                "SELECT id, email, name, role, level, skill, apikey, panel_host, avatar, created_at FROM yyt_user WHERE apikey = %s",
                 (apikey,)
             )
             row = cur.fetchone()

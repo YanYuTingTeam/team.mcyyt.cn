@@ -12,7 +12,7 @@ def handle(request):
         with db.cursor() as cur:
             cur.execute(
                 "SELECT i.code, i.created_at, i.used_at, "
-                "cu.name AS creator_name, uu.name AS used_name, uu.email AS used_email "
+                "cu.name AS creator_name, cu.avatar AS creator_avatar, uu.name AS used_name, uu.email AS used_email, uu.avatar AS used_avatar "
                 "FROM yyt_invite i "
                 "LEFT JOIN yyt_user cu ON i.created_by = cu.id "
                 "LEFT JOIN yyt_user uu ON i.used_by = uu.id "

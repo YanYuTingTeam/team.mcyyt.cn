@@ -12,7 +12,7 @@ def handle(request):
     try:
         with db.cursor() as cur:
             cur.execute(
-                "SELECT id, name, email FROM yyt_user WHERE name LIKE %s ORDER BY name ASC LIMIT 8",
+                "SELECT id, name, email, avatar FROM yyt_user WHERE name LIKE %s ORDER BY name ASC LIMIT 8",
                 ('%' + q + '%',)
             )
             rows = cur.fetchall()

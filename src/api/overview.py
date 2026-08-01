@@ -21,7 +21,7 @@ def handle(request):
             calls = cur.fetchone()
             calls = {k: int(v or 0) for k, v in calls.items()}
             cur.execute(
-                "SELECT i.code, i.created_at, i.used_at, u.name AS used_name, u.email AS used_email "
+                "SELECT i.code, i.created_at, i.used_at, u.name AS used_name, u.email AS used_email, u.avatar AS used_avatar "
                 "FROM yyt_invite i LEFT JOIN yyt_user u ON i.used_by = u.id "
                 "WHERE i.created_by = %s ORDER BY i.created_at DESC",
                 (user['id'],)

@@ -3,6 +3,9 @@ function esc(s) {
     d.textContent = s == null ? '' : String(s);
     return d.innerHTML;
 }
+function avatarUrl(u) {
+    return (u && u.avatar) ? u.avatar : '/assets/yyt64x.png';
+}
 function escAttr(s) { return String(s == null ? '' : s).replace(/\"/g, '&quot;').replace(/'/g, '&#39;').replace(/\\/g, '\\\\'); }
 function markErr(input, msg) {
     if (!input) return;
@@ -215,6 +218,7 @@ async function loadMe() {
     document.getElementById('pfRole').innerHTML = lvlBadge(u.level || 0);
     document.getElementById('sideName').textContent = u.name;
     document.getElementById('sideMail').textContent = u.email;
+    document.getElementById('sideAvatar').src = avatarUrl(u);
     var canPublish = (u.level || 0) >= 4;
     var nb = document.getElementById('noticeAddBtn'); if (nb) nb.classList.toggle('hide', !canPublish);
     var pb = document.getElementById('projectAddBtn'); if (pb) pb.classList.toggle('hide', !canPublish);
@@ -322,7 +326,7 @@ function renderChips() {
     assignUsers.forEach(function(u) {
         var chip = document.createElement('span');
         chip.className = 'u-chip';
-        chip.innerHTML = '<img src="/assets/yyt64x.png" alt=""><span>' + esc(u.name) + '</span><span class="rm" data-id="' + u.id + '">' + X_SVG + '</span>';
+        chip.innerHTML = '<img src="' + avatarUrl(u) + '" alt=""><span>' + esc(u.name) + '</span><span class="rm" data-id="' + u.id + '">' + X_SVG + '</span>';
         chip.querySelector('.rm').onclick = function(e) { e.stopPropagation(); removeChip(u.id); };
         picker.insertBefore(chip, input);
     });
@@ -361,7 +365,7 @@ function searchUser(kw) {
             list.forEach(function(u) {
                 var row = document.createElement('div');
                 row.className = 'drop-row';
-                row.innerHTML = '<img src="/assets/yyt64x.png" alt=""><div><div class="dn">' + esc(u.name) + '</div><div class="de">' + esc(u.email) + '</div></div>';
+                row.innerHTML = '<img src="' + avatarUrl(u) + '" alt=""><div><div class="dn">' + esc(u.name) + '</div><div class="de">' + esc(u.email) + '</div></div>';
                 row.onclick = function() { addChip({ id: u.id, name: u.name }); };
                 drop.appendChild(row);
             });
@@ -430,6 +434,7 @@ async function loadOverview() {
     roleEl.style.background = hexA(c, .08);
     roleEl.innerHTML = lvlBadge(u.level || 0);
     document.getElementById('ovMail').textContent = u.email;
+    document.getElementById('ovAvatar').src = avatarUrl(u);
     document.getElementById('ovSkill').innerHTML = renderSkillHtml(u.skill);
     document.getElementById('ovId').textContent = u.id;
     var bt = document.getElementById('ovCreateInviteBtn');
@@ -463,7 +468,7 @@ function renderOvInvites(invites) {
         var top = '<div class="iv-top"><span class="iv-code">#' + esc(iv.code) + '</span>' +
             (used ? '<span class="chip no">已被使用</span>' : '<span class="chip ok">未使用</span>') + '</div>';
         var mid = used
-        ? '<div class="iv-user"><img src="/assets/yyt64x.png" alt=""><div><div class="iv-un">' + esc(iv.used_name) + '</div><div class="iv-ue">' + esc(iv.used_email) + '</div></div></div>' +
+        ? '<div class="iv-user"><img src="' + avatarUrl({avatar: iv.used_avatar}) + '" alt=""><div><div class="iv-un">' + esc(iv.used_name) + '</div><div class="iv-ue">' + esc(iv.used_email) + '</div></div></div>' +
           '<div class="iv-date">创建日期: ' + esc(iv.created_at) + '<br>使用日期: ' + esc(iv.used_at) + '</div>'
         : '<div class="iv-date">创建日期: ' + esc(iv.created_at) + '</div>' +
           '<div style="margin-top:10px"><button class="act-btn" style="width:100%;justify-content:center" onclick="copyText(\'' + esc(iv.code) + '\', this)">' + '复制邀请码</button></div>';
@@ -496,6 +501,44 @@ async function saveProfile() {
     if (ret.code === 0) {
         toggleEditProfile();
         await Promise.all([loadOverview(), loadMe()]);
+    }
+}
+async function uploadAvatar(input) {
+    var file = input.files && input.files[0];
+    if (!file) return;
+    input.value = '';
+    var allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (allowed.indexOf(file.type) < 0) {
+        notify(null, '格式不支持', '仅支持 jpg / png / webp / gif 格式', 4000, '', false);
+        return;
+    }
+    var btn = document.getElementById('avatarUpload');
+    if (btn) {
+        var oldHtml = btn.innerHTML;
+        btn.innerHTML = '<img src="/assets/yyt64x.png" alt="" style="opacity:.4">' + SPIN_SVG;
+        btn.style.cursor = 'wait';
+    }
+    try {
+        var fd = new FormData();
+        fd.append('avatar', file);
+        var res = await fetch('/api/avatar_upload', { method: 'POST', body: fd });
+        var ret = await res.json();
+        if (ret.code === 0) {
+            var url = ret.data.avatar;
+            document.getElementById('ovAvatar').src = url;
+            document.getElementById('sideAvatar').src = url;
+            if (meUser) meUser.avatar = url;
+            notify(null, '头像更新成功', '你的新头像已生效', 3000, '', false);
+        } else {
+            notify(null, '上传失败', ret.message || '服务器错误', 4000, '', false);
+        }
+    } catch (e) {
+        notify(null, '上传失败', '网络错误，请重试', 4000, '', false);
+    } finally {
+        if (btn) {
+            btn.style.cursor = '';
+            if (meUser) document.getElementById('ovAvatar').src = avatarUrl(meUser);
+        }
     }
 }
 async function createInvite() {
@@ -847,7 +890,7 @@ function openSkillMembers(sName) {
     else {
         html += users.map(function(u) {
             return '<div class="member-bar">' +
-                '<img class="mb-ava" src="/assets/yyt64x.png" alt=""><div class="mb-main">' +
+                '<img class="mb-ava" src="' + avatarUrl(u) + '" alt=""><div class="mb-main">' +
                 '<div class="mb-name">' + esc(u.name) + ' ' + lvlBadge(u.level || 0) + '</div>' +
                 '<div class="mb-mail">' + esc(u.email) + '</div>' +
                 '<div class="mb-skill">' + renderSkillHtml(u.skill) + '</div></div>' +
@@ -926,7 +969,7 @@ function renderTeamMembers(users) {
     var html = users.map(function(u) {
         var skillTxt = renderSkillHtml(u.skill);
         return '<div class="member-bar">' +
-            '<img class="mb-ava" src="/assets/yyt64x.png" alt="">' +
+            '<img class="mb-ava" src="' + avatarUrl(u) + '" alt="">' +
             '<div class="mb-main">' +
             '<div class="mb-name">' + esc(u.name) + ' ' + lvlBadge(u.level || 0) + '</div>' +
             '<div class="mb-mail">' + esc(u.email) + '</div>' +
@@ -948,7 +991,7 @@ function renderTeamInvites(invites) {
             (used ? '<span class="chip no">已被使用</span>' : '<span class="chip ok">未使用</span>') + '</div>';
         var creator = iv.creator_name ? '创建者: ' + esc(iv.creator_name) : '创建者: 系统';
         var mid = used
-            ? '<div class="iv-user"><img src="/assets/yyt64x.png" alt=""><div><div class="iv-un">' + esc(iv.used_name || '--') + '</div><div class="iv-ue">' + esc(iv.used_email || '--') + '</div></div></div>' +
+            ? '<div class="iv-user"><img src="' + avatarUrl({avatar: iv.used_avatar}) + '" alt=""><div><div class="iv-un">' + esc(iv.used_name || '--') + '</div><div class="iv-ue">' + esc(iv.used_email || '--') + '</div></div></div>' +
               '<div class="iv-date">' + creator + '<br>创建: ' + esc(iv.created_at) + '<br>使用: ' + esc(iv.used_at) + '</div>'
             : '<div class="iv-date">' + creator + '<br>创建: ' + esc(iv.created_at) + '</div>' +
               '<div style="margin-top:10px"><button class="act-btn" style="width:100%;justify-content:center" onclick="copyText(\'' + esc(iv.code) + '\', this)">复制邀请码</button></div>';
@@ -991,7 +1034,7 @@ async function openMemberDetail(uid) {
         var u = d.user;
         var s = d.stats || {};
         var pages = d.pages || [];
-        var avatarHtml = '<div class="mem-avatar-row"><img src="/assets/yyt64x.png" alt=""><div>' +
+        var avatarHtml = '<div class="mem-avatar-row"><img src="' + avatarUrl(u) + '" alt=""><div>' +
             '<div class="ma-name">' + esc(u.name) + ' ' + lvlBadge(u.level || 0) + '</div>' +
             '<div class="ma-mail">' + esc(u.email) + '</div></div></div>';
         var infoHtml = '<div class="md-section"><div class="md-label">基础信息</div>' +
@@ -1031,7 +1074,7 @@ async function openMemberDetail(uid) {
             invHtml += inv.map(function(iv) {
                 var used = !!iv.used_at;
                 var tag = used ? '<span class="chip no">已使用</span>' : '<span class="chip ok">未使用</span>';
-                var ux = used ? '<div class="iv-user" style="margin-top:6px"><img src="/assets/yyt64x.png" style="width:22px;height:22px" alt=""><span>' + esc(iv.used_name || '--') + ' · ' + esc(iv.used_email || '--') + '</span></div>' : '';
+                var ux = used ? '<div class="iv-user" style="margin-top:6px"><img src="' + avatarUrl({avatar: iv.used_avatar}) + '" style="width:22px;height:22px" alt=""><span>' + esc(iv.used_name || '--') + ' · ' + esc(iv.used_email || '--') + '</span></div>' : '';
                 return '<div class="invite-box" style="margin-bottom:8px"><div class="iv-top"><span class="iv-code">#' + esc(iv.code) + '</span>' + tag + '</div>' +
                     '<div class="iv-date">创建: ' + esc(iv.created_at || '--') + (used ? '<br>使用: ' + esc(iv.used_at || '--') : '') + '</div>' + ux + '</div>';
             }).join('');
@@ -1303,7 +1346,7 @@ function renderGroupMemberList(list) {
     if (!list || !list.length) return '<div class="empty-tip">该组暂无成员</div>';
     return list.map(function(u) {
         return '<div class="member-bar">' +
-            '<img class="mb-ava" src="/assets/yyt64x.png" alt=""><div class="mb-main">' +
+            '<img class="mb-ava" src="' + avatarUrl(u) + '" alt=""><div class="mb-main">' +
             '<div class="mb-name">' + esc(u.name) + ' ' + lvlBadge(u.level || 0) + '</div>' +
             '<div class="mb-mail">' + esc(u.email) + '</div>' +
             '<div class="mb-skill">' + renderSkillHtml(u.skill) + '</div></div>' +
@@ -1318,7 +1361,7 @@ function renderGmChips() {
     __gmMembers.forEach(function(u, idx) {
         var chip = document.createElement('span');
         chip.className = 'u-chip';
-        chip.innerHTML = '<img src="/assets/yyt64x.png" alt=""><span>' + esc(u.name) + '</span><span class="rm" data-idx="' + idx + '">' + X_SVG + '</span>';
+        chip.innerHTML = '<img src="' + avatarUrl(u) + '" alt=""><span>' + esc(u.name) + '</span><span class="rm" data-idx="' + idx + '">' + X_SVG + '</span>';
         chip.querySelector('.rm').onclick = function(e) {
             e.stopPropagation();
             var i = parseInt(this.dataset.idx || '0');
@@ -1360,7 +1403,7 @@ function gmRenderDrop(list, kw) {
         list.forEach(function(u) {
             var row = document.createElement('div');
             row.className = 'drop-row';
-            row.innerHTML = '<img src="/assets/yyt64x.png" alt=""><div><div class="dn">' + esc(u.name) + (u.level != null ? ' <span style="font-size:11px;color:#777">当前' + esc(levelName(u.level)) + '</span>' : '') + '</div><div class="de">' + esc(u.email) + '</div></div>';
+            row.innerHTML = '<img src="' + avatarUrl(u) + '" alt=""><div><div class="dn">' + esc(u.name) + (u.level != null ? ' <span style="font-size:11px;color:#777">当前' + esc(levelName(u.level)) + '</span>' : '') + '</div><div class="de">' + esc(u.email) + '</div></div>';
             row.onclick = function() { gmAddChip(u); };
             drop.appendChild(row);
         });

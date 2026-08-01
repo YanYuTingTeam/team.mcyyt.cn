@@ -23,3 +23,9 @@ SMTP_CONFIG = {
     "from_name": "@team / YanYuTing",
     "from_addr": "team@mcyyt.cn"
 }
+
+CCW_CONFIG = {
+    "token": "NJzvrU31CSkhhkwM",
+    "user_id": "",
+    "default_prefix": "uploads"
+}
