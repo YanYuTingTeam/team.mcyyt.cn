@@ -51,7 +51,9 @@ def _forward(request, subpath, extra_set_cookie=None):
                 out.headers.add('Set-Cookie', extra_set_cookie)
             return out
     except urllib.error.HTTPError as e:
-        out = Response(e.read(), status=e.code, mimetype="application/json")
+        data = e.read()
+        ctype = e.headers.get('Content-Type', 'application/json')
+        return Response(data, status=e.code, mimetype=ctype.split(';')[0])
     except Exception as e:
         return Response(
             #json.dumps({"status": 502, "data": None, "message": "代理请求失败: " + str(e)}, ensure_ascii=False),
@@ -63,9 +65,19 @@ def proxy_api(request, subpath):
     sid = request.cookies.get('mcsm_sid')
     if sid and PANEL_SESSIONS.get(sid, 0) > time.time():
         return _forward(request, subpath)
+    token = request.args.get('token')
+    if token:
+        from src.api.mcsm_info import consume_token
+        data = consume_token(token)
+        print(f"[MCSM] api token={token} db_hit={bool(data)}", flush=True)
+        if data:
+            new_sid = secrets.token_hex(16)
+            PANEL_SESSIONS[new_sid] = time.time() + SESSION_TTL
+            cookie = 'mcsm_sid=' + new_sid + '; Path=/; Max-Age=' + str(SESSION_TTL) + '; HttpOnly; SameSite=Lax; Secure'
+            return _forward(request, subpath, extra_set_cookie=cookie)
     user = verify_sign(request)
     if not user:
-        return _deny("签名无效、已过期或权限不足")
+        return _deny("")
     log_api_call(request, user)
     return _forward(request, subpath)
 
@@ -80,11 +92,11 @@ def proxy_panel(request, subpath):
         data = consume_token(token)
         print(f"[MCSM] token={token} db_hit={bool(data)}", flush=True)
         if not data:
-            return _deny("令牌无效或已过期")
+            return _deny("")
         host_prefix = (request.host or '').split(':')[0].split('.')[0]
         if not data['panel_host'] or host_prefix != data['panel_host']:
             print(f"[MCSM] host_mismatch req={host_prefix} token_host={data['panel_host']}", flush=True)
-            return _deny("该入口不属于此令牌")
+            return _deny("")
         print(f"[MCSM] auth_ok host={data['panel_host']}", flush=True)
         new_sid = secrets.token_hex(16)
         PANEL_SESSIONS[new_sid] = time.time() + SESSION_TTL
@@ -92,10 +104,10 @@ def proxy_panel(request, subpath):
         return _forward(request, subpath, extra_set_cookie=cookie)
     user = verify_sign(request)
     if not user:
-        return _deny("签名无效、已过期或权限不足")
+        return _deny("")
     host_prefix = (request.host or '').split(':')[0].split('.')[0]
     if not user.get('panel_host') or host_prefix != user['panel_host']:
-        return _deny("该入口不属于此 apikey")
+        return _deny("")
     new_sid = secrets.token_hex(16)
     PANEL_SESSIONS[new_sid] = time.time() + SESSION_TTL
     cookie = 'mcsm_sid=' + new_sid + '; Path=/; Max-Age=' + str(SESSION_TTL) + '; HttpOnly; SameSite=Lax; Secure'
