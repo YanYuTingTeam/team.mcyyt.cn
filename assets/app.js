@@ -519,13 +519,16 @@ async function loadOverview() {
     renderOvInvites(ovData.invites);
     var dvBox = document.getElementById('deviceList');
     dvBox.innerHTML = ovData.sessions.map(function(s) {
-        var icon = /mobile|android|iphone/i.test(s.ua || '') ? MOBILE_SVG : DESKTOP_SVG;
+        var icon = /iPhone|iPad|Android/i.test(s.device || '') ? MOBILE_SVG : DESKTOP_SVG;
         var cur = s.is_current ? '<span class="chip ok">本机</span>' : '';
         return '<div class="dev-row">' + icon +
-            '<div class="dv-main"><div class="dv-ip">' + esc(s.ip || '未知IP') + cur + '</div>' +
-            '<div class="dv-ua">' + esc(s.ua || '未知设备') + '</div>' +
-            '<div class="dv-time">' + esc(s.created_at) + '</div></div>' +
-            '<button class="act-btn" onclick="btnRun(this, function(){ return killSession(' + s.id + ', ' + s.is_current + ') })">' + LOGOUT_SVG + ' 登出</button></div>';
+            '<div class="dv-main">' +
+                '<div class="dv-device">' + esc(s.device || '未知设备') + cur + '</div>' +
+                '<div class="dv-ip-line">IP ' + esc(s.ip || '未知IP') + '</div>' +
+                '<div class="dv-time-line">初次登录 ' + esc(s.first_seen || s.created_at) + ' | 最近 ' + esc(s.created_at) + '</div>' +
+            '</div>' +
+            '<button class="act-btn" onclick="btnRun(this, function(){ return killSession(' + s.id + ', ' + s.is_current + ') })">' + LOGOUT_SVG + ' 登出</button>' +
+        '</div>';
     }).join('');
 }
 function renderOvInvites(invites) {
@@ -554,18 +557,34 @@ async function refreshOvInvite() {
 function openProfileModal() {
     if (!ovData) return;
     var u = ovData.user;
-    var avatarHtml = '<div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">' +
-        '<div class="avatar-upload" id="pmAvatarUpload" onclick="document.getElementById(\'pmAvatarInput\').click()" style="width:80px;height:80px">' +
-        '<img id="pmAvatar" src="' + avatarUrl(u) + '" alt="">' +
-        '<div class="avatar-overlay"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h4l2-3h6l2 3h4v13H3z"/><circle cx="12" cy="13" r="4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg><span>更换头像</span></div>' +
+    var avatarHtml = '<div class="pm-section">' +
+        '<div class="pm-section-label">基础信息</div>' +
+        '<div class="pm-row">' +
+            '<div class="pm-avatar-box" id="pmAvatarUpload" onclick="document.getElementById(\'pmAvatarInput\').click()">' +
+                '<img id="pmAvatar" src="' + avatarUrl(u) + '" alt="">' +
+                '<div class="avatar-overlay"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h4l2-3h6l2 3h4v13H3z"/><circle cx="12" cy="13" r="4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg><span>更换头像</span></div>' +
+            '</div>' +
+            '<input type="file" id="pmAvatarInput" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none" onchange="uploadModalAvatar(this)">' +
+            '<div class="pm-fields">' +
+                '<div class="pm-field">' +
+                    '<label>昵称</label>' +
+                    '<input id="pmName" value="' + esc(u.name || '') + '">' +
+                '</div>' +
+                '<div class="pm-field-hint">点击头像上传新图片. 只允许 jpg / png / webp / gif</div>' +
+            '</div>' +
         '</div>' +
-        '<input type="file" id="pmAvatarInput" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none" onchange="uploadModalAvatar(this)">' +
-        '<div style="color:#888;font-size:13px">点击头像上传新图片<br>支持 jpg / png / webp / gif</div></div>';
-    var formHtml = '<div class="md-section">' +
-        '<div class="md-row"><div class="md-k">昵称</div><div class="md-v"><input id="pmName" value="' + esc(u.name || '') + '"></div></div>' +
-        '<div class="md-row"><div class="md-k">核心能力</div><div class="md-v"><div class="picker-wrap"><div class="picker" id="pfSkillPicker" onclick="document.getElementById(\'pfSkillInput\').focus()"><input id="pfSkillInput" placeholder="选择核心能力" autocomplete="off" onfocus="skillPickerSearch(this.value,\'pf\')" oninput="skillPickerSearch(this.value,\'pf\')" onkeydown="skillPickerKey(event,\'pf\')"></div><div class="picker-drop hide" id="pfSkillDrop"></div></div></div></div>' +
-        '<div class="md-row"><div class="md-k">个人简介</div><div class="md-v"><textarea id="pmBio" placeholder="介绍一下自己..." style="resize:vertical;min-height:60px;max-height:160px">' + esc(u.bio || '') + '</textarea></div></div>' +
-        '</div>';
+    '</div>';
+    var formHtml = '<div class="pm-section">' +
+        '<div class="pm-section-label">开发信息</div>' +
+        '<div class="pm-field">' +
+            '<label>核心能力</label>' +
+            '<div class="picker-wrap"><div class="picker" id="pfSkillPicker" onclick="document.getElementById(\'pfSkillInput\').focus()"><input id="pfSkillInput" placeholder="选择核心能力" autocomplete="off" onfocus="skillPickerSearch(this.value,\'pf\')" oninput="skillPickerSearch(this.value,\'pf\')" onkeydown="skillPickerKey(event,\'pf\')"></div><div class="picker-drop hide" id="pfSkillDrop"></div></div>' +
+        '</div>' +
+        '<div class="pm-field">' +
+            '<label>个人简介</label>' +
+            '<textarea id="pmBio" placeholder="介绍一下自己..." rows="4">' + esc(u.bio || '') + '</textarea>' +
+        '</div>' +
+    '</div>';
     var foot = '<button class="act-btn" onclick="closeModal()">取消</button>' +
         '<button class="add-todo-btn" onclick="btnRun(this, saveProfileModal)">保存修改</button>';
     openModal('修改个人资料', avatarHtml + formHtml, foot);
@@ -681,6 +700,11 @@ async function uploadAvatar(input) {
 async function createInvite() {
     var ret = await postJson('/api/invite_create', {});
     if (ret.code === 0) await loadOverview();
+}
+function toggleApikeyEye(btn) {
+    var input = document.getElementById('apikeyInput');
+    if (!input) return;
+    input.type = input.type === 'password' ? 'text' : 'password';
 }
 function renderApikeyBox() {
     var has = !!(ovData && ovData.apikey);
@@ -823,6 +847,7 @@ async function killSession(sid, isCurrent) {
     if (ret.code !== 0) return;
     if (isCurrent) { location.reload(); return; }
     await loadOverview();
+    notify(null, '下线成功', '已将该设备登出', 3000, '', false);
 }
 async function copyText(txt, btn) {
     try {

@@ -20,6 +20,9 @@ def _ensure_avatar_col():
                 cur.execute("SHOW COLUMNS FROM yyt_user LIKE 'bio'")
                 if not cur.fetchone():
                     cur.execute("ALTER TABLE yyt_user ADD COLUMN bio TEXT DEFAULT NULL AFTER avatar")
+                cur.execute("SHOW COLUMNS FROM yyt_notice LIKE 'created_by'")
+                if not cur.fetchone():
+                    cur.execute("ALTER TABLE yyt_notice ADD COLUMN created_by INT DEFAULT NULL AFTER content")
                 db.commit()
         finally:
             db.close()

@@ -1,5 +1,23 @@
 from utils.auth import check_login
 from utils.db import get_db
+import re
+
+_UA_PATTERNS = [
+    ('Windows', re.compile(r'Windows NT', re.I)),
+    ('Mac', re.compile(r'Mac OS X|Macintosh', re.I)),
+    ('Linux', re.compile(r'Linux', re.I)),
+    ('Android', re.compile(r'Android', re.I)),
+    ('iPhone', re.compile(r'iPhone', re.I)),
+    ('iPad', re.compile(r'iPad', re.I)),
+]
+
+def _parse_device(ua):
+    if not ua:
+        return '未知设备'
+    for name, pat in _UA_PATTERNS:
+        if pat.search(ua):
+            return name
+    return '其他'
 
 def handle(request):
     user = check_login(request)
@@ -28,13 +46,17 @@ def handle(request):
             )
             invites = cur.fetchall()
             cur.execute(
-                "SELECT id, ip, ua, created_at, (token = %s) AS is_current "
-                "FROM yyt_session WHERE user_id = %s AND expire_time > NOW() ORDER BY id DESC",
-                (token, user['id'])
+                "SELECT id, ip, ua, created_at, (token = %s) AS is_current, "
+                "(SELECT MIN(created_at) FROM yyt_session s2 WHERE s2.user_id = %s AND s2.ip = s1.ip) AS first_seen "
+                "FROM yyt_session s1 "
+                "WHERE s1.user_id = %s AND s1.expire_time > NOW() ORDER BY s1.id DESC",
+                (token, user['id'], user['id'])
             )
             sessions = cur.fetchall()
             for s in sessions:
                 s['is_current'] = int(s['is_current'] or 0)
+                s['device'] = _parse_device(s.get('ua'))
+                s['first_seen'] = str(s['first_seen']) if s.get('first_seen') else str(s.get('created_at'))
         db.commit()
         return {"code": 0, "data": {"user": user, "apikey": apikey, "calls": calls, "invites": invites, "sessions": sessions}}
     finally:
