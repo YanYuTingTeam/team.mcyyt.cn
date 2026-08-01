@@ -97,7 +97,7 @@ def handle(request):
         with db.cursor() as cur:
             cur.execute(
                 "SELECT t.id, t.title, t.link, t.content, t.created_at, t.is_global, "
-                "COALESCE(a.is_done, 0) AS is_done, u.name AS creator_name, u.avatar AS creator_avatar "
+                "COALESCE(a.is_done, 0) AS is_done, a.done_at AS my_done_at, u.name AS creator_name, u.avatar AS creator_avatar "
                 "FROM yyt_todo t "
                 "JOIN yyt_user u ON t.creator_id = u.id "
                 "LEFT JOIN yyt_todo_assign a ON a.todo_id = t.id AND a.user_id = %s "
@@ -106,6 +106,23 @@ def handle(request):
                 (user['id'], user['id'])
             )
             rows = cur.fetchall()
+            if rows:
+                ids = [r['id'] for r in rows]
+                placeholders = ','.join(['%s'] * len(ids))
+                cur.execute(
+                    "SELECT ta.todo_id, u.id, u.name, u.avatar "
+                    "FROM yyt_todo_assign ta JOIN yyt_user u ON ta.user_id = u.id "
+                    "WHERE ta.todo_id IN (" + placeholders + ") AND ta.is_done = 1",
+                    ids
+                )
+                done_map = {}
+                for r in cur.fetchall():
+                    tid = r['todo_id']
+                    if tid not in done_map:
+                        done_map[tid] = []
+                    done_map[tid].append({'id': r['id'], 'name': r['name'], 'avatar': r['avatar']})
+                for r in rows:
+                    r['done_users'] = done_map.get(r['id'], [])
         return {"code": 0, "data": rows}
     finally:
         db.close()

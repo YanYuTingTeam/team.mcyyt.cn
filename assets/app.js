@@ -259,37 +259,118 @@ function isInnerTodo(href) {
 function todoLinkHtml(it) {
     var inner = isInnerTodo(it.link);
     return '<a class="todo-link" href="' + esc(it.link) + '"' + (inner ? '' : ' target="_blank"') +
-        ' onclick="return todoLinkClick(event, this)">' + esc(it.title) + LINK_SVG + '</a>';
+        ' onclick="return todoLinkClick(event, this)">' + '#' + esc(it.id) + ' | ' + esc(it.title) + LINK_SVG + '</a>';
+}
+var __todoData = [];
+var __todoFilter = 'all';
+function setTodoFilter(f, btn) {
+    __todoFilter = f;
+    document.querySelectorAll('#todoFilters .tf-btn').forEach(function(b) { b.classList.remove('active'); });
+    if (btn) btn.classList.add('active');
+    renderTodoPage();
+}
+function renderTodoPage() {
+    var pageBox = document.getElementById('todoPageList');
+    var data = __todoData;
+    if (__todoFilter === 'incomplete') data = data.filter(function(it) { return !it.is_done; });
+    else if (__todoFilter === 'complete') data = data.filter(function(it) { return it.is_done; });
+    if (!data.length) {
+        pageBox.innerHTML = '<div class="empty-tip">暂时没有待办, 很清闲喵</div>';
+        updateScrollIndicators();
+        return;
+    }
+    pageBox.innerHTML = data.map(function(it) {
+        var t = todoLinkHtml(it);
+        var btn = it.is_done
+            ? '<button class="act-btn" onclick="btnRun(this, function(){ return markDone(' + it.id + ', false) })">' + UNDO_SVG + ' 撤销确认</button>'
+            : '<button class="act-btn" onclick="btnRun(this, function(){ return markDone(' + it.id + ', true) })">' + CHECK_SVG + ' 我已完成</button>';
+        var desc = it.content ? '<div class="t-desc">' + esc(it.content) + '</div>' : '';
+        var gTag = it.is_global ? '<span class="chip global-tag">全局</span>' : '';
+        var avaHtml = '<img class="t-creator-ava" src="' + avatarUrl({ id: it.creator_id, name: it.creator_name, avatar: it.creator_avatar }) + '" alt="">';
+        var doneExtra = '';
+        if (it.is_done && it.my_done_at) {
+            doneExtra = ' <span class="t-done-time">· 你已于 ' + esc(it.my_done_at) + ' 完成</span>';
+        }
+        var meta = '<div class="t-meta">' + gTag + '由 ' + avaHtml + '<span class="t-creator-name">' + esc(it.creator_name) + '</span> 创建 · ' + esc(it.created_at) + doneExtra + '</div>';
+        var doneAvas = '';
+        if (it.done_users && it.done_users.length) {
+            var avas = it.done_users.slice(0, 5).map(function(u) {
+                return '<img class="t-done-ava" src="' + avatarUrl(u) + '" title="' + esc(u.name) + '">';
+            }).join('');
+            var more = it.done_users.length > 5 ? '<span class="t-done-more">+' + (it.done_users.length - 5) + '</span>' : '';
+            doneAvas = '<div class="t-done-avas">' + avas + more + '</div>';
+        }
+        return '<div class="trow' + (it.is_done ? ' done' : '') + '" data-tid="' + it.id + '">' +
+            '<div class="t-left">' + (it.is_done ? OK_SVG : NO_SVG) + doneAvas + '</div>' +
+            '<div class="t-body"><div class="t-line">' + t + chipHtml(it.is_done) + '</div>' + desc + meta + '</div>' + btn + '</div>';
+    }).join('');
+    updateScrollIndicators();
 }
 async function loadTodo() {
     var ret = await getJson('/api/todo');
     var homeBox = document.getElementById('todoList');
-    var pageBox = document.getElementById('todoPageList');
     if (!ret.data || !ret.data.length) {
         homeBox.innerHTML = '<div class="empty-tip">暂时没有待办, 很清闲喵</div>';
-        pageBox.innerHTML = '<div class="empty-tip">暂时没有待办, 很清闲喵</div>';
+        __todoData = [];
+        renderTodoPage();
         return;
     }
+    __todoData = ret.data;
     homeBox.innerHTML = ret.data.slice(0, 3).map(function(it) {
         return '<div class="todo-item' + (it.is_done ? ' done' : '') + '">' + CLOCK_SVG +
             '<div class="t">' + todoLinkHtml(it) + '</div>' + chipHtml(it.is_done) + '</div>';
     }).join('');
-    pageBox.innerHTML = ret.data.map(function(it) {
-        var t = todoLinkHtml(it);
-        var btn = it.is_done
-        ? '<button class="act-btn" onclick="btnRun(this, function(){ return markDone(' + it.id + ', false) })">' + UNDO_SVG + ' 撤销确认</button>'
-        : '<button class="act-btn" onclick="btnRun(this, function(){ return markDone(' + it.id + ', true) })">' + CHECK_SVG + ' 我已完成</button>';
-        var desc = it.content ? '<div class="t-desc">' + esc(it.content) + '</div>' : '';
-        var gTag = it.is_global ? '<span class="chip global-tag">全局</span>' : '';
-        var meta = '<div class="t-meta">' + gTag + '由 ' + esc(it.creator_name) + ' 创建 · ' + esc(it.created_at) + '</div>';
-        return '<div class="trow' + (it.is_done ? ' done' : '') + '" data-tid="' + it.id + '">' + (it.is_done ? OK_SVG : NO_SVG) +
-            '<div class="t-body"><div class="t-line">' + t + chipHtml(it.is_done) + '</div>' + desc + meta + '</div>' + btn + '</div>';
-    }).join('');
+    renderTodoPage();
 }
 async function markDone(id, done) {
-    await postJson('/api/todo', { id: id, done: done });
+    var ret = await postJson('/api/todo', { id: id, done: done });
+    if (ret.code !== 0) return ret;
+    if (done) notify(null, '完成待办', '待办 #' + id + ' 已标记完成', 2500, '', false);
+    else notify(null, '撤销完成', '待办 #' + id + ' 已撤销完成', 2500, '', false);
     await loadTodo();
+    return ret;
 }
+function updateScrollIndicators() {
+    var topEl = document.getElementById('scrollTopIndicator');
+    var botEl = document.getElementById('scrollBottomIndicator');
+    if (!topEl || !botEl) return;
+    var pageList = document.getElementById('todoPageList');
+    var page = document.getElementById('pageTodo');
+    if (!page || page.classList.contains('hide') || !pageList) {
+        topEl.classList.remove('show');
+        botEl.classList.remove('show');
+        return;
+    }
+    var rows = pageList.querySelectorAll('.trow');
+    var incompleteIds = {};
+    __todoData.forEach(function(it) { if (!it.is_done) incompleteIds[it.id] = true; });
+    if (!Object.keys(incompleteIds).length) {
+        topEl.classList.remove('show');
+        botEl.classList.remove('show');
+        return;
+    }
+    var scrollTop = window.scrollY || document.documentElement.scrollTop;
+    var viewH = window.innerHeight;
+    var pageRect = pageList.getBoundingClientRect();
+    var listTopInView = pageRect.top + scrollTop;
+    var aboveCount = 0;
+    var belowCount = 0;
+    rows.forEach(function(row) {
+        var tid = parseInt(row.getAttribute('data-tid'));
+        if (!incompleteIds[tid]) return;
+        var rowTop = row.offsetTop + listTopInView;
+        var rowBottom = rowTop + row.offsetHeight;
+        if (rowBottom < scrollTop) aboveCount++;
+        else if (rowTop > scrollTop + viewH) belowCount++;
+    });
+    document.getElementById('scrollTopCount').textContent = aboveCount;
+    document.getElementById('scrollBottomCount').textContent = belowCount;
+    topEl.classList.toggle('show', aboveCount > 0);
+    botEl.classList.toggle('show', belowCount > 0);
+}
+window.addEventListener('scroll', function() {
+    updateScrollIndicators();
+}, { passive: true });
 function todoLinkClick(e, a) {
     var href = a.getAttribute('href');
     if (!isInnerTodo(href)) return true;

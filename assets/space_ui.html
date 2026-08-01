@@ -149,6 +149,19 @@
                 </div>
                 <button class="add-todo-btn" onclick="switchPage('addtodo', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m-7-7h14"/></svg> 添加待办</button>
             </div>
+            <div class="todo-filters" id="todoFilters">
+                <button class="tf-btn active" data-filter="all" onclick="setTodoFilter('all', this)">全部</button>
+                <button class="tf-btn" data-filter="incomplete" onclick="setTodoFilter('incomplete', this)">未完成</button>
+                <button class="tf-btn" data-filter="complete" onclick="setTodoFilter('complete', this)">已完成</button>
+            </div>
+            <div class="scroll-indicator top" id="scrollTopIndicator">
+                <span id="scrollTopCount">0</span> 个未完成
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 15l-6-6-6 6"/></svg>
+            </div>
+            <div class="scroll-indicator bottom" id="scrollBottomIndicator">
+                <span id="scrollBottomCount">0</span> 个未完成
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9l6 6 6-6"/></svg>
+            </div>
             <div class="panel" id="todoPageList"></div>
         </div>
         <div class="page hide" id="pageTodoDetail">

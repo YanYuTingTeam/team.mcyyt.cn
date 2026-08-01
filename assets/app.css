@@ -419,11 +419,22 @@ a { color: #ef5777; }
     0% { background: rgba(239, 87, 119, .18); }
     100% { background: transparent; }
 }
-.trow .st-icon { width: 22px; height: 22px; flex-shrink: 0; }
-.trow .st-icon.ok { color: #4caf7d; }
-.trow .st-icon.no { color: #ef8c37; }
+.trow .t-left { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 28px; flex-shrink: 0; }
+.trow .t-left > svg { width: 22px; height: 22px; color: #ef8c37; }
+.trow.done .t-left > svg { color: #4caf7d; }
 .trow .t-title { font-size: 15px; color: #eee; }
 .trow.done .t-title { color: #777; }
+.trow .t-done-avas { display: flex; flex-wrap: wrap; gap: 2px; justify-content: center; }
+.trow .t-done-ava { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid #2b2b2e; background: #1a1a1c; object-fit: cover; }
+.trow .t-done-more { font-size: 10px; color: #888; background: #1d1d20; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; line-height: 1; }
+.trow .t-body { flex: 1; min-width: 0; }
+.trow .t-line { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.trow .t-desc { font-size: 13px; color: #999; line-height: 1.6; margin-top: 6px; }
+.trow .t-meta { font-size: 12px; color: #666; margin-top: 6px; display: flex; align-items: center; flex-wrap: wrap; gap: 4px; }
+.trow .t-creator-ava { width: 16px; height: 16px; border-radius: 50%; vertical-align: middle; border: 1px solid #2b2b2e; object-fit: cover; }
+.trow .t-creator-name { color: #aaa; }
+.trow.done .t-creator-name { color: #777; }
+.trow .t-done-time { color: #4caf7d; margin-left: 2px; }
 .act-btn {
     display: flex;
     align-items: center;
@@ -463,10 +474,46 @@ a { color: #ef5777; }
 }
 .add-todo-btn:hover { opacity: .88; }
 .add-todo-btn svg { width: 16px; height: 16px; }
-.trow .t-body { flex: 1; min-width: 0; }
-.trow .t-line { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.trow .t-desc { font-size: 13px; color: #999; line-height: 1.6; margin-top: 6px; }
-.trow .t-meta { font-size: 12px; color: #666; margin-top: 6px; }
+.todo-filters { display: flex; gap: 8px; margin: 16px 0 12px; }
+.todo-filters .tf-btn {
+    background: transparent;
+    border: 1px solid #2b2b2e;
+    color: #999;
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all .15s;
+}
+.todo-filters .tf-btn:hover { border-color: #444; color: #eee; }
+.todo-filters .tf-btn.active { background: #ef5777; border-color: #ef5777; color: #fff; }
+.scroll-indicator {
+    position: fixed;
+    right: 24px;
+    z-index: 900;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(30, 30, 33, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid #2b2b2e;
+    color: #ddd;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    opacity: 0;
+    transform: translateY(-8px) scale(0.9);
+    pointer-events: none;
+    transition: opacity .25s ease, transform .25s ease;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, .4);
+}
+.scroll-indicator.top { top: 80px; }
+.scroll-indicator.bottom { bottom: 32px; }
+.scroll-indicator svg { width: 14px; height: 14px; color: #ef5777; }
+.scroll-indicator > span { color: #ef5777; font-weight: bold; }
+.scroll-indicator.show { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
 .back-link {
     display: inline-flex;
     align-items: center;
@@ -1007,4 +1054,12 @@ input.input-error, select.input-error, textarea.input-error { border-color: #ef5
     .modal-body { padding: 14px 16px; }
     .modal-foot { padding: 12px 16px; flex-wrap: wrap; }
     .modal-foot button { flex: 1; min-width: 120px; }
+    .scroll-indicator { right: 12px; padding: 6px 12px; font-size: 12px; }
+    .scroll-indicator.top { top: 64px; }
+    .scroll-indicator.bottom { bottom: 16px; }
+    .trow { flex-wrap: wrap; gap: 10px; }
+    .trow > .act-btn { width: 100%; justify-content: center; }
+    .trow .t-left { flex-direction: row; width: auto; }
+    .todo-filters { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
+    .todo-filters .tf-btn { flex-shrink: 0; }
 }
