@@ -14,3 +14,12 @@ MCSM_CONFIG = {
     "panel_suffix": "mcsm.mcyyt.cn",
     "sign_window": 300
 }
+
+SMTP_CONFIG = {
+    "host": "smtp.feishu.cn",
+    "port": 465,
+    "user": "team@mcyyt.cn",
+    "password": "",
+    "from_name": "@team / YanYuTing",
+    "from_addr": "team@mcyyt.cn"
+}

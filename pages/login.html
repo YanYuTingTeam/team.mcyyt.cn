@@ -172,6 +172,54 @@ body {
     z-index: 3;
 }
 .hide { display: none !important; }
+/* 验证码弹窗 */
+.verify-overlay {
+    position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0);
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+    animation: vFadeIn .22s ease forwards;
+}
+.verify-overlay.closing { animation: vFadeOut .18s ease forwards; }
+@keyframes vFadeIn { to { background: rgba(0,0,0,.7); } }
+@keyframes vFadeOut { from { background: rgba(0,0,0,.7); } to { background: rgba(0,0,0,0); } }
+.verify-box {
+    background: #0f0f10; border: 1px solid #2b2b2e; border-radius: 14px;
+    padding: 32px 36px; width: 100%; max-width: 380px;
+    animation: vPop .26s cubic-bezier(.2,.8,.2,1) forwards;
+}
+.verify-overlay.closing .verify-box { animation: vPopOut .18s ease forwards; }
+@keyframes vPop { from { opacity:0; transform: translateY(16px) scale(.96); } to { opacity:1; transform: translateY(0) scale(1); } }
+@keyframes vPopOut { to { opacity:0; transform: translateY(8px) scale(.97); } }
+.verify-title { font-size: 18px; font-weight: bold; text-align: center; color: #eee; }
+.verify-sub { font-size: 13px; color: #999; text-align: center; margin: 10px 0 22px; line-height: 1.6; }
+.verify-sub b { color: #ef5777; }
+.code-row { display: flex; gap: 8px; justify-content: center; margin-bottom: 20px; }
+.code-row input {
+    width: 44px; height: 52px; text-align: center; font-size: 22px; font-weight: bold;
+    background: #060607; border: 1px solid #2b2b2e; border-radius: 8px; color: #eee;
+    font-family: inherit; outline: none; transition: border .2s;
+}
+.code-row input:focus { border-color: #ef5777; }
+.code-row input.err { border-color: #ff6b81; animation: shake .3s; }
+@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)} }
+.verify-resend { text-align: center; margin-bottom: 16px; }
+.verify-resend a { color: #ef5777; text-decoration: none; font-size: 12px; cursor: pointer; }
+.verify-resend a.disabled { color: #555; cursor: not-allowed; }
+.verify-btn {
+    width: 100%; background: linear-gradient(90deg, #d9436b, #ef5777); border: none;
+    border-radius: 8px; padding: 12px; color: #fff; font-size: 15px; font-family: inherit; cursor: pointer;
+}
+.verify-btn:disabled { opacity: .5; cursor: not-allowed; }
+.verify-err { color: #ff6b81; font-size: 13px; text-align: center; min-height: 18px; margin-bottom: 10px; }
+/* 注册验证码字段 */
+.send-code-row { display: flex; gap: 10px; }
+.send-code-row input { flex: 1; }
+.send-code-btn {
+    flex-shrink: 0; background: #151517; border: 1px solid rgba(239,87,119,.35);
+    border-radius: 8px; padding: 0 16px; color: #ef5777; font-size: 13px; font-family: inherit;
+    cursor: pointer; white-space: nowrap; transition: border .2s;
+}
+.send-code-btn:hover { border-color: #ef5777; }
+.send-code-btn:disabled { opacity: .5; cursor: not-allowed; }
 @media (max-width: 900px) {
     .left-side { display: none; }
     .right-side { min-width: 0; }
@@ -266,6 +314,13 @@ body {
                 <div class="field-top"><label>邀请码</label></div>
                 <input type="text" id="regCode" placeholder="填写一次性邀请码">
             </div>
+            <div class="field-box">
+                <div class="field-top"><label>邮箱验证码</label></div>
+                <div class="send-code-row">
+                    <input type="text" id="regEmailCode" placeholder="6位验证码" maxlength="6" inputmode="numeric">
+                    <button class="send-code-btn" id="sendRegCodeBtn" onclick="sendRegCode()">发送验证码</button>
+                </div>
+            </div>
             <div class="err-msg" id="regErr"></div>
             <button class="login-btn" id="regBtn" onclick="doReg()">注册</button>
             <div class="go-reg" onclick="showReg(false)">
@@ -277,6 +332,23 @@ body {
                 <div class="arrow"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 6l6 6l-6 6"/></svg></div>
             </div>
         </div>
+    </div>
+</div>
+<div class="verify-overlay hide" id="verifyOverlay">
+    <div class="verify-box">
+        <div class="verify-title">异地登录验证</div>
+        <div class="verify-sub">检测到你在<b>新设备</b>上登录, 已向 <b id="verifyEmail"></b> 发送验证码</div>
+        <div class="code-row">
+            <input type="text" maxlength="1" inputmode="numeric" id="vc1" oninput="codeNext(this,'vc2')" onkeydown="codeBack(event,this,'vc1')">
+            <input type="text" maxlength="1" inputmode="numeric" id="vc2" oninput="codeNext(this,'vc3')" onkeydown="codeBack(event,this,'vc1')">
+            <input type="text" maxlength="1" inputmode="numeric" id="vc3" oninput="codeNext(this,'vc4')" onkeydown="codeBack(event,this,'vc2')">
+            <input type="text" maxlength="1" inputmode="numeric" id="vc4" oninput="codeNext(this,'vc5')" onkeydown="codeBack(event,this,'vc3')">
+            <input type="text" maxlength="1" inputmode="numeric" id="vc5" oninput="codeNext(this,'vc6')" onkeydown="codeBack(event,this,'vc4')">
+            <input type="text" maxlength="1" inputmode="numeric" id="vc6" onkeydown="codeBack(event,this,'vc5')">
+        </div>
+        <div class="verify-err" id="verifyErr"></div>
+        <div class="verify-resend"><a id="resendLink" onclick="resendLoginCode()">重新发送验证码</a></div>
+        <button class="verify-btn" id="verifyBtn" onclick="submitVerifyCode()">验证并登录</button>
     </div>
 </div>
 <script>
@@ -300,25 +372,148 @@ async function postJson(url, body) {
     });
     return res.json();
 }
+
+/* ===== 登录 ===== */
+var loginEmailVal = '', loginPwVal = '';
 async function doLogin() {
     var btn = document.getElementById('loginBtn');
     var err = document.getElementById('loginErr');
     err.textContent = '';
     btn.disabled = true;
+    loginEmailVal = document.getElementById('loginEmail').value;
+    loginPwVal = document.getElementById('loginPassword').value;
     try {
-        var ret = await postJson('/api/login', {
-            email: document.getElementById('loginEmail').value,
-            password: document.getElementById('loginPassword').value
-        });
+        var ret = await postJson('/api/login', { email: loginEmailVal, password: loginPwVal });
         if (ret.code === 0) { location.reload(); return; }
+        if (ret.code === 202) {
+            btn.disabled = false;
+            openVerifyModal();
+            return;
+        }
         err.textContent = ret.message || '登录失败';
     } catch (e) {
         err.textContent = '网络出问题了, 稍后再试';
     }
     btn.disabled = false;
 }
+
+/* ===== 登录验证码弹窗 ===== */
+function openVerifyModal() {
+    document.getElementById('verifyEmail').textContent = loginEmailVal;
+    document.getElementById('verifyErr').textContent = '';
+    for (var i = 1; i <= 6; i++) document.getElementById('vc' + i).value = '';
+    var ov = document.getElementById('verifyOverlay');
+    ov.classList.remove('hide', 'closing');
+    // 自动发送验证码
+    sendLoginCode();
+    setTimeout(function() { document.getElementById('vc1').focus(); }, 100);
+}
+function closeVerifyModal() {
+    var ov = document.getElementById('verifyOverlay');
+    ov.classList.add('closing');
+    setTimeout(function() { ov.classList.add('hide'); ov.classList.remove('closing'); }, 180);
+}
+function codeNext(self, nextId) {
+    self.value = self.value.replace(/\D/g, '');
+    if (self.value && nextId) document.getElementById(nextId).focus();
+}
+function codeBack(e, self, prevId) {
+    if (e.key === 'Backspace' && !self.value && prevId) {
+        document.getElementById(prevId).focus();
+    }
+}
+function getVerifyCode() {
+    var c = '';
+    for (var i = 1; i <= 6; i++) c += document.getElementById('vc' + i).value;
+    return c;
+}
+var resendTimer = null;
+async function sendLoginCode() {
+    var link = document.getElementById('resendLink');
+    link.classList.add('disabled');
+    link.textContent = '发送中...';
+    var ret = await postJson('/api/send_email_code', { email: loginEmailVal, purpose: 'login' });
+    if (ret.code === 0) {
+        var cnt = 120;
+        link.textContent = '重新发送 (' + cnt + 's)';
+        resendTimer = setInterval(function() {
+            cnt--;
+            if (cnt <= 0) {
+                clearInterval(resendTimer);
+                link.classList.remove('disabled');
+                link.textContent = '重新发送验证码';
+            } else {
+                link.textContent = '重新发送 (' + cnt + 's)';
+            }
+        }, 1000);
+    } else {
+        link.classList.remove('disabled');
+        link.textContent = '重新发送验证码';
+        document.getElementById('verifyErr').textContent = ret.message || '发送失败';
+    }
+}
+function resendLoginCode() {
+    var link = document.getElementById('resendLink');
+    if (link.classList.contains('disabled')) return;
+    sendLoginCode();
+}
+async function submitVerifyCode() {
+    var code = getVerifyCode();
+    var errEl = document.getElementById('verifyErr');
+    errEl.textContent = '';
+    if (code.length !== 6) {
+        errEl.textContent = '请输入完整的6位验证码';
+        return;
+    }
+    var btn = document.getElementById('verifyBtn');
+    btn.disabled = true;
+    try {
+        var ret = await postJson('/api/login', { email: loginEmailVal, password: loginPwVal, email_code: code });
+        if (ret.code === 0) { location.reload(); return; }
+        errEl.textContent = ret.message || '验证失败';
+        if (ret.code === 403) {
+            for (var i = 1; i <= 6; i++) {
+                var el = document.getElementById('vc' + i);
+                el.classList.add('err');
+                (function(el) { setTimeout(function() { el.classList.remove('err'); }, 400); })(el);
+            }
+        }
+    } catch (e) {
+        errEl.textContent = '网络出问题了';
+    }
+    btn.disabled = false;
+}
+
+/* ===== 注册 ===== */
 function checkPwStrong(pw) {
     return pw.length >= 12 && /[A-Z]/.test(pw) && /[a-z]/.test(pw) && /\d/.test(pw) && /[^A-Za-z0-9]/.test(pw);
+}
+var regSendTimer = null;
+async function sendRegCode() {
+    var btn = document.getElementById('sendRegCodeBtn');
+    var email = document.getElementById('regEmail').value.trim();
+    if (!email) { document.getElementById('regErr').textContent = '请先填写邮箱'; return; }
+    btn.disabled = true;
+    btn.textContent = '发送中...';
+    var ret = await postJson('/api/send_email_code', { email: email, purpose: 'register' });
+    if (ret.code === 0) {
+        var cnt = 120;
+        btn.textContent = '重新发送 (' + cnt + 's)';
+        regSendTimer = setInterval(function() {
+            cnt--;
+            if (cnt <= 0) {
+                clearInterval(regSendTimer);
+                btn.disabled = false;
+                btn.textContent = '发送验证码';
+            } else {
+                btn.textContent = '重新发送 (' + cnt + 's)';
+            }
+        }, 1000);
+    } else {
+        btn.disabled = false;
+        btn.textContent = '发送验证码';
+        document.getElementById('regErr').textContent = ret.message || '发送失败';
+    }
 }
 async function doReg() {
     var btn = document.getElementById('regBtn');
@@ -326,21 +521,18 @@ async function doReg() {
     err.textContent = '';
     var pw = document.getElementById('regPassword').value;
     var pw2 = document.getElementById('regPassword2').value;
-    if (!checkPwStrong(pw)) {
-        err.textContent = '密码不符合要求';
-        return;
-    }
-    if (pw !== pw2) {
-        err.textContent = '两次输入的密码不一致';
-        return;
-    }
+    if (!checkPwStrong(pw)) { err.textContent = '密码不符合要求'; return; }
+    if (pw !== pw2) { err.textContent = '两次输入的密码不一致'; return; }
+    var emailCode = document.getElementById('regEmailCode').value.trim();
+    if (!emailCode || emailCode.length !== 6) { err.textContent = '请填写6位邮箱验证码'; return; }
     btn.disabled = true;
     try {
         var ret = await postJson('/api/register', {
             name: document.getElementById('regName').value,
             email: document.getElementById('regEmail').value,
             password: pw,
-            invite_code: document.getElementById('regCode').value
+            invite_code: document.getElementById('regCode').value,
+            email_code: emailCode
         });
         if (ret.code === 0) { location.reload(); return; }
         err.textContent = ret.message || '注册失败';
@@ -351,6 +543,10 @@ async function doReg() {
 }
 document.addEventListener('keydown', function(e) {
     if (e.key !== 'Enter') return;
+    if (!document.getElementById('verifyOverlay').classList.contains('hide')) {
+        if (e.target.id && e.target.id.startsWith('vc')) submitVerifyCode();
+        return;
+    }
     if (document.getElementById('regBox').classList.contains('hide')) doLogin();
     else doReg();
 });

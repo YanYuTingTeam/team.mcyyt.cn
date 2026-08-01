@@ -6,6 +6,7 @@ from utils.auth import make_token, get_client_info
 from utils.security import (
     check_auth_ban, register_attempt_incr, register_attempt_remaining
 )
+from utils.email_verify import verify_email_code
 
 def check_pw_strong(pw):
     return (len(pw) >= 12 and re.search(r'[A-Z]', pw) and re.search(r'[a-z]', pw)
@@ -22,10 +23,15 @@ def handle(request):
     password = data.get('password') or ''
     name = (data.get('name') or '').strip()
     invite_code = (data.get('invite_code') or '').strip()
+    email_code = (data.get('email_code') or '').strip()
     if not email or not password or not name or not invite_code:
         return {"code": 400, "message": "badly param"}
     if not check_pw_strong(password):
         return {"code": 400, "message": "badly param"}
+    # 验证邮箱验证码
+    vok, vmsg = verify_email_code(email, email_code, 'register')
+    if not vok:
+        return {"code": 403, "message": vmsg}
     remain_before = register_attempt_remaining(request)
     db = get_db()
     try:

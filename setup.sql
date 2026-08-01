@@ -133,6 +133,21 @@ CREATE TABLE IF NOT EXISTS yyt_sec_counter (
     KEY idx_expire (expire_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE IF NOT EXISTS yyt_email_code (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) NOT NULL,
+    code CHAR(6) NOT NULL,
+    purpose VARCHAR(32) NOT NULL COMMENT 'login=登录验证 register=注册验证',
+    ip_seg VARCHAR(64) NOT NULL,
+    ua_hash VARCHAR(64) NOT NULL,
+    used TINYINT DEFAULT 0,
+    expire_at DATETIME NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    KEY idx_email (email),
+    KEY idx_seg (ip_seg),
+    KEY idx_expire (expire_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE IF NOT EXISTS yyt_skill_meta (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(64) NOT NULL UNIQUE,

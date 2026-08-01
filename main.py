@@ -30,7 +30,7 @@ import_lock = threading.Lock()
 
 PUBLIC_PATHS = {
     '/', '/login', '/register', '/space.html', '/login.html',
-    '/api/login', '/api/register',
+    '/api/login', '/api/register', '/api/send_email_code',
 }
 
 def _is_public(path):
@@ -43,7 +43,9 @@ def _is_public(path):
 @app.before_request
 def security_guard():
     path = request.path or '/'
-    banned, btype, exp, seg = check_ban(request, 'any')
+    banned, btype, exp, seg = check_ban(request, 'auth')
+    if not banned:
+        banned, btype, exp, seg = check_ban(request, 'rate')
     if banned:
         if is_ajax_api(request):
             return json_response("404 page not found", 404)

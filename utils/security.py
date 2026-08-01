@@ -194,3 +194,47 @@ def is_ajax_api(request):
     if 'application/json' in accept or 'xmlhttprequest' in xreq:
         return True
     return False
+
+# 同一设备 120s 内只能发 1 次; 同一 IP 段 24h 内最多 3 次, 超出则封 24h
+EMAIL_CODE_DEVICE_WINDOW = 120
+EMAIL_CODE_SEG_MAX = 3
+EMAIL_CODE_SEG_WINDOW = 86400
+EMAIL_CODE_BAN_HOURS = 24
+
+
+def check_email_rate(request):
+    """返回 (ok, message)"""
+    ip = get_client_ip(request)
+    seg = ip_segment(ip)
+    ua_hash = _ua_hash_from_request(request)
+    db = get_db()
+    try:
+        _cleanup(db)
+        with db.cursor() as cur:
+            cur.execute(
+                "SELECT id FROM yyt_email_code "
+                "WHERE ua_hash = %s AND ip_seg = %s AND created_at > DATE_SUB(NOW(), INTERVAL %s SECOND) "
+                "ORDER BY id DESC LIMIT 1",
+                (ua_hash, seg, EMAIL_CODE_DEVICE_WINDOW)
+            )
+            if cur.fetchone():
+                return False, 'badly request'
+            cur.execute(
+                "SELECT COUNT(*) AS cnt FROM yyt_email_code "
+                "WHERE ip_seg = %s AND created_at > DATE_SUB(NOW(), INTERVAL %s SECOND)",
+                (seg, EMAIL_CODE_SEG_WINDOW)
+            )
+            row = cur.fetchone()
+            cnt = int((row or {}).get('cnt') or 0)
+            if cnt >= EMAIL_CODE_SEG_MAX:
+                add_ban(seg, 'email', EMAIL_CODE_BAN_HOURS)
+                return False, 'badly request'
+        return True, 'ok'
+    finally:
+        db.close()
+
+
+def _ua_hash_from_request(request):
+    import hashlib
+    ua = (request.headers.get('User-Agent') or '')[:255]
+    return hashlib.md5(ua.encode()).hexdigest()[:16]
