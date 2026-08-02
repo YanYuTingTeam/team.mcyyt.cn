@@ -102,7 +102,7 @@ def handle(request):
                 "JOIN yyt_user u ON t.creator_id = u.id "
                 "LEFT JOIN yyt_todo_assign a ON a.todo_id = t.id AND a.user_id = %s "
                 "WHERE t.is_global = 1 OR a.user_id = %s "
-                "ORDER BY COALESCE(a.is_done, 0) ASC, t.id DESC",
+                "ORDER BY t.id DESC",
                 (user['id'], user['id'])
             )
             rows = cur.fetchall()

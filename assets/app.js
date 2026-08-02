@@ -244,6 +244,8 @@ async function loadMe() {
     skillBox.innerHTML = renderSkillHtml(u.skill);
 }
 var CLOCK_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0-18 0"/><path d="M12 7v5l3 3"/></g></svg>';
+var EYE_OPEN_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></g></svg>';
+var EYE_CLOSED_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-10-8-10-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 10 8 10 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></g></svg>';
 var OK_SVG = '<svg xmlns="http://www.w3.org/2000/svg" class="st-icon ok" viewBox="0 0 24 24"><path fill="currentColor" d="M17 3.34a10 10 0 1 1-14.995 8.984L2 12l.005-.324A10 10 0 0 1 17 3.34m-1.293 5.953a1 1 0 0 0-1.32-.083l-.094.083L11 12.585l-1.293-1.292l-.094-.083a1 1 0 0 0-1.403 1.403l.083.094l2 2l.094.083a1 1 0 0 0 1.226 0l.094-.083l4-4l.083-.094a1 1 0 0 0-.083-1.32"/></svg>';
 var NO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" class="st-icon no" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2c5.523 0 10 4.477 10 10a10 10 0 0 1-19.995.324L2 12l.004-.28C2.152 6.327 6.57 2 12 2m.01 13l-.127.007a1 1 0 0 0 0 1.986L12 17l.127-.007a1 1 0 0 0 0-1.986zM12 7a1 1 0 0 0-.993.883L11 8v4l.007.117a1 1 0 0 0 1.986 0L13 12V8l-.007-.117A1 1 0 0 0 12 7"/></svg>';
 var CHECK_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 12l5 5L20 7"/></svg>';
@@ -301,8 +303,8 @@ function renderTodoPage() {
             doneAvas = '<div class="t-done-avas">' + avas + more + '</div>';
         }
         return '<div class="trow' + (it.is_done ? ' done' : '') + '" data-tid="' + it.id + '">' +
-            '<div class="t-left">' + (it.is_done ? OK_SVG : NO_SVG) + doneAvas + '</div>' +
-            '<div class="t-body"><div class="t-line">' + t + chipHtml(it.is_done) + '</div>' + desc + meta + '</div>' + btn + '</div>';
+            (it.is_done ? OK_SVG : NO_SVG) +
+            '<div class="t-body"><div class="t-line">' + t + chipHtml(it.is_done) + doneAvas + '</div>' + desc + meta + '</div>' + btn + '</div>';
     }).join('');
     updateScrollIndicators();
 }
@@ -595,18 +597,18 @@ async function loadOverview() {
     document.getElementById('stToday').textContent = ovData.calls.today;
     document.getElementById('stWeek').textContent = ovData.calls.week;
     document.getElementById('stMonth').textContent = ovData.calls.month;
-    document.getElementById('apikeyInput').value = ovData.apikey;
     renderApikeyBox();
     renderOvInvites(ovData.invites);
+    renderOvTodos();
     var dvBox = document.getElementById('deviceList');
     dvBox.innerHTML = ovData.sessions.map(function(s) {
         var icon = /iPhone|iPad|Android/i.test(s.device || '') ? MOBILE_SVG : DESKTOP_SVG;
         var cur = s.is_current ? '<span class="chip ok">本机</span>' : '';
         return '<div class="dev-row">' + icon +
             '<div class="dv-main">' +
-                '<div class="dv-device">' + esc(s.device || '未知设备') + cur + '</div>' +
+                '<div class="dv-device">运行于 ' + esc(s.device || '未知设备') + cur + '</div>' +
                 '<div class="dv-ip-line">IP ' + esc(s.ip || '未知IP') + '</div>' +
-                '<div class="dv-time-line">初次登录 ' + esc(s.first_seen || s.created_at) + ' | 最近 ' + esc(s.created_at) + '</div>' +
+                '<div class="dv-time-line">初次登录 ' + esc(s.first_seen || s.created_at) + ' | 最近登录 ' + esc(s.created_at) + '</div>' +
             '</div>' +
             '<button class="act-btn" onclick="btnRun(this, function(){ return killSession(' + s.id + ', ' + s.is_current + ') })">' + LOGOUT_SVG + ' 登出</button>' +
         '</div>';
@@ -634,6 +636,36 @@ async function refreshOvInvite() {
     var ret = await getJson('/api/overview');
     ovData = ret.data;
     renderOvInvites(ovData.invites);
+}
+async function renderOvTodos() {
+    var box = document.getElementById('ovTodoList');
+    if (!box) return;
+    try {
+        var ret = await getJson('/api/todo');
+        if (!ret.data || !ret.data.length) {
+            box.innerHTML = '<div class="empty-tip">还没有待办</div>';
+            return;
+        }
+        var unfinished = ret.data.filter(function(t) { return !t.is_done; });
+        var display = unfinished.length ? unfinished : ret.data;
+        var shown = display.slice(0, 5);
+        box.innerHTML = shown.map(function(it) {
+            var statusIcon = it.is_done ? OK_SVG : NO_SVG;
+            var doneClass = it.is_done ? ' done' : '';
+            return '<div class="ov-todo-row' + doneClass + '">' +
+                statusIcon +
+                '<div class="ov-todo-info">' +
+                    '<a class="ov-todo-link" href="/todos/' + it.id + '" onclick="event.preventDefault(); openTodo(' + it.id + ')">' + esc(it.title) + '</a>' +
+                    '<div class="ov-todo-meta">#' + it.id + ' · ' + esc(it.creator_name) + ' · ' + esc(it.created_at) + '</div>' +
+                '</div>' +
+                '<button class="ov-todo-check" title="' + (it.is_done ? '撤销' : '完成') + '" onclick="btnRun(this, function(){ return markDone(' + it.id + ', ' + (!it.is_done) + ') })">' +
+                    (it.is_done ? UNDO_SVG : CHECK_SVG) +
+                '</button>' +
+            '</div>';
+        }).join('');
+    } catch (e) {
+        box.innerHTML = '<div class="empty-tip">加载失败</div>';
+    }
 }
 function openProfileModal() {
     if (!ovData) return;
@@ -785,7 +817,29 @@ async function createInvite() {
 function toggleApikeyEye(btn) {
     var input = document.getElementById('apikeyInput');
     if (!input) return;
-    input.type = input.type === 'password' ? 'text' : 'password';
+    var isShown = btn.classList.toggle('shown');
+    if (isShown) {
+        input.value = input.dataset.real || '';
+        btn.innerHTML = EYE_CLOSED_SVG;
+        btn.title = '隐藏';
+    } else {
+        input.value = (input.dataset.real || '').replace(/./g, '*');
+        btn.innerHTML = EYE_OPEN_SVG;
+        btn.title = '显示';
+    }
+}
+function setApikeyValue(realKey) {
+    var input = document.getElementById('apikeyInput');
+    if (!input) return;
+    input.dataset.real = realKey || '';
+    var btn = input.parentElement.querySelector('.key-eye-btn');
+    if (btn && btn.classList.contains('shown')) {
+        input.value = realKey || '';
+        btn.innerHTML = EYE_CLOSED_SVG;
+    } else {
+        input.value = (realKey || '').replace(/./g, '*');
+        if (btn) { btn.innerHTML = EYE_OPEN_SVG; btn.classList.remove('shown'); }
+    }
 }
 function renderApikeyBox() {
     var has = !!(ovData && ovData.apikey);
@@ -793,12 +847,12 @@ function renderApikeyBox() {
     document.getElementById('apikeyNone').classList.toggle('hide', has);
     document.getElementById('apikeyResetBtn').classList.toggle('hide', !has);
     document.getElementById('apikeyApplyBtn').classList.toggle('hide', has);
+    if (has) setApikeyValue(ovData.apikey);
 }
 async function resetApikey() {
     var ret = await postJson('/api/apikey_reset', {});
     if (ret.code === 0) {
         if (ovData) ovData.apikey = ret.data.apikey;
-        document.getElementById('apikeyInput').value = ret.data.apikey;
         renderApikeyBox();
     }
 }
