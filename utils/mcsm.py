@@ -15,8 +15,8 @@ _STRIP_QUERY = {'sec', 'apikey', 'a', 'b'}
 
 def _deny(msg):
     return Response(
-        #json.dumps({"status": 403, "data": None, "message": msg}, ensure_ascii=False),
-        #status=403, mimetype="application/json"
+        json.dumps({"status": 403, "data": None, "message": msg}, ensure_ascii=False),
+        status=403, mimetype="application/json"
     )
 
 def _clean_sessions():
@@ -56,8 +56,8 @@ def _forward(request, subpath, extra_set_cookie=None):
         return Response(data, status=e.code, mimetype=ctype.split(';')[0])
     except Exception as e:
         return Response(
-            #json.dumps({"status": 502, "data": None, "message": "代理请求失败: " + str(e)}, ensure_ascii=False),
-            #status=502, mimetype="application/json"
+            json.dumps({"status": 502, "data": None, "message": "代理请求失败: " + str(e)}, ensure_ascii=False),
+            status=502, mimetype="application/json"
         )
 
 def proxy_api(request, subpath):
@@ -77,7 +77,7 @@ def proxy_api(request, subpath):
             return _forward(request, subpath, extra_set_cookie=cookie)
     user = verify_sign(request)
     if not user:
-        return _deny("")
+        return _deny("apikey或签名校验失败")
     log_api_call(request, user)
     return _forward(request, subpath)
 
