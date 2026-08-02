@@ -61,6 +61,19 @@
                     <button class="act-btn" onclick="switchPage('todo', this)">查看全部待办 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-6 6l6-6m-6-6l6 6"/></svg></button>
                 </div>
             </div>
+            <div class="card" id="cardApiCalls">
+                <div class="card-head">API CALLS</div>
+                <div style="color:#999;font-size:13px;margin-bottom:16px">API 调用次数总览</div>
+                <div class="stat-grid">
+                    <div class="st"><div class="sn" id="stYesterday">0</div><div class="sl">昨日</div></div>
+                    <div class="st"><div class="sn" id="stToday">0</div><div class="sl">今日</div></div>
+                    <div class="st"><div class="sn" id="stWeek">0</div><div class="sl">近7天</div></div>
+                    <div class="st"><div class="sn" id="stMonth">0</div><div class="sl">近30天</div></div>
+                </div>
+                <div style="margin-top:16px;display:flex;justify-content:flex-end">
+                    <button class="act-btn" onclick="switchPage('logs', this)">查看全部日志 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-6 6l6-6m-6-6l6 6"/></svg></button>
+                </div>
+            </div>
             <div class="card" id="cardNotice">
                 <div class="card-head">UPDATES</div>
                 <div style="color:#999;font-size:13px;margin-bottom:6px">公告与最新动态</div>
@@ -108,19 +121,6 @@
                     <div id="inviteList"></div>
                 </div>
                 <div class="card">
-                    <div class="card-head">API CALLS</div>
-                    <div style="color:#999;font-size:13px;margin-bottom:16px">API 调用次数总览</div>
-                    <div class="stat-grid">
-                        <div class="st"><div class="sn" id="stYesterday">0</div><div class="sl">昨日</div></div>
-                        <div class="st"><div class="sn" id="stToday">0</div><div class="sl">今日</div></div>
-                        <div class="st"><div class="sn" id="stWeek">0</div><div class="sl">近7天</div></div>
-                        <div class="st"><div class="sn" id="stMonth">0</div><div class="sl">近30天</div></div>
-                    </div>
-                    <div style="margin-top:16px;display:flex;justify-content:flex-end">
-                        <button class="act-btn" onclick="switchPage('logs', this)">查看全部日志 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-6 6l6-6m-6-6l6 6"/></svg></button>
-                    </div>
-                </div>
-                <div class="card">
                     <div class="card-head">API KEY</div>
                     <div style="color:#999;font-size:13px;margin-bottom:10px">你的专属APIkey, 请勿泄露给他人</div>
                     <div class="key-row hide" id="apikeyHas">
@@ -139,14 +139,6 @@
                     <div style="color:#999;font-size:13px;margin-bottom:6px">登录过的设备</div>
                     <div id="deviceList"></div>
                 </div>
-                <div class="card">
-                    <div class="card-head-row">
-                        <div class="card-head">MY TODOS</div>
-                        <button class="act-btn" style="padding:4px 10px;font-size:12px" onclick="switchPage('todo', this)">查看全部</button>
-                    </div>
-                    <div style="color:#999;font-size:13px;margin-bottom:12px">最近的待办事项</div>
-                    <div id="ovTodoList"></div>
-                </div>
             </div>
         </div>
         <div class="page hide" id="pageTodo">
@@ -162,6 +154,8 @@
                 <button class="tf-btn active" data-filter="all" onclick="setTodoFilter('all', this)">全部</button>
                 <button class="tf-btn" data-filter="incomplete" onclick="setTodoFilter('incomplete', this)">未完成</button>
                 <button class="tf-btn" data-filter="complete" onclick="setTodoFilter('complete', this)">已完成</button>
+                <button class="tf-btn" data-filter="created" onclick="setTodoFilter('created', this)">我创建的</button>
+                <button class="tf-btn" data-filter="assigned" onclick="setTodoFilter('assigned', this)">我负责的</button>
             </div>
             <div class="todo-filters tag-filters" id="todoTagFilters"></div>
             <div class="scroll-indicator top" id="scrollTopIndicator">

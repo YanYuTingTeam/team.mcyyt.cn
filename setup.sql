@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS yyt_user (
     panel_host VARCHAR(16) DEFAULT NULL,
     avatar VARCHAR(512) DEFAULT NULL,
     bio TEXT DEFAULT NULL,
+    track_todo_id INT DEFAULT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -49,6 +50,9 @@ CREATE TABLE IF NOT EXISTS yyt_todo (
     content TEXT,
     is_global TINYINT DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT NULL,
+    all_done_at DATETIME DEFAULT NULL,
+    done_notify_sent TINYINT DEFAULT 0,
     KEY idx_creator (creator_id),
     KEY idx_global (is_global)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -95,7 +99,7 @@ CREATE TABLE IF NOT EXISTS yyt_visit (
 
 INSERT INTO yyt_page_access (page_key, min_level, show_in_nav) VALUES
     ('home', 0, 1), ('overview', 0, 1), ('todo', 1, 1), ('notice', 1, 1),
-    ('project', 1, 1), ('apis', 1, 1), ('mcsm', 4, 1), ('team', 5, 1)
+    ('project', 1, 1), ('apis', 1, 1), ('mcsm', 4, 1), ('team', 5, 1), ('settings', 0, 1)
 ON DUPLICATE KEY UPDATE page_key = page_key;
 
 INSERT INTO yyt_invite (code) VALUES ('YYT-WELCOME-001');
@@ -169,3 +173,11 @@ INSERT INTO yyt_skill_meta (name, color) VALUES
     ('美术', '#f59f00'),
     ('运营', '#4caf7d')
 ON DUPLICATE KEY UPDATE name = name;
+
+CREATE TABLE IF NOT EXISTS yyt_notify_setting (
+    user_id INT PRIMARY KEY,
+    todo_done TINYINT DEFAULT 1,
+    todo_new TINYINT DEFAULT 1,
+    online TINYINT DEFAULT 1,
+    invite_used TINYINT DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -223,15 +223,27 @@ def handle(request):
             except Exception:
                 pass
             tag_filter = request.args.get('tag') or ''
+            scope = (request.args.get('scope') or '').strip()
             sql = (
                 "SELECT t.id, t.title, t.link, t.content, t.created_at, t.updated_at, t.is_global, t.creator_id, "
                 "COALESCE(a.is_done, 0) AS is_done, a.done_at AS my_done_at, u.name AS creator_name, u.avatar AS creator_avatar "
                 "FROM yyt_todo t "
                 "JOIN yyt_user u ON t.creator_id = u.id "
                 "LEFT JOIN yyt_todo_assign a ON a.todo_id = t.id AND a.user_id = %s "
-                "WHERE (t.is_global = 1 OR a.user_id = %s)"
+                "WHERE 1 = 1"
             )
-            params = [user['id'], user['id']]
+            params = [user['id']]
+            if scope == 'all':
+                pass
+            elif scope == 'created':
+                sql += " AND t.creator_id = %s"
+                params.append(user['id'])
+            elif scope == 'assigned':
+                sql += " AND (t.is_global = 1 OR EXISTS (SELECT 1 FROM yyt_todo_assign a2 WHERE a2.todo_id = t.id AND a2.user_id = %s))"
+                params.append(user['id'])
+            else:
+                sql += " AND (t.is_global = 1 OR a.user_id = %s)"
+                params.append(user['id'])
             if tag_filter:
                 sql += " AND EXISTS (SELECT 1 FROM yyt_todo_tag_rel r WHERE r.todo_id = t.id AND r.tag_id = %s)"
                 params.append(int(tag_filter))

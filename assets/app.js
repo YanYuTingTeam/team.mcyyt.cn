@@ -107,7 +107,7 @@ async function postJson(url, body) {
 }
 var PAGE_PATH = { home: '/', overview: '/overview', todo: '/todos', notice: '/notice', project: '/projects', apis: '/apis', logs: '/logs', mcsm: '/mcsmanager', team: '/team', addtodo: '/todos/add', tododetail: '/todos', settings: '/settings' };
 var NAV_OF = { home: 'home', overview: 'overview', todo: 'todo', notice: 'notice', project: 'project', apis: 'apis', logs: 'overview', mcsm: 'mcsm', team: 'team', addtodo: 'todo', tododetail: 'todo', settings: 'settings' };
-var PAGE_LOADER = { home: null, overview: loadOverview, todo: loadTodo, notice: loadNotice, project: loadProject, apis: loadApis, logs: loadLogs, mcsm: loadMcsm, team: loadTeam, addtodo: resetAddTodo, tododetail: null, settings: loadSettings };
+var PAGE_LOADER = { home: loadOverview, overview: loadOverview, todo: loadTodo, notice: loadNotice, project: loadProject, apis: loadApis, logs: loadLogs, mcsm: loadMcsm, team: loadTeam, addtodo: resetAddTodo, tododetail: null, settings: loadSettings };
 var SPIN_SVG = '<svg xmlns="http://www.w3.org/2000/svg" class="spin" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3a9 9 0 1 0 9 9"/></svg>';
 var LEVEL_NAME = { 0: '待定', 1: '志愿者 | 初级', 2: '志愿者 | 中级', 3: '志愿者 | 高级', 4: '管理员', 5: '服主' };
 var LEVEL_COLOR = { 0: '#888', 1: '#4caf7d', 2: '#4dabf7', 3: '#cc5de8', 4: '#f59f00', 5: '#ef5777' };
@@ -332,7 +332,12 @@ function setTodoFilter(f, btn) {
     __todoFilter = f;
     document.querySelectorAll('#todoFilters .tf-btn').forEach(function(b) { b.classList.remove('active'); });
     if (btn) btn.classList.add('active');
-    renderTodoPage();
+    if (f === 'all' || f === 'created' || f === 'assigned') {
+        __todoPageScope = f;
+        loadTodoPage(f);
+    } else {
+        renderTodoPage();
+    }
 }
 function setTodoTagFilter(tagId, btn) {
     __todoTagFilter = tagId;
@@ -341,7 +346,7 @@ function setTodoTagFilter(tagId, btn) {
         loadTodoByTag(tagId);
     } else {
         history.pushState(null, '', '/todos');
-        loadTodoAll();
+        loadTodoPage(__todoPageScope);
     }
     renderTodoTagFilters();
     if (tagId) {
@@ -360,11 +365,17 @@ async function loadTodoAll() {
     var ret = await getJson('/api/todo');
     __todoData = ret.data || [];
     renderTodoHome();
+}
+async function loadTodoPage(scope) {
+    var url = '/api/todo?scope=' + encodeURIComponent(scope || 'all');
+    if (__todoTagFilter) url += '&tag=' + __todoTagFilter;
+    var ret = await getJson(url);
+    __todoPageData = ret.data || [];
     renderTodoPage();
 }
 function renderTodoPage() {
     var pageBox = document.getElementById('todoPageList');
-    var data = __todoData;
+    var data = __todoPageData || [];
     if (__todoFilter === 'incomplete') data = data.filter(function(it) { return !it.is_done; });
     else if (__todoFilter === 'complete') data = data.filter(function(it) { return it.is_done; });
     if (!data.length) {
@@ -421,8 +432,10 @@ function navTodoTag(e, tagId) {
     return false;
 }
 async function loadTodoByTag(tagId) {
-    var ret = await getJson('/api/todo?tag=' + tagId);
-    __todoData = ret.data || [];
+    var url = '/api/todo?tag=' + tagId;
+    if (__todoPageScope) url += '&scope=' + encodeURIComponent(__todoPageScope);
+    var ret = await getJson(url);
+    __todoPageData = ret.data || [];
     renderTodoPage();
 }
 async function loadTodo() {
@@ -436,7 +449,10 @@ async function loadTodo() {
             document.querySelectorAll('#todoTagFilters .tf-btn').forEach(function(b) { b.classList.remove('active'); });
             tagBtn.classList.add('active');
         }
+        __todoPageScope = 'all';
         await loadTodoByTag(__todoTagFilter);
+        var ret2 = await getJson('/api/todo');
+        __todoData = ret2.data || [];
         renderTodoHome();
         return;
     }
@@ -446,8 +462,9 @@ async function loadTodo() {
     if (allTagBtn) allTagBtn.classList.add('active');
     var ret = await getJson('/api/todo');
     __todoData = ret.data || [];
+    __todoPageScope = 'all';
+    await loadTodoPage('all');
     renderTodoHome();
-    renderTodoPage();
 }
 function renderTodoHome() {
     var homeBox = document.getElementById('todoList');
@@ -498,9 +515,29 @@ function renderTodoHome() {
         _schedMasonry();
         return;
     }
-    homeBox.innerHTML = __todoData.slice(0, 3).map(function(it) {
-        return '<div class="todo-item' + (it.is_done ? ' done' : '') + '">' + CLOCK_SVG +
-            '<div class="t">' + todoLinkHtml(it) + '</div>' + chipHtml(it.is_done) + '</div>';
+    var unfinished = __todoData.filter(function(t) { return !t.is_done; });
+    var display = unfinished.length ? unfinished : __todoData;
+    var shown = display.slice(0, 5);
+    var LINK_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14"><g fill="none" stroke="#ef5777" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></g></svg>';
+    homeBox.innerHTML = shown.map(function(it) {
+        var doneClass = it.is_done ? ' done' : '';
+        var statusChip = it.is_done
+            ? '<span class="chip ok" style="padding:2px 8px;font-size:12px">Complete</span>'
+            : '<span class="chip no" style="padding:2px 8px;font-size:12px">Incomplete</span>';
+        return '<div class="ov-todo-row' + doneClass + '" style="padding:10px 4px">' +
+            (it.is_done ? OK_SVG : NO_SVG) +
+            '<div class="ov-todo-info">' +
+                '<div style="display:flex;align-items:center;gap:6px">' +
+                    '<a class="ov-todo-link" href="/todos/' + it.id + '" onclick="event.preventDefault(); openTodo(' + it.id + ')" style="color:#ef5777;font-weight:600">' + esc(it.title) + '</a>' +
+                    '<a href="/todos/' + it.id + '" onclick="event.preventDefault(); openTodo(' + it.id + ')" title="打开待办 #' + it.id + '" style="display:inline-flex">' + LINK_SVG + '</a>' +
+                    statusChip +
+                '</div>' +
+                '<div class="ov-todo-meta">#' + it.id + ' · ' + esc(it.creator_name) + ' · ' + esc(it.created_at) + '</div>' +
+            '</div>' +
+            '<button class="ov-todo-check" title="' + (it.is_done ? '撤销' : '完成') + '" onclick="btnRun(this, function(){ return markDone(' + it.id + ', ' + (!it.is_done) + ') })">' +
+                (it.is_done ? UNDO_SVG : CHECK_SVG) +
+            '</button>' +
+        '</div>';
     }).join('');
     _schedMasonry();
 }
@@ -536,7 +573,7 @@ function updateScrollIndicators() {
     }
     var rows = pageList.querySelectorAll('.trow');
     var incompleteIds = {};
-    __todoData.forEach(function(it) { if (!it.is_done) incompleteIds[it.id] = true; });
+    (__todoPageData || []).forEach(function(it) { if (!it.is_done) incompleteIds[it.id] = true; });
     if (!Object.keys(incompleteIds).length) {
         topEl.classList.remove('show');
         botEl.classList.remove('show');
@@ -836,6 +873,8 @@ async function submitTodoEdit() {
 }
 var __trackTodoId = null;
 var __trackTodoData = null;
+var __todoPageData = [];
+var __todoPageScope = 'all';
 async function loadTrackTodo() {
     var ret = await getJson('/api/track_todo');
     if (ret.code !== 0) return;
