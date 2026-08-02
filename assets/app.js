@@ -58,9 +58,9 @@ async function postJson(url, body) {
     });
     return res.json();
 }
-var PAGE_PATH = { home: '/', overview: '/overview', todo: '/todos', notice: '/notice', project: '/projects', apis: '/apis', logs: '/logs', mcsm: '/mcsmanager', team: '/team', addtodo: '/todos/add', tododetail: '/todos' };
-var NAV_OF = { home: 'home', overview: 'overview', todo: 'todo', notice: 'notice', project: 'project', apis: 'apis', logs: 'overview', mcsm: 'mcsm', team: 'team', addtodo: 'todo', tododetail: 'todo' };
-var PAGE_LOADER = { home: null, overview: loadOverview, todo: loadTodo, notice: loadNotice, project: loadProject, apis: loadApis, logs: loadLogs, mcsm: loadMcsm, team: loadTeam, addtodo: resetAddTodo, tododetail: null };
+var PAGE_PATH = { home: '/', overview: '/overview', todo: '/todos', notice: '/notice', project: '/projects', apis: '/apis', logs: '/logs', mcsm: '/mcsmanager', team: '/team', addtodo: '/todos/add', tododetail: '/todos', settings: '/settings' };
+var NAV_OF = { home: 'home', overview: 'overview', todo: 'todo', notice: 'notice', project: 'project', apis: 'apis', logs: 'overview', mcsm: 'mcsm', team: 'team', addtodo: 'todo', tododetail: 'todo', settings: 'settings' };
+var PAGE_LOADER = { home: null, overview: loadOverview, todo: loadTodo, notice: loadNotice, project: loadProject, apis: loadApis, logs: loadLogs, mcsm: loadMcsm, team: loadTeam, addtodo: resetAddTodo, tododetail: null, settings: loadSettings };
 var SPIN_SVG = '<svg xmlns="http://www.w3.org/2000/svg" class="spin" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3a9 9 0 1 0 9 9"/></svg>';
 var LEVEL_NAME = { 0: '待定', 1: '志愿者 | 初级', 2: '志愿者 | 中级', 3: '志愿者 | 高级', 4: '管理员', 5: '服主' };
 var LEVEL_COLOR = { 0: '#888', 1: '#4caf7d', 2: '#4dabf7', 3: '#cc5de8', 4: '#f59f00', 5: '#ef5777' };
@@ -71,9 +71,9 @@ var DEFAULT_PAGE_ACCESS = {
     todo: { min_level: 1, show_in_nav: 1 }, notice: { min_level: 1, show_in_nav: 1 },
     project: { min_level: 1, show_in_nav: 1 }, apis: { min_level: 1, show_in_nav: 1 },
     mcsm: { min_level: 4, show_in_nav: 1 }, team: { min_level: 5, show_in_nav: 1 },
-    invite_create: { min_level: 4, show_in_nav: 0 }
+    invite_create: { min_level: 4, show_in_nav: 0 }, settings: { min_level: 0, show_in_nav: 1 }
 };
-var PAGE_LABEL = { home: '空间首页', overview: '个人概览', todo: '待办事项', notice: '通知动态', project: '项目展示', apis: 'API 文档', mcsm: 'MCSManager', team: '团队管理', invite_create: '生成邀请码' };
+var PAGE_LABEL = { home: '空间首页', overview: '个人概览', todo: '待办事项', notice: '通知动态', project: '项目展示', apis: 'API 文档', mcsm: 'MCSManager', team: '团队管理', invite_create: '生成邀请码', settings: '设置' };
 var PAGE_KIND = { invite_create: 'feature' };
 var meUser = null;
 var pageAccess = {};
@@ -332,7 +332,7 @@ function renderTodoPage() {
         if (it.is_done && it.my_done_at) {
             doneExtra = ' <span class="t-done-time">· 你已于 ' + esc(it.my_done_at) + ' 完成</span>';
         }
-        var meta = '<div class="t-meta">' + gTag + '由 ' + avaHtml + '<span class="t-creator-name">' + esc(it.creator_name) + '</span> 创建 · ' + esc(it.created_at) + doneExtra + '</div>';
+        var meta = '<div class="t-meta">' + gTag + '由 ' + avaHtml + '<span class="t-creator-name">' + esc(it.creator_name) + '</span> 创建 · ' + esc(it.created_at) + (it.updated_at ? '<span class="t-updated">最后修改于 ' + esc(it.updated_at) + '</span>' : '') + doneExtra + '</div>';
         var doneAvas = '';
         if (it.done_users && it.done_users.length) {
             var avas = it.done_users.slice(0, 5).map(function(u) {
@@ -392,6 +392,47 @@ async function loadTodo() {
 }
 function renderTodoHome() {
     var homeBox = document.getElementById('todoList');
+    if (__trackTodoId && __trackTodoData) {
+        var t = __trackTodoData.todo;
+        if (t) {
+            var tagChip = '';
+            if (t.tags && t.tags.length) {
+                tagChip = t.tags.slice(0, 3).map(function(tg) {
+                    var c = tg.color || '#ef5777';
+                    return '<span class="t-tag-chip" style="color:' + c + ';border-color:' + hexA(c,.45) + ';background:' + hexA(c,.08) + '">' + esc(tg.name) + '</span>';
+                }).join(' ');
+            }
+            var assigneesHtml = '';
+            var trackD = __trackTodoData;
+            if (t.is_global) assigneesHtml = '<span class="chip global-tag">全体成员</span>';
+            else if (trackD.assignees && trackD.assignees.length) {
+                assigneesHtml = trackD.assignees.map(function(u) {
+                    return '<span class="td-person-sm"><img src="' + avatarUrl(u) + '">' + esc(u.name) + '</span>';
+                }).join(' ');
+            }
+            var total = t.is_global ? ALL_USERS.length : (trackD.assignees ? trackD.assignees.length : 0);
+            var doneCnt = trackD.done_users ? trackD.done_users.length : 0;
+            var pct = total > 0 ? Math.round(doneCnt * 100 / total) : 0;
+            var updatedHtml = t.updated_at ? ' <span class="td-sep">|</span> <span class="td-time">最后修改于 ' + esc(t.updated_at) + '</span>' : '';
+            var gTag = t.is_global ? '<span class="chip global-tag">全局</span>' : '';
+            var html = '<div class="tracked-todo">' +
+                '<div class="tracked-head">' +
+                '<div class="tracked-icon"></div>' +
+                '<div class="tracked-title-wrap">' +
+                '<div class="tracked-title">#<b>' + esc(t.id) + '</b> · ' + esc(t.title) + ' ' + gTag + '</div>' +
+                '<div class="tracked-meta">创建于 ' + esc(t.created_at) + updatedHtml + '</div>' +
+                '</div>' +
+                '<button class="td-track-btn active" onclick="btnRun(this, function(){ return toggleTrackTodo(' + t.id + ') })"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M21 21l-4.35-4.35"/><circle cx="11" cy="11" r="8"/></g></svg> 已追踪</button>' +
+                '</div>';
+            if (tagChip) html += '<div class="tracked-section"><div class="tracked-label">Tag</div><div class="t-tags">' + tagChip + '</div></div>';
+            if (assigneesHtml) html += '<div class="tracked-section"><div class="tracked-label">负责人</div><div class="td-assignees-sm">' + assigneesHtml + '</div></div>';
+            html += '<div class="tracked-section"><div class="tracked-label">进度</div><div class="tracked-progress"><div class="tracked-progress-bar" style="width:' + pct + '%"></div></div><span class="tracked-progress-txt">' + doneCnt + '/' + total + ' 人已完成 (' + pct + '%)</span></div>';
+            if (t.content) html += '<div class="tracked-section"><div class="tracked-label">内容</div><div class="td-content">' + esc(t.content) + '</div></div>';
+            html += '<div class="tracked-actions"><button class="td-link-btn" onclick="navTodoDetail(event, ' + t.id + ')">查看详情 →</button></div>';
+            homeBox.innerHTML = html;
+            return;
+        }
+    }
     if (!__todoData.length) {
         homeBox.innerHTML = '<div class="empty-tip">暂时没有待办, 很清闲喵</div>';
         return;
@@ -506,13 +547,20 @@ function renderTodoDetail(d) {
             return '<a class="t-tag-chip" href="/todos/tag/' + tg.id + '" style="color:' + c + ';border-color:' + hexA(c,.45) + ';background:' + hexA(c,.08) + '" onclick="return navTodoTag(event,' + tg.id + ')">' + esc(tg.name) + '</a>';
         }).join(' ');
     }
-    var head = '<div class="td-head">' + icon + '<span class="td-title">#' + esc(t.id) + ' · ' + esc(t.title) + '</span>' + gTag + '</div>';
+    var trackCls = __trackTodoId == t.id ? ' active' : '';
+    var trackLabel = __trackTodoId == t.id ? '已追踪' : '追踪';
+    var trackBtn = '<button class="td-track-btn' + trackCls + '" onclick="btnRun(this, function(){ return toggleTrackTodo(' + t.id + ') })"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M21 21l-4.35-4.35"/><circle cx="11" cy="11" r="8"/></g></svg> ' + trackLabel + '</button>';
+    var editBtn = t.is_creator ? '<button class="td-edit-btn" onclick="openTodoEditModal(' + t.id + ')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M7 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-1"/><path d="M20.385 6.585a2.1 2.1 0 0 0-2.97-2.97L9 12v3h3zM16 5l3 3"/></g></svg> 编辑</button>' : '';
+    var headRight = '<div style="display:flex;gap:8px;align-items:center;flex-shrink:0">' + editBtn + trackBtn + '</div>';
+    var head = '<div class="td-head"><div class="td-head-left">' + icon + '<span class="td-title">#' + esc(t.id) + ' · ' + esc(t.title) + '</span>' + gTag + '</div>' + headRight + '</div>';
     var creator = { id: t.creator_id, name: t.creator_name, avatar: t.creator_avatar };
+    var updatedHtml = t.updated_at ? '<span class="td-sep">|</span><span class="td-time">最后修改于 ' + esc(t.updated_at) + '</span>' : '';
     var creatorLine = '<div class="td-meta">' +
         '<img class="td-ava" src="' + avatarUrl(creator) + '" alt="">' +
         '<span class="td-name">' + esc(t.creator_name) + '</span>' +
         '<span class="td-sep">|</span>' +
         '<span class="td-time">创建时间 ' + esc(t.created_at) + '</span>' +
+        updatedHtml +
         '</div>';
     var tagSection = tagChip ? '<div class="td-section"><div class="td-label">Tag</div><div class="t-tags">' + tagChip + '</div></div>' : '';
     var assigneeHtml = '';
@@ -549,6 +597,217 @@ async function markTodoDetailDone(done) {
     if (!__todoDetailId) return;
     await postJson('/api/todo', { id: parseInt(__todoDetailId), done: done });
     await loadTodoDetail(__todoDetailId);
+    await loadTrackTodo();
+    renderTodoHome();
+}
+var __editTodoId = null;
+var __editTags = [];
+var __editAssigns = [];
+function openTodoEditModal(id) {
+    var it = (__todoData || []).find(function(x) { return x.id == id; });
+    if (!it) { alert('待办未加载'); return; }
+    __editTodoId = id;
+    __editTags = (it.tags || []).map(function(x) { return { id: x.id, name: x.name, color: x.color }; });
+    __editAssigns = [];
+    var head = '编辑待办 #' + id;
+    var tagsHtml = renderEditTags();
+    var assignsHtml = renderEditAssignsChips();
+    var body = '<div class="add-todo-card">' +
+        '<div class="add-todo-row"><label>标题</label><input id="etTitle" type="text" placeholder="待办标题" value="' + escAttr(it.title || '') + '"></div>' +
+        '<div class="add-todo-row"><label>链接 (可选, 默认跳转到详情)</label><input id="etLink" type="text" placeholder="https://..." value="' + escAttr(it.link || '') + '"></div>' +
+        '<div class="add-todo-row"><label>内容描述</label><textarea id="etContent" rows="5" placeholder="详细描述该任务...">' + esc(it.content || '') + '</textarea></div>' +
+        '<div class="add-todo-row"><label class="row-inline"><input type="checkbox" id="etGlobal"' + (it.is_global ? ' checked' : '') + ' onchange="document.getElementById(\'etAssignRow\').classList.toggle(\'hide\', this.checked)"> 全局待办 (全员可见, 无需指派)</label></div>' +
+        '<div class="add-todo-row hide" id="etAssignRow">' +
+        '<label>指派负责人</label>' +
+        '<div class="picker-wrap"><div class="picker" id="etAssignPicker" onclick="document.getElementById(\'etAssignInput\').focus()">' + assignsHtml +
+        '<input id="etAssignInput" placeholder="输入昵称搜索" autocomplete="off" onfocus="etAssignSearch(this.value)" oninput="etAssignSearch(this.value)" onkeydown="etAssignKey(event)"></div>' +
+        '<div class="picker-drop hide" id="etAssignDrop"></div></div></div>' +
+        '<div class="add-todo-row"><label>Tag</label>' +
+        '<div class="picker-wrap"><div class="picker" id="etTagPicker" onclick="document.getElementById(\'etTagInput\').focus()">' + tagsHtml +
+        '<input id="etTagInput" placeholder="搜索Tag" autocomplete="off" onfocus="etTagSearch(this.value)" oninput="etTagSearch(this.value)" onkeydown="etTagKey(event)"></div>' +
+        '<div class="picker-drop hide" id="etTagDrop"></div></div></div>' +
+        '<div class="err-tip" id="etErr" style="color:#ef5777;font-size:12px;margin-top:6px"></div>' +
+        '</div>';
+    var foot = '<button class="act-btn" onclick="closeModal()">取消</button>' +
+        '<button class="add-todo-btn" onclick="btnRun(this, submitTodoEdit)">保存修改</button>';
+    openModal(head, body, foot);
+}
+function renderEditTags() {
+    return __editTags.map(function(t) {
+        var c = t.color || '#ef5777';
+        return '<span class="u-chip skill" style="color:' + c + ';border-color:' + hexA(c,.45) + ';background:' + hexA(c,.08) + '"><span>' + esc(t.name) + '</span><span class="rm" onclick="__editTags = __editTags.filter(function(x){return x.id!==' + t.id + '});openTodoEditModalRefresh()">' + X_SVG + '</span></span>';
+    }).join('');
+}
+function renderEditAssignsChips() {
+    return __editAssigns.map(function(u) {
+        return '<span class="u-chip"><img src="' + avatarUrl(u) + '" alt=""><span>' + esc(u.name) + '</span><span class="rm" onclick="__editAssigns = __editAssigns.filter(function(x){return x.id!==' + u.id + '});openTodoEditModalRefresh()">' + X_SVG + '</span></span>';
+    }).join('');
+}
+function openTodoEditModalRefresh() {
+    if (!__editTodoId) return;
+    var tagPick = document.getElementById('etTagPicker');
+    if (tagPick) {
+        tagPick.querySelectorAll('.u-chip').forEach(function(c) { c.remove(); });
+        tagPick.insertAdjacentHTML('afterbegin', renderEditTags());
+    }
+    var ap = document.getElementById('etAssignPicker');
+    if (ap) {
+        ap.querySelectorAll('.u-chip').forEach(function(c) { c.remove(); });
+        ap.insertAdjacentHTML('afterbegin', renderEditAssignsChips());
+    }
+}
+function etTagSearch(kw) {
+    var drop = document.getElementById('etTagDrop');
+    if (!drop) return;
+    kw = (kw || '').trim();
+    var all = [];
+    for (var k in __todoTagMeta) all.push(__todoTagMeta[k]);
+    var filtered = kw ? all.filter(function(t) { return t.name.indexOf(kw) !== -1; }) : all;
+    filtered = filtered.filter(function(t) { return !__editTags.some(function(s) { return s.id === t.id; }); });
+    if (!filtered.length) { drop.innerHTML = '<div class="drop-empty">' + (kw ? '没有匹配的Tag' : '暂无可选Tag') + '</div>'; drop.classList.remove('hide'); return; }
+    drop.innerHTML = filtered.map(function(t) {
+        var c = t.color || '#ef5777';
+        return '<div class="drop-row" onclick="pickEditTag(' + t.id + ')"><span class="skill-tag sm" style="color:' + c + ';border-color:' + hexA(c,.45) + ';background:' + hexA(c,.08) + '">' + esc(t.name) + '</span></div>';
+    }).join('');
+    drop.classList.remove('hide');
+}
+function etTagKey(e) {
+    if (e.key === 'Backspace' && !e.target.value && __editTags.length) { __editTags.pop(); openTodoEditModalRefresh(); }
+    if (e.key === 'Enter') e.preventDefault();
+}
+function pickEditTag(id) {
+    var t = __todoTagMeta[id]; if (!t) return;
+    if (__editTags.some(function(s) { return s.id === id; })) return;
+    __editTags.push({ id: t.id, name: t.name, color: t.color });
+    openTodoEditModalRefresh();
+    var inp = document.getElementById('etTagInput'); if (inp) { inp.value = ''; inp.focus(); }
+    document.getElementById('etTagDrop').classList.add('hide');
+}
+function etAssignSearch(kw) {
+    var drop = document.getElementById('etAssignDrop'); if (!drop) return;
+    kw = (kw || '').trim().toLowerCase();
+    var all = ALL_USERS.filter(function(u) { return (u.name || '').toLowerCase().indexOf(kw) !== -1 || (u.email || '').toLowerCase().indexOf(kw) !== -1; });
+    if (!kw) all = all.slice(0, 20);
+    all = all.filter(function(u) { return !__editAssigns.some(function(x) { return x.id === u.id; }); });
+    if (!all.length) { drop.innerHTML = '<div class="drop-empty">没有匹配的用户</div>'; drop.classList.remove('hide'); return; }
+    drop.innerHTML = all.slice(0, 20).map(function(u) {
+        return '<div class="drop-row" onclick="pickEditAssign(' + u.id + ')"><img class="d-ava" src="' + avatarUrl(u) + '" alt=""><div class="d-main"><div class="d-name">' + esc(u.name) + '</div><div class="d-mail">' + esc(u.email || '') + '</div></div></div>';
+    }).join('');
+    drop.classList.remove('hide');
+}
+function etAssignKey(e) {
+    if (e.key === 'Backspace' && !e.target.value && __editAssigns.length) { __editAssigns.pop(); openTodoEditModalRefresh(); }
+    if (e.key === 'Enter') e.preventDefault();
+}
+function pickEditAssign(id) {
+    var u = ALL_USERS.find(function(x) { return x.id === id; }); if (!u) return;
+    if (__editAssigns.some(function(s) { return s.id === id; })) return;
+    __editAssigns.push({ id: u.id, name: u.name, avatar: u.avatar, email: u.email });
+    openTodoEditModalRefresh();
+    var inp = document.getElementById('etAssignInput'); if (inp) { inp.value = ''; inp.focus(); }
+    document.getElementById('etAssignDrop').classList.add('hide');
+}
+async function submitTodoEdit() {
+    if (!__editTodoId) return;
+    var title = (document.getElementById('etTitle').value || '').trim();
+    var err = document.getElementById('etErr');
+    if (!title) { err.textContent = '标题不能为空'; return; }
+    var link = (document.getElementById('etLink').value || '').trim();
+    var content = (document.getElementById('etContent').value || '').trim();
+    var is_global = document.getElementById('etGlobal').checked ? 1 : 0;
+    var body = { edit_todo_id: __editTodoId, title: title, link: link, content: content, is_global: is_global };
+    if (__editTags.length) body.tag_ids = __editTags.map(function(t) { return t.id; });
+    if (!is_global) {
+        if (__editAssigns.length) body.assignees = __editAssigns.map(function(u) { return u.id; });
+    }
+    var ret = await postJson('/api/todo', body);
+    if (ret.code !== 0) { err.textContent = ret.message || '保存失败'; return; }
+    closeModal();
+    notify(null, '已保存', '待办 #' + __editTodoId + ' 修改已保存', 2500, '', false);
+    var _savedId = __editTodoId;
+    __editTodoId = null; __editTags = []; __editAssigns = [];
+    await loadTodo();
+    if (__todoDetailId == _savedId || String(__todoDetailId) === String(_savedId)) await loadTodoDetail(__todoDetailId);
+    if (__trackTodoId == _savedId || String(__trackTodoId) === String(_savedId)) { await loadTrackTodo(); renderTodoHome(); }
+}
+var __trackTodoId = null;
+var __trackTodoData = null;
+async function loadTrackTodo() {
+    var ret = await getJson('/api/track_todo');
+    if (ret.code !== 0) return;
+    __trackTodoId = ret.data && ret.data.track_todo_id ? ret.data.track_todo_id : null;
+    __trackTodoData = ret.data && ret.data.track ? ret.data.track : null;
+}
+async function toggleTrackTodo(id) {
+    if (__trackTodoId == id) {
+        await postJson('/api/track_todo', { clear: 1 });
+        notify(null, '已取消追踪', '待办 #' + id + ' 已从首页卡片移除', 2500, '', false);
+    } else {
+        await postJson('/api/track_todo', { todo_id: id });
+        notify(null, '已追踪', '待办 #' + id + ' 将显示在空间首页', 2500, '', false);
+    }
+    await loadTrackTodo();
+    renderTodoHome();
+    if (__todoDetailId) await loadTodoDetail(__todoDetailId);
+}
+async function sendPwdEmailCode() {
+    var btn = document.getElementById('pwdSendCodeBtn');
+    if (!meUser || !meUser.email) return;
+    var ret = await postJson('/api/send_email_code', { email: meUser.email, purpose: 'change_pwd' });
+    if (ret.code !== 0) { markErr(btn, ret.message || '发送失败'); return; }
+    notify(null, '验证码已发送', '请查收邮箱', 3000, '', false);
+    var t = 120;
+    btn.disabled = true;
+    btn.dataset.busy = '1';
+    var old = btn.innerHTML;
+    var itv = setInterval(function() {
+        t--;
+        btn.innerHTML = t + 's 后重发';
+        if (t <= 0) { clearInterval(itv); btn.innerHTML = old; btn.disabled = false; delete btn.dataset.busy; }
+    }, 1000);
+}
+async function submitChangePwd() {
+    var old_pwd = document.getElementById('pwdOld').value || '';
+    var new_pwd = document.getElementById('pwdNew').value || '';
+    var code = (document.getElementById('pwdCode').value || '').trim();
+    if (!old_pwd) { markErr(document.getElementById('pwdOld'), '请输入原密码'); return; }
+    if (new_pwd.length < 6) { markErr(document.getElementById('pwdNew'), '新密码至少6位'); return; }
+    if (!code) { markErr(document.getElementById('pwdCode'), '请输入邮箱验证码'); return; }
+    var ret = await postJson('/api/change_password', { old_password: old_pwd, new_password: new_pwd, email_code: code });
+    if (ret.code !== 0) {
+        if (ret.code === 403) markErr(document.getElementById('pwdOld'), ret.message || '原密码错误');
+        else if (ret.code === 400) markErr(document.getElementById('pwdCode'), ret.message || '验证码错误');
+        else notify(null, '修改失败', ret.message || '未知错误', 4000, '', false);
+        return;
+    }
+    notify(null, '密码已更新', '请使用新密码重新登录', 3000, '', false);
+    document.getElementById('pwdOld').value = '';
+    document.getElementById('pwdNew').value = '';
+    document.getElementById('pwdCode').value = '';
+    setTimeout(doLogout, 1500);
+}
+var __notifyState = {};
+async function loadSettings() {
+    var nr = await getJson('/api/notify_settings');
+    if (nr.code === 0) {
+        __notifyState = nr.data || {};
+        document.querySelectorAll('#pageSettings .switch').forEach(function(sw) {
+            var k = sw.dataset.key;
+            sw.classList.toggle('on', !!__notifyState[k]);
+        });
+    }
+}
+async function toggleNotifySwitch(sw) {
+    var k = sw.dataset.key;
+    var val = sw.classList.contains('on') ? 0 : 1;
+    var body = {}; body[k] = val;
+    var ret = await postJson('/api/notify_settings', body);
+    if (ret.code === 0) {
+        sw.classList.toggle('on', !!val);
+        __notifyState[k] = val;
+    } else {
+        notify(null, '保存失败', ret.message || '服务器错误', 4000, '', false);
+    }
 }
 var assignUsers = [];
 function toggleGlobalTodo() {
@@ -1992,7 +2251,7 @@ async function submitProject() {
     showPage(start);
     initMeteors();
     document.addEventListener('click', function(e) {
-        ['#assignDrop','#mmSkillDrop','#gmDrop','#atTagDrop','#pfSkillDrop'].forEach(function(sel) {
+        ['#assignDrop','#mmSkillDrop','#gmDrop','#atTagDrop','#pfSkillDrop','#etTagDrop','#etAssignDrop'].forEach(function(sel) {
             var d = document.querySelector(sel);
             if (!d || d.classList.contains('hide')) return;
             if (!e.target.closest('.picker-wrap')) d.classList.add('hide');
@@ -2000,7 +2259,7 @@ async function submitProject() {
     });
     try {
         await loadSkillsMeta();
-        var jobs = [loadMe(), loadPagesConfig(), loadTodo(), loadNotice(), loadProject(), document.fonts.ready];
+        var jobs = [loadMe(), loadPagesConfig(), loadTodo(), loadNotice(), loadProject(), loadTrackTodo(), document.fonts.ready];
         if (start === 'overview') jobs.push(loadOverview());
         if (start === 'apis') jobs.push(loadApis());
         if (start === 'logs') jobs.push(loadLogs());

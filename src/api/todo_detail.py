@@ -13,7 +13,7 @@ def handle(request):
     try:
         with db.cursor() as cur:
             cur.execute(
-                "SELECT t.id, t.title, t.link, t.content, t.created_at, t.is_global, "
+                "SELECT t.id, t.title, t.link, t.content, t.created_at, t.updated_at, t.is_global, "
                 "u.id AS creator_id, u.name AS creator_name, u.avatar AS creator_avatar "
                 "FROM yyt_todo t JOIN yyt_user u ON t.creator_id = u.id "
                 "WHERE t.id = %s",
@@ -22,6 +22,7 @@ def handle(request):
             todo = cur.fetchone()
             if not todo:
                 return {"code": 404, "message": "待办不存在"}
+            todo['is_creator'] = (todo['creator_id'] == user['id'])
             cur.execute(
                 "SELECT r.tag_id AS id, t.name, t.color "
                 "FROM yyt_todo_tag_rel r JOIN yyt_todo_tag t ON r.tag_id = t.id "

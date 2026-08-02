@@ -1,56 +1,29 @@
 import smtplib
-import hashlib
+import os
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.utils import formataddr
 from config import SMTP_CONFIG
 
-def _ua_hash(ua):
-    return hashlib.md5((ua or '').encode()).hexdigest()[:16]
+_TPL_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'assets', 'mail_templates')
 
-def _build_html(code, purpose_label):
-    return f'''<!DOCTYPE html>
-<html><head><meta charset="UTF-8"></head>
-<body style="margin:0;padding:0;background:#0a0a0a;font-family:'MiSans','微软雅黑',sans-serif">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg,#1a0d12 0%,#0d0d0f 55%,#16090e 100%);min-height:100vh">
-<tr><td align="center" style="padding:40px 20px">
-<table width="420" cellpadding="0" cellspacing="0" style="background:#0f0f10;border:1px solid #2b2b2e;border-radius:14px;overflow:hidden">
-<tr><td style="padding:28px 32px 0">
-<div style="font-size:20px;font-weight:bold;color:#eee;letter-spacing:1px">@team / YanYuTing</div>
-<div style="font-size:13px;color:#ef5777;margin-top:4px">YanYuTing Passport</div>
-</td></tr>
-<tr><td style="padding:20px 32px">
-<div style="height:1px;background:#2b2b2e;margin-bottom:20px"></div>
-<p style="font-size:14px;color:#ccc;line-height:1.8;margin:0">
-你正在进行<strong style="color:#ef5777">{purpose_label}</strong>操作, 这是你的验证码:
-</p>
-<div style="text-align:center;margin:24px 0">
-<span style="display:inline-block;font-size:36px;letter-spacing:10px;font-weight:bold;color:#ef5777;background:#1a0d12;border:1px solid rgba(239,87,119,.3);border-radius:10px;padding:16px 28px">{code}</span>
-</div>
-<p style="font-size:12px;color:#777;line-height:1.7;margin:0">
-验证码 5 分钟内有效, 请勿泄露给他人.<br>
-如果这不是你本人的操作, 请忽略此邮件.
-</p>
-</td></tr>
-<tr><td style="padding:0 32px 20px">
-<div style="height:1px;background:#2b2b2e;margin-bottom:16px"></div>
-<p style="font-size:11px;color:#555;margin:0">
-@team / YanYuTing — 烟雨庭团队协作空间<br>
-此邮件由系统自动发送, 请勿回复
-</p>
-</td></tr>
-</table>
-</td></tr>
-</table>
-</body></html>'''
+def _load_tpl(name, vars=None):
+    p = os.path.join(_TPL_DIR, name)
+    try:
+        with open(p, 'r', encoding='utf-8') as f:
+            html = f.read()
+    except Exception:
+        return ''
+    if vars:
+        for k, v in vars.items():
+            html = html.replace('{{' + k + '}}', str(v))
+            html = html.replace('{% ' + k + ' %}', str(v))
+    return html
 
-def send_code_email(to_email, code, purpose):
+def _send_html(to_email, subject, html):
     cfg = SMTP_CONFIG
     if not cfg.get('host') or not cfg.get('user') or not cfg.get('password'):
         return False, 'SMTP未配置'
-    purpose_label = '登录' if purpose == 'login' else '注册'
-    subject = f'[@team] {purpose_label}验证码: {code}'
-    html = _build_html(code, purpose_label)
     msg = MIMEMultipart('alternative')
     msg['Subject'] = subject
     msg['From'] = formataddr((cfg.get('from_name', '@team'), cfg.get('from_addr') or cfg['user']))
@@ -68,3 +41,17 @@ def send_code_email(to_email, code, purpose):
         return True, 'ok'
     except Exception as e:
         return False, str(e)
+
+def send_code_email(to_email, code, purpose):
+    purpose_label = {'login': '登录', 'register': '注册', 'change_pwd': '修改密码'}.get(purpose, purpose or '验证')
+    subject = f'[@team] {purpose_label}验证码: {code}'
+    html = _load_tpl('email_code.html', {'PURPOSE': purpose_label, 'CODE': code})
+    if not html:
+        return False, '模板加载失败'
+    return _send_html(to_email, subject, html)
+
+def send_template_email(to_email, subject, tpl_name, vars=None):
+    html = _load_tpl(tpl_name, vars or {})
+    if not html:
+        return False, '模板加载失败'
+    return _send_html(to_email, subject, html)

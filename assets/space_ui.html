@@ -18,6 +18,7 @@
             <div class="nav-item" data-page="apis" onclick="switchPage('apis', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 13h5m3 3V8h3a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-3m8-5v8M9 16v-5.5a2.5 2.5 0 0 0-5 0V16"/></svg> API 文档</div>
             <div class="nav-item" data-page="mcsm" onclick="switchPage('mcsm', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1zm4 15h10m-8-4v4m6-4v4"/></svg> MCSManager</div>
             <div class="nav-item hide" data-page="team" onclick="switchPage('team', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8a4 4 0 0 0 0 8m13 10v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg> 团队管理</div>
+            <div class="nav-item" data-page="settings" onclick="switchPage('settings', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></g></svg> 设置</div>
         </div>
         <div class="side-user-wrap">
             <div class="user-menu hide" id="userMenu" onclick="event.stopPropagation()">
@@ -372,6 +373,71 @@
                     <div class="team-scroll" id="teamLogs"></div>
                     <div style="margin-top:14px;display:flex;justify-content:flex-end">
                         <button class="act-btn" id="teamLogsMoreBtn" onclick="btnRun(this, loadTeamLogsAll)">查看全部日志 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-6 6l6-6m-6-6l6 6"/></svg></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="page hide" id="pageSettings">
+            <div class="page-mini">SETTINGS</div>
+            <div class="page-title">设置</div>
+            <div class="page-sub">账号安全与通知偏好</div>
+            <div class="masonry-grid">
+                <div class="card">
+                    <div class="card-head">安全</div>
+                    <div class="setting-group">
+                        <div class="setting-group-title">修改密码</div>
+                        <div class="form-row">
+                            <label>原密码</label>
+                            <input type="password" id="pwdOld" placeholder="请输入原密码">
+                        </div>
+                        <div class="form-row">
+                            <label>新密码 (至少 6 位)</label>
+                            <input type="password" id="pwdNew" placeholder="请输入新密码">
+                        </div>
+                        <div class="form-row">
+                            <label>邮箱验证码</label>
+                            <div class="form-row-with-btn">
+                                <input type="text" id="pwdCode" placeholder="6位数字验证码" maxlength="6">
+                                <button class="act-btn" id="pwdSendCodeBtn" onclick="btnRun(this, sendPwdEmailCode)">发送验证码</button>
+                            </div>
+                        </div>
+                        <div style="margin-top:16px;display:flex;justify-content:flex-end">
+                            <button class="add-todo-btn" onclick="btnRun(this, submitChangePwd)">确认修改</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-head">通知</div>
+                    <div class="setting-group">
+                        <div class="setting-group-title">邮件推送</div>
+                        <div class="setting-row">
+                            <div>
+                                <div class="sr-title">待办完成状态推送</div>
+                                <div class="sr-desc">你创建的待办被全部完成时发送邮件通知</div>
+                            </div>
+                            <button class="switch" data-key="todo_done" onclick="toggleNotifySwitch(this)"></button>
+                        </div>
+                        <div class="setting-row">
+                            <div>
+                                <div class="sr-title">新待办推送</div>
+                                <div class="sr-desc">你被指派为待办负责人时发送邮件通知</div>
+                            </div>
+                            <button class="switch" data-key="todo_new" onclick="toggleNotifySwitch(this)"></button>
+                        </div>
+                        <div class="setting-row">
+                            <div>
+                                <div class="sr-title">上线推送</div>
+                                <div class="sr-desc">成员登录时发送邮件通知</div>
+                            </div>
+                            <button class="switch" data-key="online" onclick="toggleNotifySwitch(this)"></button>
+                        </div>
+                        <div class="setting-row">
+                            <div>
+                                <div class="sr-title">邀请码被使用推送</div>
+                                <div class="sr-desc">你创建的邀请码被注册使用时发送邮件通知</div>
+                            </div>
+                            <button class="switch" data-key="invite_used" onclick="toggleNotifySwitch(this)"></button>
+                        </div>
                     </div>
                 </div>
             </div>

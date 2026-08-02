@@ -12,21 +12,25 @@ CODE_EXPIRE_MINUTES = 5
 def handle(request):
     if request.method != 'POST':
         return {"code": 405, "message": "method not allow"}
-    # 检查是否被 email 风控封禁
     banned, btype, exp, _ = check_ban(request, 'email')
     if banned:
         return {"code": 429, "message": "请求过于频繁, 请稍后再试"}
     data = request.get_json(silent=True) or {}
     email = (data.get('email') or '').strip()
     purpose = (data.get('purpose') or '').strip()
-    if not email or purpose not in ('login', 'register'):
+    if not email:
         return {"code": 400, "message": "参数错误"}
-    # 风控检查
+    if purpose == 'change_pwd':
+        user = check_login(request)
+        if not user:
+            return {"code": 401, "message": "未登录"}
+        if email != user['email']:
+            return {"code": 400, "message": "只能给自己的邮箱发送验证码"}
+    elif purpose not in ('login', 'register'):
+        return {"code": 400, "message": "参数错误"}
     ok, msg = check_email_rate(request)
     if not ok:
         return {"code": 429, "message": msg}
-    # 登录场景: 验证邮箱是否已注册
-    # 注册场景: 验证邮箱是否未被注册
     db = get_db()
     try:
         with db.cursor() as cur:
@@ -36,7 +40,6 @@ def handle(request):
                 return {"code": 404, "message": "该邮箱未注册"}
             if purpose == 'register' and exists:
                 return {"code": 409, "message": "该邮箱已注册"}
-            # 生成验证码
             code = ''.join([str(secrets.randbelow(10)) for _ in range(6)])
             seg = ip_segment(get_client_ip(request))
             ua_hash = _ua_hash_from_request(request)
@@ -48,7 +51,6 @@ def handle(request):
         db.commit()
     finally:
         db.close()
-    # 发送邮件
     ok, err = send_code_email(email, code, purpose)
     if not ok:
         return {"code": 500, "message": "邮件发送失败: " + err}
