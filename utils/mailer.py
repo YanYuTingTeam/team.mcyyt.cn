@@ -7,6 +7,23 @@ from config import SMTP_CONFIG
 
 _TPL_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'assets', 'mail_templates')
 
+import re
+_IF_RE = re.compile(r'\{%\s*if\s+([A-Z0-9_]+)\s*%\}([\s\S]*?)\{%\s*endif\s*%\}', re.IGNORECASE)
+
+def _render_ifs(html, vars):
+    def _sub(m):
+        key = m.group(1).strip()
+        body = m.group(2)
+        val = vars.get(key, '')
+        if val:
+            return body
+        return ''
+    prev = None
+    while prev != html:
+        prev = html
+        html = _IF_RE.sub(_sub, html)
+    return html
+
 def _load_tpl(name, vars=None):
     p = os.path.join(_TPL_DIR, name)
     try:
@@ -14,10 +31,12 @@ def _load_tpl(name, vars=None):
             html = f.read()
     except Exception:
         return ''
-    if vars:
-        for k, v in vars.items():
-            html = html.replace('{{' + k + '}}', str(v))
-            html = html.replace('{% ' + k + ' %}', str(v))
+    v = vars or {}
+    html = _render_ifs(html, v)
+    if v:
+        for k, val in v.items():
+            html = html.replace('{{' + k + '}}', str(val))
+            html = html.replace('{% ' + k + ' %}', str(val))
     return html
 
 def _send_html(to_email, subject, html):

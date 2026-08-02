@@ -495,12 +495,16 @@ function renderTodoHome() {
             var pct = total > 0 ? Math.round(doneCnt * 100 / total) : 0;
             var updatedHtml = t.updated_at ? ' <span class="td-sep">|</span> <span class="td-time">最后修改于 ' + esc(t.updated_at) + '</span>' : '';
             var gTag = t.is_global ? '<span class="chip global-tag">全局</span>' : '';
+            var creatorAva = t.creator_avatar
+                ? ('<img class="t-creator-ava" src="' + avatarUrl({id:t.creator_id,name:t.creator_name,avatar:t.creator_avatar}) + '" alt="">')
+                : ('<img class="t-creator-ava" src="' + avatarUrl({id:t.creator_id,name:t.creator_name}) + '" alt="">');
+            var creatorLine = creatorAva + ' <span class="t-creator-name" style="color:#ccc">' + esc(t.creator_name) + '</span>';
             var html = '<div class="tracked-todo">' +
                 '<div class="tracked-head">' +
                 '<div class="tracked-icon"></div>' +
                 '<div class="tracked-title-wrap">' +
                 '<div class="tracked-title">#<b>' + esc(t.id) + '</b> · ' + esc(t.title) + ' ' + gTag + '</div>' +
-                '<div class="tracked-meta">创建于 ' + esc(t.created_at) + updatedHtml + '</div>' +
+                '<div class="tracked-meta">' + creatorLine + ' · 创建于 ' + esc(t.created_at) + updatedHtml + '</div>' +
                 '</div>' +
                 '<button class="td-track-btn active" onclick="btnRun(this, function(){ return toggleTrackTodo(' + t.id + ') })"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M21 21l-4.35-4.35"/><circle cx="11" cy="11" r="8"/></g></svg> 已追踪</button>' +
                 '</div>';
@@ -508,7 +512,7 @@ function renderTodoHome() {
             if (assigneesHtml) html += '<div class="tracked-section"><div class="tracked-label">负责人</div><div class="td-assignees-sm">' + assigneesHtml + '</div></div>';
             html += '<div class="tracked-section"><div class="tracked-label">进度</div><div class="tracked-progress"><div class="tracked-progress-bar" style="width:' + pct + '%"></div></div><span class="tracked-progress-txt">' + doneCnt + '/' + total + ' 人已完成 (' + pct + '%)</span></div>';
             if (t.content) html += '<div class="tracked-section"><div class="tracked-label">内容</div><div class="td-content">' + esc(t.content) + '</div></div>';
-            html += '<div class="tracked-actions"><button class="td-link-btn" onclick="navTodoDetail(event, ' + t.id + ')">查看详情 →</button></div>';
+            html += '<div class="tracked-actions"><button class="act-btn" onclick="openTodo(' + t.id + ')">查看详情 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-6 6l6-6m-6-6l6 6"/></svg></button></div>';
             homeBox.innerHTML = html;
             _schedMasonry();
             return;
@@ -1909,17 +1913,30 @@ function renderTeamInvites(invites) {
     }
     var html = invites.map(function(iv) {
         var used = !!iv.used_at;
-        var top = '<div class="iv-top"><span class="iv-code">#' + esc(iv.code) + '</span>' +
-            (used ? '<span class="chip no">已被使用</span>' : '<span class="chip ok">未使用</span>') + '</div>';
+        var disabled = !!iv.disabled;
+        var statusChip = used
+            ? '<span class="chip no">已被使用</span>'
+            : (disabled ? '<span class="chip no" style="background:rgba(239,87,119,.1);border-color:rgba(239,87,119,.4);color:#ef5777">失效</span>' : '<span class="chip ok">未使用</span>');
+        var top = '<div class="iv-top"><span class="iv-code">#' + esc(iv.code) + '</span>' + statusChip + '</div>';
         var creator = iv.creator_name ? '创建者: ' + esc(iv.creator_name) : '创建者: 系统';
+        var actions = [];
+        if (!used) actions.push('<button class="act-btn" style="flex:1;justify-content:center" onclick="copyText(\'' + esc(iv.code) + '\', this)">复制邀请码</button>');
+        if (!used && !disabled) actions.push('<button class="act-btn danger" style="flex:1;justify-content:center" onclick="btnRun(this, function(){ return disableInvite(\'' + escAttr(iv.code) + '\') })">标记失效</button>');
         var mid = used
             ? '<div class="iv-user"><img src="' + avatarUrl({name: iv.used_name, avatar: iv.used_avatar}) + '" alt=""><div><div class="iv-un">' + esc(iv.used_name || '--') + '</div><div class="iv-ue">' + esc(iv.used_email || '--') + '</div></div></div>' +
               '<div class="iv-date">' + creator + '<br>创建: ' + esc(iv.created_at) + '<br>使用: ' + esc(iv.used_at) + '</div>'
             : '<div class="iv-date">' + creator + '<br>创建: ' + esc(iv.created_at) + '</div>' +
-              '<div style="margin-top:10px"><button class="act-btn" style="width:100%;justify-content:center" onclick="copyText(\'' + esc(iv.code) + '\', this)">复制邀请码</button></div>';
+              (actions.length ? ('<div style="margin-top:10px;display:flex;gap:8px">' + actions.join('') + '</div>') : '');
         return '<div class="invite-box">' + top + mid + '</div>';
     }).join('');
     document.getElementById('teamInvites').innerHTML = html;
+}
+async function disableInvite(code) {
+    var ret = await postJson('/api/admin_invites', { action: 'disable', code: code });
+    if (ret.code === 0) {
+        await refreshTeamInvites();
+    }
+    return ret;
 }
 function renderTeamStats(s) {
     var items = [

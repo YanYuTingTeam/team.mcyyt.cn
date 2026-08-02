@@ -452,6 +452,8 @@ a { color: #ef5777; }
 }
 .act-btn svg { width: 14px; height: 14px; }
 .act-btn:hover { border-color: #ef5777; color: #ef5777; }
+.act-btn.danger { color: #ef5777; border-color: rgba(239,87,119,.45); background: rgba(239,87,119,.06); }
+.act-btn.danger:hover { background: rgba(239,87,119,.14); }
 .panel .add-row { margin: 8px 0 14px; }
 .page-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
 .page-head .htxt { min-width: 0; }
@@ -1219,7 +1221,8 @@ input.input-error, select.input-error, textarea.input-error { border-color: #ef5
 .tracked-title-wrap { flex: 1; min-width: 0; }
 .tracked-title { font-size: 17px; font-weight: bold; color: #fff; margin-bottom: 4px; word-break: break-word; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .tracked-title b { color: #ef5777; font-family: 'Orbixbeta', sans-serif; font-weight: 400; }
-.tracked-meta { font-size: 12px; color: #888; display: flex; align-items: center; flex-wrap: wrap; gap: 0; }
+.tracked-meta { font-size: 12px; color: #888; display: flex; align-items: center; flex-wrap: wrap; gap: 4px; }
+.tracked-meta .t-creator-ava { width: 16px; height: 16px; border-radius: 50%; vertical-align: middle; border: 1px solid #2b2b2e; object-fit: cover; }
 .tracked-section { margin-bottom: 14px; }
 .tracked-label { font-size: 12px; color: #ef5777; margin-bottom: 8px; font-family: 'Orbixbeta', 'MiSans', sans-serif; }
 .td-assignees-sm { display: flex; flex-wrap: wrap; gap: 8px; }

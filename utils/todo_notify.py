@@ -6,6 +6,38 @@ _notify_inited = False
 NOTIFY_KEYS = ('todo_done', 'todo_new', 'online', 'invite_used')
 DEFAULT_NOTIFY = {k: 1 for k in NOTIFY_KEYS}
 
+def get_base_url():
+    try:
+        from config import BASE_URL
+        b = BASE_URL or ''
+        if b:
+            return b.rstrip('/')
+    except Exception:
+        pass
+    return 'https://team.mcyyt.cn'
+
+def _ensure_notice_cols(cur):
+    try:
+        cur.execute("SHOW COLUMNS FROM yyt_notice LIKE 'user_id'")
+        if not cur.fetchone():
+            cur.execute("ALTER TABLE yyt_notice ADD COLUMN user_id INT DEFAULT NULL, ADD KEY idx_user (user_id)")
+    except Exception:
+        pass
+    try:
+        cur.execute("SHOW COLUMNS FROM yyt_notice LIKE 'content'")
+        if not cur.fetchone():
+            cur.execute("ALTER TABLE yyt_notice ADD COLUMN content TEXT")
+    except Exception:
+        pass
+
+def _ensure_invite_cols(cur):
+    try:
+        cur.execute("SHOW COLUMNS FROM yyt_invite LIKE 'disabled'")
+        if not cur.fetchone():
+            cur.execute("ALTER TABLE yyt_invite ADD COLUMN disabled TINYINT DEFAULT 0")
+    except Exception:
+        pass
+
 def _init_table(cur):
     global _notify_inited
     if _notify_inited:
@@ -28,7 +60,44 @@ def _init_table(cur):
             cur.execute("ALTER TABLE yyt_user ADD COLUMN track_todo_id INT DEFAULT NULL")
     except Exception:
         pass
+    _ensure_notice_cols(cur)
+    _ensure_invite_cols(cur)
     _notify_inited = True
+
+def add_user_notice(user_id, title, content=None):
+    if not user_id:
+        return False
+    ok = False
+    db = get_db()
+    try:
+        with db.cursor() as cur:
+            _init_table(cur)
+            cur.execute(
+                "INSERT INTO yyt_notice (user_id, title, content) VALUES (%s, %s, %s)",
+                (int(user_id), (title or '').strip()[:255], (content or '').strip() or None)
+            )
+            db.commit()
+            nid = cur.lastrowid
+            ok = True
+        try:
+            cur2 = None
+            with db.cursor() as cur2:
+                cur2.execute("SELECT email, name FROM yyt_user WHERE id = %s AND email IS NOT NULL", (int(user_id),))
+                u = cur2.fetchone()
+            if u and u.get('email'):
+                vars = {
+                    'NOTICE_TITLE': (title or '').strip()[:255],
+                    'NOTICE_CONTENT': (content or '')[:2000],
+                    'NOTICE_CREATED_AT': '-',
+                    'BASE_URL': get_base_url(),
+                    'USER_NAME': u.get('name') or '',
+                }
+                send_template_email(u['email'], '[@team] 通知动态: ' + vars['NOTICE_TITLE'], 'user_notice.html', vars)
+        except Exception:
+            pass
+    finally:
+        db.close()
+    return ok
 
 def get_user_notify(cur, user_id):
     _init_table(cur)
@@ -110,15 +179,10 @@ def notify_new_todo(todo_id, creator_id, assignee_ids):
                 list(assignee_ids)
             )
             users = cur.fetchall()
-            base_url = ''
-            try:
-                from config import BASE_URL
-                base_url = BASE_URL or ''
-            except Exception:
-                pass
+            base_url = get_base_url()
             link = t.get('link') or ('/todos/' + str(t['id']))
             if not link.startswith('http'):
-                link = base_url.rstrip('/') + link
+                link = base_url + link
             for u in users:
                 if u['id'] == creator_id:
                     continue
@@ -131,6 +195,7 @@ def notify_new_todo(todo_id, creator_id, assignee_ids):
                     'TODO_TITLE': t['title'] or '',
                     'TODO_CONTENT': (t['content'] or '')[:400],
                     'TODO_TAGS': _tag_chips_html(t.get('tags')),
+                    'BASE_URL': base_url,
                 }
                 subject = f'[@team] 新待办: {t["title"]}'
                 send_template_email(u['email'], subject, 'todo_new_assignee.html', vars)
@@ -166,15 +231,10 @@ def try_send_done_emails(cur):
             )
             assigns = cur.fetchall()
             done_list = [x for x in assigns if x['is_done']]
-            base_url = ''
-            try:
-                from config import BASE_URL
-                base_url = BASE_URL or ''
-            except Exception:
-                pass
+            base_url = get_base_url()
             link = t.get('link') or ('/todos/' + str(t['id']))
             if not link.startswith('http'):
-                link = base_url.rstrip('/') + link
+                link = base_url + link
             vars = {
                 'TODO_URL': link,
                 'TODO_TITLE': t['title'] or '',
@@ -183,6 +243,7 @@ def try_send_done_emails(cur):
                 'DONE_COUNT': len(done_list),
                 'ASSIGN_COUNT': len(assigns),
                 'DONE_AVATARS': ''.join([_avatar_img({'name': x['name'], 'avatar': x['avatar']}) for x in done_list]),
+                'BASE_URL': base_url,
             }
             subject = f'[@team] 待办已完成: {t["title"]}'
             send_template_email(r['creator_email'], subject, 'todo_all_done.html', vars)

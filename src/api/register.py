@@ -36,7 +36,15 @@ def handle(request):
     db = get_db()
     try:
         with db.cursor() as cur:
-            cur.execute("SELECT code FROM yyt_invite WHERE code = %s AND used_by IS NULL", (invite_code,))
+            try:
+                cur.execute("SHOW COLUMNS FROM yyt_invite LIKE 'disabled'")
+                has_disabled = bool(cur.fetchone())
+            except Exception:
+                has_disabled = False
+            if has_disabled:
+                cur.execute("SELECT code FROM yyt_invite WHERE code = %s AND used_by IS NULL AND (disabled IS NULL OR disabled = 0)", (invite_code,))
+            else:
+                cur.execute("SELECT code FROM yyt_invite WHERE code = %s AND used_by IS NULL", (invite_code,))
             invite_ok = cur.fetchone()
             cur.execute("SELECT id FROM yyt_user WHERE email = %s", (email,))
             dup_email = cur.fetchone()

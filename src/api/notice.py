@@ -1,5 +1,7 @@
 from utils.auth import check_login
 from utils.db import get_db
+from utils.todo_notify import _init_table, get_base_url
+from utils.mailer import send_template_email
 
 def handle(request):
     user = check_login(request)
@@ -15,12 +17,54 @@ def handle(request):
             if not title:
                 return {"code": 400, "message": "标题不能为空"}
             content = (data.get('content') or '').strip()
+            base_url = get_base_url()
+            ids_to_notify = []
             with db.cursor() as cur:
-                cur.execute("INSERT INTO yyt_notice (title, content) VALUES (%s, %s)", (title, content or None))
-            db.commit()
+                _init_table(cur)
+                target_user_id = data.get('user_id')
+                if target_user_id:
+                    uid = int(target_user_id)
+                    cur.execute("INSERT INTO yyt_notice (user_id, title, content) VALUES (%s, %s, %s)", (uid, title, content or None))
+                    ids_to_notify.append(uid)
+                else:
+                    cur.execute("SELECT id, email, name FROM yyt_user WHERE email IS NOT NULL")
+                    users = cur.fetchall()
+                    cur.execute(
+                        "INSERT INTO yyt_notice (user_id, title, content) VALUES " + ','.join(["(%s, %s, %s)"] * len(users)),
+                        tuple(v for u in users for v in [u['id'], title, content or None])
+                    )
+                    ids_to_notify = [u['id'] for u in users if u.get('email')]
+                db.commit()
+            if ids_to_notify:
+                try:
+                    with db.cursor() as cur2:
+                        cur2.execute(
+                            "SELECT id, email, name FROM yyt_user WHERE id IN (" + ','.join(['%s']*len(ids_to_notify)) + ")",
+                            ids_to_notify
+                        )
+                        rows = cur2.fetchall()
+                    for u in rows:
+                        if not u.get('email'):
+                            continue
+                        vars = {
+                            'NOTICE_TITLE': title,
+                            'NOTICE_CONTENT': content or '',
+                            'NOTICE_CREATED_AT': '-',
+                            'BASE_URL': base_url,
+                            'USER_NAME': u.get('name') or '',
+                        }
+                        send_template_email(u['email'], '[@team] 通知动态: ' + title, 'user_notice.html', vars)
+                except Exception:
+                    pass
             return {"code": 0, "message": "ok"}
         with db.cursor() as cur:
-            cur.execute("SELECT id, title, content, created_at FROM yyt_notice ORDER BY id DESC LIMIT 20")
+            _init_table(cur)
+            cur.execute(
+                "SELECT id, title, content, created_at FROM yyt_notice "
+                "WHERE user_id = %s OR user_id IS NULL "
+                "ORDER BY id DESC LIMIT 20",
+                (user['id'],)
+            )
             rows = cur.fetchall()
         return {"code": 0, "data": rows}
     finally:
