@@ -19,12 +19,12 @@
         var bs = document.getElementById('__bs');
         if(bs){ bs.style.display='none'; }
         var s = document.createElement('script');
-        s.src = '/assets/app.js?_v=' + Date.now();
+        s.src = '/api/spa_js?_v=' + Date.now();
         s.onerror = function(){ err('页面加载失败'); };
         document.head.appendChild(s);
     }
     function go(){
-        fetch('/assets/space_ui.html?_v=' + Date.now(), {cache:'no-store'})
+        fetch('/api/spa_ui?_v=' + Date.now(), {cache:'no-store'})
             .then(function(r){
                 if(r.status === 401){ location.href = '/login.html'; return Promise.reject(new Error('unauth')); }
                 if(!r.ok) throw new Error('UI '+r.status);

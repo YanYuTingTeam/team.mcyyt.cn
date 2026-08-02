@@ -33,9 +33,13 @@ PUBLIC_PATHS = {
     '/api/login', '/api/register', '/api/send_email_code',
 }
 
+PROTECTED_ASSETS = {'/assets/space_ui.html', '/assets/app.js'}
+
 def _is_public(path):
     if path in PUBLIC_PATHS:
         return True
+    if path in PROTECTED_ASSETS:
+        return False
     if path.startswith('/assets/') or path.startswith('/amusource/') or path.startswith('/storage/'):
         return True
     return False
@@ -119,6 +123,8 @@ def serve_image(uuid, filename):
 
 @app.route('/assets/<path:filename>')
 def serve_assets(filename):
+    if filename in ('space_ui.html', 'app.js'):
+        return Response('404', status=404, mimetype='text/plain')
     return send_from_directory(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'assets'), filename)
 
 @app.route('/todos/<tid>', methods=['GET'])
