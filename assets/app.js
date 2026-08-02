@@ -34,6 +34,53 @@ function markErr(input, msg) {
     setTimeout(function(){ input && input.classList.remove('input-error'); }, 300);
     input.classList.add('input-error');
 }
+function layoutMasonry() {
+    var grids = document.querySelectorAll('.card-grid, .masonry-grid');
+    grids.forEach(function(box) {
+        if (box.offsetParent === null) return;
+        var rect = box.getBoundingClientRect();
+        var W = rect.width;
+        var GAP = 20;
+        var cols = 3;
+        if (W <= 720) cols = 1;
+        else if (W <= 1100) cols = 2;
+        var colW = (W - (cols - 1) * GAP) / cols;
+        var colH = [];
+        for (var i = 0; i < cols; i++) colH.push(0);
+        var cards = box.children;
+        for (var i = 0; i < cards.length; i++) {
+            var card = cards[i];
+            if (!card.classList || !card.classList.contains('card')) continue;
+            var full = card.classList.contains('hero-card') || card.classList.contains('span-full');
+            if (full) {
+                card.style.width = '100%';
+                card.style.left = '0';
+                var top = 0;
+                for (var k = 0; k < colH.length; k++) if (colH[k] > top) top = colH[k];
+                card.style.top = top + 'px';
+                top += card.offsetHeight + GAP;
+                for (var k = 0; k < colH.length; k++) colH[k] = top;
+            } else {
+                card.style.width = colW + 'px';
+                var minV = colH[0], minIdx = 0;
+                for (var j = 1; j < colH.length; j++) {
+                    if (colH[j] < minV) { minV = colH[j]; minIdx = j; }
+                }
+                card.style.left = (minIdx * (colW + GAP)) + 'px';
+                card.style.top = minV + 'px';
+                colH[minIdx] = minV + card.offsetHeight + GAP;
+            }
+        }
+        var maxH = 0;
+        for (var k = 0; k < colH.length; k++) if (colH[k] > maxH) maxH = colH[k];
+        box.style.height = Math.max(0, maxH - GAP) + 'px';
+    });
+}
+function _schedMasonry() {
+    setTimeout(layoutMasonry, 0);
+    setTimeout(layoutMasonry, 120);
+    setTimeout(layoutMasonry, 480);
+}
 document.addEventListener('input', function(e) {
     if (e.target.classList && e.target.classList.contains('input-error')) {
         e.target.classList.remove('input-error');
@@ -183,6 +230,7 @@ function showPage(name) {
     if (name === 'tododetail') pageId = 'pageTodoDetail';
     document.getElementById(pageId).classList.remove('hide');
     window.scrollTo({ top: 0 });
+    _schedMasonry();
 }
 async function switchPage(name, el) {
     if (name === nowPage) return;
@@ -431,17 +479,20 @@ function renderTodoHome() {
             if (t.content) html += '<div class="tracked-section"><div class="tracked-label">内容</div><div class="td-content">' + esc(t.content) + '</div></div>';
             html += '<div class="tracked-actions"><button class="td-link-btn" onclick="navTodoDetail(event, ' + t.id + ')">查看详情 →</button></div>';
             homeBox.innerHTML = html;
+            _schedMasonry();
             return;
         }
     }
     if (!__todoData.length) {
         homeBox.innerHTML = '<div class="empty-tip">暂时没有待办, 很清闲喵</div>';
+        _schedMasonry();
         return;
     }
     homeBox.innerHTML = __todoData.slice(0, 3).map(function(it) {
         return '<div class="todo-item' + (it.is_done ? ' done' : '') + '">' + CLOCK_SVG +
             '<div class="t">' + todoLinkHtml(it) + '</div>' + chipHtml(it.is_done) + '</div>';
     }).join('');
+    _schedMasonry();
 }
 function renderTodoTagFilters() {
     var box = document.getElementById('todoTagFilters');
@@ -2290,6 +2341,11 @@ async function submitProject() {
     }
 }
 (async function boot() {
+    var __mT = null;
+    window.addEventListener('resize', function() {
+        if (__mT) clearTimeout(__mT);
+        __mT = setTimeout(function(){ layoutMasonry(); }, 150);
+    });
     var start = pageFromPath();
     showPage(start);
     initMeteors();
@@ -2316,6 +2372,8 @@ async function submitProject() {
         }
     } finally {
         document.getElementById('loadMask').style.display = 'none';
+        _schedMasonry();
+        setTimeout(layoutMasonry, 900);
     }
     var m = location.pathname.match(/^\/todos\/(\d+)$/);
     if (m) { await loadTodoDetail(m[1]); showPage('tododetail'); }
