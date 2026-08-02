@@ -125,6 +125,7 @@ function openModal(title, bodyHtml, footHtml) {
 function closeModal() {
     var root = document.getElementById('modalRoot');
     if (root.classList.contains('hide')) return;
+    _hideEtOverlays();
     root.classList.add('closing');
     setTimeout(function() {
         root.classList.add('hide');
@@ -603,6 +604,28 @@ async function markTodoDetailDone(done) {
 var __editTodoId = null;
 var __editTags = [];
 var __editAssigns = [];
+function _etOverlay(id) {
+    var ov = document.getElementById(id);
+    if (!ov) {
+        ov = document.createElement('div');
+        ov.id = id;
+        ov.className = 'picker-drop et-drop-overlay hide';
+        document.body.appendChild(ov);
+    }
+    return ov;
+}
+function _positionOverlay(ov, inp) {
+    var rect = inp.getBoundingClientRect();
+    ov.style.top = (rect.bottom + 4) + 'px';
+    ov.style.left = rect.left + 'px';
+    ov.style.width = rect.width + 'px';
+}
+function _hideEtOverlays() {
+    var a = document.getElementById('etTagDropOverlay');
+    var b = document.getElementById('etAssignDropOverlay');
+    if (a) a.classList.add('hide');
+    if (b) b.classList.add('hide');
+}
 function openTodoEditModal(id) {
     var it = (__todoData || []).find(function(x) { return x.id == id; });
     if (!it) { alert('待办未加载'); return; }
@@ -612,24 +635,30 @@ function openTodoEditModal(id) {
     var head = '编辑待办 #' + id;
     var tagsHtml = renderEditTags();
     var assignsHtml = renderEditAssignsChips();
-    var body = '<div class="add-todo-card">' +
-        '<div class="add-todo-row"><label>标题</label><input id="etTitle" type="text" placeholder="待办标题" value="' + escAttr(it.title || '') + '"></div>' +
-        '<div class="add-todo-row"><label>链接 (可选, 默认跳转到详情)</label><input id="etLink" type="text" placeholder="https://..." value="' + escAttr(it.link || '') + '"></div>' +
-        '<div class="add-todo-row"><label>内容描述</label><textarea id="etContent" rows="5" placeholder="详细描述该任务...">' + esc(it.content || '') + '</textarea></div>' +
-        '<div class="add-todo-row"><label class="row-inline"><input type="checkbox" id="etGlobal"' + (it.is_global ? ' checked' : '') + ' onchange="document.getElementById(\'etAssignRow\').classList.toggle(\'hide\', this.checked)"> 全局待办 (全员可见, 无需指派)</label></div>' +
-        '<div class="add-todo-row hide" id="etAssignRow">' +
-        '<label>指派负责人</label>' +
-        '<div class="picker-wrap"><div class="picker" id="etAssignPicker" onclick="document.getElementById(\'etAssignInput\').focus()">' + assignsHtml +
-        '<input id="etAssignInput" placeholder="输入昵称搜索" autocomplete="off" onfocus="etAssignSearch(this.value)" oninput="etAssignSearch(this.value)" onkeydown="etAssignKey(event)"></div>' +
-        '<div class="picker-drop hide" id="etAssignDrop"></div></div></div>' +
-        '<div class="add-todo-row"><label>Tag</label>' +
+    var body = '<div class="td-section">' +
+        '<div class="td-label">基础信息</div>' +
+        '<div class="form-row"><label class="form-label"><b>*</b> 标题</label><input class="form-input" id="etTitle" placeholder="待办标题" value="' + escAttr(it.title || '') + '"></div>' +
+        '<div class="form-row"><label class="form-label">URL <span style="color:#666;font-size:12px">(可选, 留空则跳转到详情)</span></label><input class="form-input" id="etLink" placeholder="https://..." value="' + escAttr(it.link || '') + '"></div>' +
+        '<div class="form-row"><label class="form-label">Tag <span style="color:#666;font-size:12px">(可选)</span></label>' +
         '<div class="picker-wrap"><div class="picker" id="etTagPicker" onclick="document.getElementById(\'etTagInput\').focus()">' + tagsHtml +
         '<input id="etTagInput" placeholder="搜索Tag" autocomplete="off" onfocus="etTagSearch(this.value)" oninput="etTagSearch(this.value)" onkeydown="etTagKey(event)"></div>' +
-        '<div class="picker-drop hide" id="etTagDrop"></div></div></div>' +
-        '<div class="err-tip" id="etErr" style="color:#ef5777;font-size:12px;margin-top:6px"></div>' +
-        '</div>';
+        '</div></div>' +
+        '<div class="form-row"><label class="form-label">内容</label><textarea class="form-area" id="etContent" placeholder="详细描述该任务...">' + esc(it.content || '') + '</textarea></div>' +
+        '</div>' +
+        '<div class="td-section">' +
+        '<div class="td-label">分配设置</div>' +
+        '<div class="form-row"><label class="form-label" style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none">' +
+        '<input type="checkbox" id="etGlobal"' + (it.is_global ? ' checked' : '') + ' onchange="document.getElementById(\'etAssignRow\').classList.toggle(\'hide\', this.checked)" style="width:16px;height:16px;accent-color:#ef5777">' +
+        '全局待办 <span style="color:#666;font-size:12px">(选中后所有有权限的成员都会收到此待办)</span></label></div>' +
+        '<div class="form-row' + (it.is_global ? ' hide' : '') + '" id="etAssignRow">' +
+        '<label class="form-label">指派负责人 <span style="color:#666;font-size:12px">(留空则不修改原有指派)</span></label>' +
+        '<div class="picker-wrap"><div class="picker" id="etAssignPicker" onclick="document.getElementById(\'etAssignInput\').focus()">' + assignsHtml +
+        '<input id="etAssignInput" placeholder="输入昵称搜索并选择" autocomplete="off" onfocus="etAssignSearch(this.value)" oninput="etAssignSearch(this.value)" onkeydown="etAssignKey(event)"></div>' +
+        '</div></div>' +
+        '</div>' +
+        '<div class="err-msg" id="etErr" style="color:#ff6b81;font-size:13px;min-height:18px"></div>';
     var foot = '<button class="act-btn" onclick="closeModal()">取消</button>' +
-        '<button class="add-todo-btn" onclick="btnRun(this, submitTodoEdit)">保存修改</button>';
+        '<button class="add-todo-btn" onclick="btnRun(this, submitTodoEdit)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m-7-7h14"/></svg> 保存修改</button>';
     openModal(head, body, foot);
 }
 function renderEditTags() {
@@ -657,8 +686,10 @@ function openTodoEditModalRefresh() {
     }
 }
 function etTagSearch(kw) {
-    var drop = document.getElementById('etTagDrop');
-    if (!drop) return;
+    var drop = _etOverlay('etTagDropOverlay');
+    var inp = document.getElementById('etTagInput');
+    if (!inp) { drop.classList.add('hide'); return; }
+    _positionOverlay(drop, inp);
     kw = (kw || '').trim();
     var all = [];
     for (var k in __todoTagMeta) all.push(__todoTagMeta[k]);
@@ -681,31 +712,43 @@ function pickEditTag(id) {
     __editTags.push({ id: t.id, name: t.name, color: t.color });
     openTodoEditModalRefresh();
     var inp = document.getElementById('etTagInput'); if (inp) { inp.value = ''; inp.focus(); }
-    document.getElementById('etTagDrop').classList.add('hide');
+    var drop = document.getElementById('etTagDropOverlay'); if (drop) drop.classList.add('hide');
 }
+var etAssignTimer = null;
 function etAssignSearch(kw) {
-    var drop = document.getElementById('etAssignDrop'); if (!drop) return;
-    kw = (kw || '').trim().toLowerCase();
-    var all = ALL_USERS.filter(function(u) { return (u.name || '').toLowerCase().indexOf(kw) !== -1 || (u.email || '').toLowerCase().indexOf(kw) !== -1; });
-    if (!kw) all = all.slice(0, 20);
-    all = all.filter(function(u) { return !__editAssigns.some(function(x) { return x.id === u.id; }); });
-    if (!all.length) { drop.innerHTML = '<div class="drop-empty">没有匹配的用户</div>'; drop.classList.remove('hide'); return; }
-    drop.innerHTML = all.slice(0, 20).map(function(u) {
-        return '<div class="drop-row" onclick="pickEditAssign(' + u.id + ')"><img class="d-ava" src="' + avatarUrl(u) + '" alt=""><div class="d-main"><div class="d-name">' + esc(u.name) + '</div><div class="d-mail">' + esc(u.email || '') + '</div></div></div>';
-    }).join('');
-    drop.classList.remove('hide');
+    var drop = _etOverlay('etAssignDropOverlay');
+    var inp = document.getElementById('etAssignInput');
+    if (!inp) { drop.classList.add('hide'); return; }
+    _positionOverlay(drop, inp);
+    kw = (kw || '').trim();
+    if (etAssignTimer) clearTimeout(etAssignTimer);
+    etAssignTimer = setTimeout(async function() {
+        try {
+            var ret = await getJson('/api/user_search?q=' + encodeURIComponent(kw));
+            __etAssignCache = ret.data || [];
+            var list = __etAssignCache.filter(function(u) { return !__editAssigns.some(function(x) { return x.id === u.id; }); });
+            if (!list.length) { drop.innerHTML = '<div class="drop-empty">没有匹配的用户</div>'; }
+            else {
+                drop.innerHTML = list.map(function(u) {
+                    return '<div class="drop-row" onclick="pickEditAssign(' + u.id + ')"><img src="' + avatarUrl(u) + '" alt=""><div><div class="dn">' + esc(u.name) + '</div><div class="de">' + esc(u.email || '') + '</div></div></div>';
+                }).join('');
+            }
+            drop.classList.remove('hide');
+        } catch (e) {}
+    }, kw ? 160 : 0);
 }
 function etAssignKey(e) {
     if (e.key === 'Backspace' && !e.target.value && __editAssigns.length) { __editAssigns.pop(); openTodoEditModalRefresh(); }
     if (e.key === 'Enter') e.preventDefault();
 }
+var __etAssignCache = [];
 function pickEditAssign(id) {
-    var u = ALL_USERS.find(function(x) { return x.id === id; }); if (!u) return;
+    var u = __etAssignCache.find(function(x) { return x.id === id; }); if (!u) return;
     if (__editAssigns.some(function(s) { return s.id === id; })) return;
     __editAssigns.push({ id: u.id, name: u.name, avatar: u.avatar, email: u.email });
     openTodoEditModalRefresh();
     var inp = document.getElementById('etAssignInput'); if (inp) { inp.value = ''; inp.focus(); }
-    document.getElementById('etAssignDrop').classList.add('hide');
+    var drop = document.getElementById('etAssignDropOverlay'); if (drop) drop.classList.add('hide');
 }
 async function submitTodoEdit() {
     if (!__editTodoId) return;
@@ -2251,7 +2294,7 @@ async function submitProject() {
     showPage(start);
     initMeteors();
     document.addEventListener('click', function(e) {
-        ['#assignDrop','#mmSkillDrop','#gmDrop','#atTagDrop','#pfSkillDrop','#etTagDrop','#etAssignDrop'].forEach(function(sel) {
+        ['#assignDrop','#mmSkillDrop','#gmDrop','#atTagDrop','#pfSkillDrop','#etTagDropOverlay','#etAssignDropOverlay'].forEach(function(sel) {
             var d = document.querySelector(sel);
             if (!d || d.classList.contains('hide')) return;
             if (!e.target.closest('.picker-wrap')) d.classList.add('hide');

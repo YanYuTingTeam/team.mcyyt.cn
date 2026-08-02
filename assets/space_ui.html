@@ -7,7 +7,7 @@
         <div class="side-logo"><img src="https://zhishi.oss-cn-beijing.aliyuncs.com/user_projects_assets/8dc1228e306610e583e5728cd7e49fa7.png" alt="烟雨庭"></div>
         <div class="search-box">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0-14 0m18 11l-6-6"/></svg>
-            <input id="searchInput" placeholder="搜索" oninput="doSearch(this.value)">
+            <input id="searchInput" placeholder="搜索" autocomplete="off" oninput="doSearch(this.value)">
         </div>
         <div class="nav-list" id="navList">
             <div class="nav-item now" data-page="home" onclick="switchPage('home', this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M5 12H3l9-9l9 9h-2M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/><path d="M9 21v-6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v6"/></g></svg> 空间首页</div>
@@ -388,16 +388,16 @@
                         <div class="setting-group-title">修改密码</div>
                         <div class="form-row">
                             <label>原密码</label>
-                            <input type="password" id="pwdOld" placeholder="请输入原密码">
+                            <input type="password" id="pwdOld" autocomplete="off" placeholder="请输入原密码">
                         </div>
                         <div class="form-row">
                             <label>新密码 (至少 6 位)</label>
-                            <input type="password" id="pwdNew" placeholder="请输入新密码">
+                            <input type="password" id="pwdNew" autocomplete="new-password" placeholder="请输入新密码">
                         </div>
                         <div class="form-row">
                             <label>邮箱验证码</label>
                             <div class="form-row-with-btn">
-                                <input type="text" id="pwdCode" placeholder="6位数字验证码" maxlength="6">
+                                <input type="text" id="pwdCode" placeholder="6位数字验证码" maxlength="6" autocomplete="off">
                                 <button class="act-btn" id="pwdSendCodeBtn" onclick="btnRun(this, sendPwdEmailCode)">发送验证码</button>
                             </div>
                         </div>
