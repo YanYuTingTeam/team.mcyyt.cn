@@ -62,8 +62,10 @@ def _forward(request, subpath, extra_set_cookie=None):
 
 def proxy_api(request, subpath):
     _clean_sessions()
+    print(f"[proxy_api] host={request.host} path={request.path} method={request.method} subpath={subpath} sid={request.cookies.get('mcsm_sid') is not None} sec={bool(request.args.get('sec'))} has_X_API_Key={bool(request.headers.get('X-API-Key') or request.args.get('apikey'))}", flush=True)
     sid = request.cookies.get('mcsm_sid')
     if sid and PANEL_SESSIONS.get(sid, 0) > time.time():
+        print(f"[proxy_api] auth=session sid={sid[:8]}... OK", flush=True)
         return _forward(request, subpath)
     sec = request.args.get('sec')
     if sec:
@@ -75,9 +77,12 @@ def proxy_api(request, subpath):
             PANEL_SESSIONS[new_sid] = time.time() + SESSION_TTL
             cookie = 'mcsm_sid=' + new_sid + '; Path=/; Max-Age=' + str(SESSION_TTL) + '; HttpOnly; SameSite=Lax; Secure'
             return _forward(request, subpath, extra_set_cookie=cookie)
-    user = verify_sign(request)
+    user, reason = verify_sign(request, debug=True)
     if not user:
-        return _deny("apikey或签名校验失败")
+        msg = reason or "apikey或签名校验失败"
+        print(f"[proxy_api] auth=sign FAIL msg={msg}", flush=True)
+        return _deny(msg)
+    print(f"[proxy_api] auth=sign OK user={user.get('name')} uid={user.get('id')}", flush=True)
     log_api_call(request, user)
     return _forward(request, subpath)
 
@@ -102,7 +107,7 @@ def proxy_panel(request, subpath):
         PANEL_SESSIONS[new_sid] = time.time() + SESSION_TTL
         cookie = 'mcsm_sid=' + new_sid + '; Path=/; Max-Age=' + str(SESSION_TTL) + '; HttpOnly; SameSite=Lax; Secure'
         return _forward(request, subpath, extra_set_cookie=cookie)
-    user = verify_sign(request)
+    user, reason = verify_sign(request)
     if not user:
         return _deny("")
     host_prefix = (request.host or '').split(':')[0].split('.')[0]

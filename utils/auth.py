@@ -64,19 +64,35 @@ def calc_sign(apikey, a, path, salt):
     msg = (apikey + a + path).encode('utf-8')
     return hmac.new(salt.encode('utf-8'), msg, hashlib.md5).hexdigest()
 
-def verify_sign(request):
+def verify_sign(request, debug=False):
     apikey = (request.headers.get('X-API-Key') or request.args.get('apikey') or request.cookies.get('mcsm_proxy_key') or '').strip()
     a = (request.headers.get('a') or request.args.get('a') or '').strip()
     b = (request.headers.get('b') or request.args.get('b') or '').strip()
     if not apikey or not a or not b or not a.isdigit():
-        return None
+        reason = '缺少签名参数: ' + ','.join([
+            'no-apikey' if not apikey else '',
+            'no-a' if not a else '',
+            'no-b' if not b else '',
+            'a-not-digit' if a and not a.isdigit() else ''
+        ]).strip(',')
+        if debug:
+            print(f'[verify_sign FAIL({reason})] host={request.host} path={request.path} method={request.method} apikey={apikey[:8] + "...(" + str(len(apikey)) + ")" if apikey else "empty"} a={a} b={'len='+str(len(b)) if b else 'empty'}', flush=True)
+        return None, reason
     now = int(time.time() * 1000)
     window = MCSM_CONFIG.get('sign_window', 300) * 1000
-    if abs(now - int(a)) > window:
-        return None
-    expect = calc_sign(apikey, a, request.path, MCSM_CONFIG.get('salt', ''))
+    diff = now - int(a)
+    if abs(diff) > window:
+        reason = f'签名过期: a={a} now={now} diff_ms={diff} window={window}'
+        if debug:
+            print(f'[verify_sign FAIL({reason})] host={request.host} path={request.path} method={request.method}', flush=True)
+        return None, reason
+    salt = MCSM_CONFIG.get('salt', '')
+    expect = calc_sign(apikey, a, request.path, salt)
     if not hmac.compare_digest(expect, b):
-        return None
+        reason = f'签名不匹配: host={request.host} path={request.path} method={request.method} expect={expect[:8]}... got={b[:8]}... len(expect)={len(expect)} len(b)={len(b)}'
+        if debug:
+            print('[verify_sign FAIL(sign-mismatch)] ' + reason, flush=True)
+        return None, '签名校验失败'
     db = get_db()
     try:
         with db.cursor() as cur:
@@ -87,9 +103,19 @@ def verify_sign(request):
             row = cur.fetchone()
     finally:
         db.close()
-    if not row or (row.get('level') or 0) < 1:
-        return None
-    return row
+    if not row:
+        reason = f'apikey不存在: apikey_prefix={apikey[:8] + "..."}'
+        if debug:
+            print(f'[verify_sign FAIL(db-no-user)] host={request.host} {reason}', flush=True)
+        return None, '该APIKey未在系统中登记'
+    if (row.get('level') or 0) < 1:
+        reason = f'用户等级不足: level={row.get("level")} user={row.get("name")}'
+        if debug:
+            print(f'[verify_sign FAIL(level<1)] host={request.host} {reason}', flush=True)
+        return None, '用户无权调用API'
+    if debug:
+        print(f'[verify_sign OK] host={request.host} path={request.path} user={row.get("name")} uid={row.get("id")}', flush=True)
+    return row, ''
 
 def log_api_call(request, user):
     ip, _ = get_client_info(request)
