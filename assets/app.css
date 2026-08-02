@@ -488,6 +488,17 @@ a { color: #ef5777; }
 }
 .todo-filters .tf-btn:hover { border-color: #444; color: #eee; }
 .todo-filters .tf-btn.active { background: #ef5777; border-color: #ef5777; color: #fff; }
+.todo-filters.tag-filters { margin-top: 0; margin-bottom: 8px; }
+.todo-filters.tag-filters .tf-btn { display: flex; align-items: center; gap: 6px; }
+.todo-filters.tag-filters .tf-btn.active { background: transparent; color: #eee; }
+.tf-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+.t-tag-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 12px; padding: 3px 10px; border-radius: 12px;
+    border: 1px solid; text-decoration: none; cursor: pointer;
+    transition: opacity .15s; margin-top: 6px;
+}
+.t-tag-chip:hover { opacity: .8; }
 .scroll-indicator {
     position: fixed;
     right: 24px;
@@ -978,6 +989,8 @@ input.input-error, select.input-error, textarea.input-error { border-color: #ef5
     .masonry-grid { column-count: 1; }
 }
 .td-card { max-width: 760px; }
+.td-card .form-row { margin-bottom: 16px; }
+.td-card .form-row:last-child { margin-bottom: 0; }
 .td-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
 .td-head .st-icon { width: 22px; height: 22px; flex-shrink: 0; }
 .td-head .st-icon.ok { color: #4caf7d; }

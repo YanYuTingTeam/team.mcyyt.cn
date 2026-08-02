@@ -13,9 +13,11 @@ def handle(request):
     try:
         with db.cursor() as cur:
             cur.execute(
-                "SELECT t.id, t.title, t.link, t.content, t.created_at, t.is_global, "
-                "u.id AS creator_id, u.name AS creator_name, u.avatar AS creator_avatar "
+                "SELECT t.id, t.title, t.link, t.content, t.created_at, t.is_global, t.tag_id, "
+                "u.id AS creator_id, u.name AS creator_name, u.avatar AS creator_avatar, "
+                "tg.name AS tag_name, tg.color AS tag_color "
                 "FROM yyt_todo t JOIN yyt_user u ON t.creator_id = u.id "
+                "LEFT JOIN yyt_todo_tag tg ON t.tag_id = tg.id "
                 "WHERE t.id = %s",
                 (tid,)
             )

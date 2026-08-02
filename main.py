@@ -126,6 +126,11 @@ def todo_detail_page(tid):
     from utils.page import serve_space
     return serve_space(request)
 
+@app.route('/todos/tag/<tid>', methods=['GET'])
+def todo_tag_page(tid):
+    from utils.page import serve_space
+    return serve_space(request)
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     try:

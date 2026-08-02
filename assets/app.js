@@ -205,6 +205,7 @@ async function switchPage(name, el) {
 function pageFromPath() {
     var p = location.pathname;
     if (p === '/todos/add') return 'addtodo';
+    if (/^\/todos\/tag\/\d+$/.test(p)) return 'todo';
     if (/^\/todos\/\d+$/.test(p)) return 'tododetail';
     if (p === '/todos' || p.indexOf('/todos/') === 0) return 'todo';
     for (var k in PAGE_PATH) {
@@ -218,6 +219,9 @@ window.addEventListener('popstate', function() {
     if (p === 'tododetail') {
         var m = location.pathname.match(/^\/todos\/(\d+)$/);
         if (m) loadTodoDetail(m[1]);
+    }
+    if (p === 'todo') {
+        loadTodo();
     }
 });
 function doSearch(kw) {
@@ -265,10 +269,38 @@ function todoLinkHtml(it) {
 }
 var __todoData = [];
 var __todoFilter = 'all';
+var __todoTagFilter = null;
+var __todoTagMeta = {};
+async function loadTodoTagMeta() {
+    try {
+        var ret = await getJson('/api/todo_tag');
+        var m = {};
+        (ret.data || []).forEach(function(t) { m[t.id] = t; });
+        __todoTagMeta = m;
+    } catch (e) { __todoTagMeta = __todoTagMeta || {}; }
+}
 function setTodoFilter(f, btn) {
     __todoFilter = f;
     document.querySelectorAll('#todoFilters .tf-btn').forEach(function(b) { b.classList.remove('active'); });
     if (btn) btn.classList.add('active');
+    renderTodoPage();
+}
+function setTodoTagFilter(tagId, btn) {
+    __todoTagFilter = tagId;
+    document.querySelectorAll('#todoTagFilters .tf-btn').forEach(function(b) { b.classList.remove('active'); });
+    if (btn) btn.classList.add('active');
+    if (tagId) {
+        history.pushState(null, '', '/todos/tag/' + tagId);
+        loadTodoByTag(tagId);
+    } else {
+        history.pushState(null, '', '/todos');
+        loadTodoAll();
+    }
+}
+async function loadTodoAll() {
+    var ret = await getJson('/api/todo');
+    __todoData = ret.data || [];
+    renderTodoHome();
     renderTodoPage();
 }
 function renderTodoPage() {
@@ -286,6 +318,12 @@ function renderTodoPage() {
         var btn = it.is_done
             ? '<button class="act-btn" onclick="btnRun(this, function(){ return markDone(' + it.id + ', false) })">' + UNDO_SVG + ' 撤销确认</button>'
             : '<button class="act-btn" onclick="btnRun(this, function(){ return markDone(' + it.id + ', true) })">' + CHECK_SVG + ' 我已完成</button>';
+        var tagHtml = '';
+        if (it.tag_id && __todoTagMeta[it.tag_id]) {
+            var tg = __todoTagMeta[it.tag_id];
+            var c = tg.color || '#ef5777';
+            tagHtml = '<a class="t-tag-chip" href="/todos/tag/' + tg.id + '" style="color:' + c + ';border-color:' + hexA(c,.45) + ';background:' + hexA(c,.08) + '" onclick="return navTodoTag(event,' + tg.id + ')">' + esc(tg.name) + '</a>';
+        }
         var desc = it.content ? '<div class="t-desc">' + esc(it.content) + '</div>' : '';
         var gTag = it.is_global ? '<span class="chip global-tag">全局</span>' : '';
         var avaHtml = '<img class="t-creator-ava" src="' + avatarUrl({ id: it.creator_id, name: it.creator_name, avatar: it.creator_avatar }) + '" alt="">';
@@ -304,25 +342,74 @@ function renderTodoPage() {
         }
         return '<div class="trow' + (it.is_done ? ' done' : '') + '" data-tid="' + it.id + '">' +
             (it.is_done ? OK_SVG : NO_SVG) +
-            '<div class="t-body"><div class="t-line">' + t + chipHtml(it.is_done) + doneAvas + '</div>' + desc + meta + '</div>' + btn + '</div>';
+            '<div class="t-body"><div class="t-line">' + t + chipHtml(it.is_done) + doneAvas + '</div>' + tagHtml + desc + meta + '</div>' + btn + '</div>';
     }).join('');
     updateScrollIndicators();
 }
+function navTodoTag(e, tagId) {
+    e.preventDefault();
+    history.pushState(null, '', '/todos/tag/' + tagId);
+    __todoTagFilter = tagId;
+    showPage('todo');
+    loadTodoByTag(tagId);
+    renderTodoTagFilters();
+    var tagBtn = document.querySelector('#todoTagFilters .tf-btn[data-tag="' + tagId + '"]');
+    if (tagBtn) {
+        document.querySelectorAll('#todoTagFilters .tf-btn').forEach(function(b) { b.classList.remove('active'); });
+        tagBtn.classList.add('active');
+    }
+    return false;
+}
+async function loadTodoByTag(tagId) {
+    var ret = await getJson('/api/todo?tag=' + tagId);
+    __todoData = ret.data || [];
+    renderTodoPage();
+}
 async function loadTodo() {
-    var ret = await getJson('/api/todo');
-    var homeBox = document.getElementById('todoList');
-    if (!ret.data || !ret.data.length) {
-        homeBox.innerHTML = '<div class="empty-tip">暂时没有待办, 很清闲喵</div>';
-        __todoData = [];
-        renderTodoPage();
+    await loadTodoTagMeta();
+    renderTodoTagFilters();
+    var tagMatch = location.pathname.match(/^\/todos\/tag\/(\d+)$/);
+    if (tagMatch) {
+        __todoTagFilter = parseInt(tagMatch[1]);
+        var tagBtn = document.querySelector('#todoTagFilters .tf-btn[data-tag="' + __todoTagFilter + '"]');
+        if (tagBtn) {
+            document.querySelectorAll('#todoTagFilters .tf-btn').forEach(function(b) { b.classList.remove('active'); });
+            tagBtn.classList.add('active');
+        }
+        await loadTodoByTag(__todoTagFilter);
+        renderTodoHome();
         return;
     }
-    __todoData = ret.data;
-    homeBox.innerHTML = ret.data.slice(0, 3).map(function(it) {
+    __todoTagFilter = null;
+    document.querySelectorAll('#todoTagFilters .tf-btn').forEach(function(b) { b.classList.remove('active'); });
+    var allTagBtn = document.querySelector('#todoTagFilters .tf-btn[data-tag=""]');
+    if (allTagBtn) allTagBtn.classList.add('active');
+    var ret = await getJson('/api/todo');
+    __todoData = ret.data || [];
+    renderTodoHome();
+    renderTodoPage();
+}
+function renderTodoHome() {
+    var homeBox = document.getElementById('todoList');
+    if (!__todoData.length) {
+        homeBox.innerHTML = '<div class="empty-tip">暂时没有待办, 很清闲喵</div>';
+        return;
+    }
+    homeBox.innerHTML = __todoData.slice(0, 3).map(function(it) {
         return '<div class="todo-item' + (it.is_done ? ' done' : '') + '">' + CLOCK_SVG +
             '<div class="t">' + todoLinkHtml(it) + '</div>' + chipHtml(it.is_done) + '</div>';
     }).join('');
-    renderTodoPage();
+}
+function renderTodoTagFilters() {
+    var box = document.getElementById('todoTagFilters');
+    if (!box) return;
+    var html = '<button class="tf-btn active" data-tag="" onclick="setTodoTagFilter(null, this)">全部Tag</button>';
+    for (var k in __todoTagMeta) {
+        var t = __todoTagMeta[k];
+        var c = t.color || '#ef5777';
+        html += '<button class="tf-btn" data-tag="' + t.id + '" onclick="setTodoTagFilter(' + t.id + ', this)" style="' + (t.id == __todoTagFilter ? 'border-color:' + hexA(c,.6) : '') + '"><span class="tf-dot" style="background:' + c + '"></span>' + esc(t.name) + '</button>';
+    }
+    box.innerHTML = html;
 }
 async function markDone(id, done) {
     var ret = await postJson('/api/todo', { id: id, done: done });
@@ -411,6 +498,11 @@ function renderTodoDetail(d) {
     var t = d.todo;
     var icon = d.my_done ? OK_SVG : NO_SVG;
     var gTag = t.is_global ? '<span class="chip global-tag">全局</span>' : '';
+    var tagChip = '';
+    if (t.tag_id && t.tag_name) {
+        var c = t.tag_color || '#ef5777';
+        tagChip = '<a class="t-tag-chip" href="/todos/tag/' + t.tag_id + '" style="color:' + c + ';border-color:' + hexA(c,.45) + ';background:' + hexA(c,.08) + '" onclick="return navTodoTag(event,' + t.tag_id + ')">' + esc(t.tag_name) + '</a>';
+    }
     var head = '<div class="td-head">' + icon + '<span class="td-title">#' + esc(t.id) + ' · ' + esc(t.title) + '</span>' + gTag + '</div>';
     var creator = { id: t.creator_id, name: t.creator_name, avatar: t.creator_avatar };
     var creatorLine = '<div class="td-meta">' +
@@ -419,6 +511,7 @@ function renderTodoDetail(d) {
         '<span class="td-sep">|</span>' +
         '<span class="td-time">创建时间 ' + esc(t.created_at) + '</span>' +
         '</div>';
+    var tagSection = tagChip ? '<div class="td-section"><div class="td-label">Tag</div>' + tagChip + '</div>' : '';
     var assigneeHtml = '';
     if (t.is_global) {
         assigneeHtml = '<div class="td-section"><div class="td-label">目标</div><div class="td-assignees"><span class="chip global-tag">全体成员</span></div></div>';
@@ -447,7 +540,7 @@ function renderTodoDetail(d) {
             '<button class="add-todo-btn" onclick="btnRun(this, function(){ return markTodoDetailDone(true) })">' + CHECK_SVG + ' 我已完成</button>' +
             '</div>';
     }
-    document.getElementById('todoDetailBox').innerHTML = '<div class="card td-card">' + head + creatorLine + assigneeHtml + contentHtml + doneHtml + actionHtml + '</div>';
+    document.getElementById('todoDetailBox').innerHTML = '<div class="card td-card">' + head + creatorLine + tagSection + assigneeHtml + contentHtml + doneHtml + actionHtml + '</div>';
 }
 async function markTodoDetailDone(done) {
     if (!__todoDetailId) return;
@@ -459,7 +552,8 @@ function toggleGlobalTodo() {
     var isGlobal = document.getElementById('atGlobal').checked;
     document.getElementById('assignRow').classList.toggle('hide', isGlobal);
 }
-function resetAddTodo() {
+async function resetAddTodo() {
+    if (!Object.keys(__todoTagMeta).length) await loadTodoTagMeta();
     document.getElementById('atTitle').value = '';
     document.getElementById('atLink').value = '';
     document.getElementById('atContent').value = '';
@@ -470,6 +564,69 @@ function resetAddTodo() {
     document.getElementById('assignRow').classList.remove('hide');
     assignUsers = [];
     renderChips();
+    __atTag = null;
+    var tagInput = document.getElementById('atTagInput');
+    if (tagInput) tagInput.value = '';
+    var tagDrop = document.getElementById('atTagDrop');
+    if (tagDrop) tagDrop.classList.add('hide');
+    renderAtTagChip();
+}
+var __atTag = null;
+function renderAtTagChip() {
+    var picker = document.getElementById('atTagPicker');
+    if (!picker) return;
+    picker.querySelectorAll('.u-chip').forEach(function(c) { c.remove(); });
+    if (__atTag) {
+        var c = __atTag.color || '#ef5777';
+        var chip = document.createElement('span');
+        chip.className = 'u-chip skill';
+        chip.style.color = c;
+        chip.style.borderColor = hexA(c, .45);
+        chip.style.background = hexA(c, .08);
+        chip.innerHTML = '<span>' + esc(__atTag.name) + '</span><span class="rm">' + X_SVG + '</span>';
+        chip.querySelector('.rm').onclick = function(e) {
+            e.stopPropagation();
+            __atTag = null;
+            renderAtTagChip();
+        };
+        var inp = document.getElementById('atTagInput');
+        picker.insertBefore(chip, inp);
+    }
+}
+function todoTagPickerSearch(kw) {
+    var drop = document.getElementById('atTagDrop');
+    if (!drop) return;
+    kw = (kw || '').trim();
+    var all = [];
+    for (var k in __todoTagMeta) all.push(__todoTagMeta[k]);
+    var filtered = kw ? all.filter(function(t) { return t.name.indexOf(kw) !== -1; }) : all;
+    if (__atTag) filtered = filtered.filter(function(t) { return t.id !== __atTag.id; });
+    if (!filtered.length) {
+        drop.innerHTML = '<div class="drop-empty">' + (kw ? '没有匹配的Tag' : '暂无可选Tag') + '</div>';
+        drop.classList.remove('hide');
+        return;
+    }
+    drop.innerHTML = filtered.map(function(t) {
+        var c = t.color || '#ef5777';
+        return '<div class="drop-row" onclick="pickAtTag(' + t.id + ')"><span class="skill-tag sm" style="color:' + c + ';border-color:' + hexA(c,.45) + ';background:' + hexA(c,.08) + '">' + esc(t.name) + '</span></div>';
+    }).join('');
+    drop.classList.remove('hide');
+}
+function todoTagPickerKey(e) {
+    if (e.key === 'Backspace' && !e.target.value && __atTag) {
+        __atTag = null;
+        renderAtTagChip();
+    }
+    if (e.key === 'Enter') e.preventDefault();
+}
+function pickAtTag(id) {
+    var t = __todoTagMeta[id];
+    if (!t) return;
+    __atTag = { id: t.id, name: t.name, color: t.color };
+    renderAtTagChip();
+    var inp = document.getElementById('atTagInput');
+    if (inp) { inp.value = ''; inp.focus(); }
+    document.getElementById('atTagDrop').classList.add('hide');
 }
 function renderChips() {
     var picker = document.getElementById('assignPicker');
@@ -538,6 +695,7 @@ async function submitTodo() {
         content: document.getElementById('atContent').value.trim(),
         is_global: isGlobal
     };
+    if (__atTag) body.tag_id = __atTag.id;
     if (!isGlobal) {
         body.assignees = assignUsers.map(function(u) { return u.id; });
     }
@@ -1121,6 +1279,8 @@ async function loadTeam() {
     renderTeamLogs(ret[2].data || []);
     var sret = await getJson('/api/admin_skills');
     renderTeamSkills(sret.data || []);
+    var tret = await getJson('/api/todo_tag');
+    renderTeamTodoTags(tret.data || []);
 }
 async function refreshTeamInvites() {
     var ret = await getJson('/api/admin_invites');
@@ -1220,6 +1380,64 @@ async function deleteSkill(id, name, btn) {
     if (!confirm('确定删除能力「' + name + '」? 所有成员的该能力会被移除。')) return;
     var ret = await postJson('/api/admin_skills', { action: 'delete', id: id });
     if (ret.code === 0) await reloadSkills();
+}
+async function reloadTodoTags() {
+    await loadTodoTagMeta();
+    var ret = await getJson('/api/todo_tag');
+    renderTeamTodoTags(ret.data || []);
+}
+function renderTeamTodoTags(list) {
+    var box = document.getElementById('teamTodoTags');
+    if (!box) return;
+    var addBtn = '<div style="margin-top:12px"><button class="add-todo-btn" onclick="openTodoTagEdit(null)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m-7-7h14"/></svg> 新增Tag</button></div>';
+    if (!list || !list.length) {
+        box.innerHTML = '<div class="empty-tip">还没有Tag</div>' + addBtn;
+        return;
+    }
+    var html = '<div class="grp-grid">';
+    list.forEach(function(t) {
+        var c = t.color || '#ef5777';
+        html += '<div class="grp-card">' +
+            '<span class="skill-tag sm" style="color:' + c + ';border-color:' + hexA(c,.45) + ';background:' + hexA(c,.08) + '">' + esc(t.name) + '</span>' +
+            '<div class="grp-name">' + esc(t.name) + '</div>' +
+            '<div class="grp-actions">' +
+            '<button class="card-head-btn" onclick="openTodoTagEdit(' + t.id + ',\'' + escAttr(t.name) + '\',\'' + escAttr(c) + '\')">编辑</button>' +
+            '<button class="card-head-btn danger" onclick="btnRun(this, function(btn){ return deleteTodoTag(' + t.id + ',\'' + escAttr(t.name) + '\',btn); })">删除</button>' +
+            '</div></div>';
+    });
+    html += '</div>' + addBtn;
+    box.innerHTML = html;
+}
+function openTodoTagEdit(id, name, color) {
+    name = name || '';
+    color = color || '#ef5777';
+    var isNew = !id;
+    var title = isNew ? '新增Tag' : '编辑Tag';
+    var body = '<div class="md-section"><div class="md-label">基础设置</div>' +
+        '<div class="md-row"><div class="md-k">名称</div><div class="md-v"><input id="tt_name" value="' + esc(name) + '" placeholder="如 日常/紧急/长期"></div></div>' +
+        '<div class="md-row"><div class="md-k">标识颜色</div><div class="md-v"><input type="color" class="color-in" id="tt_color" value="' + esc(color) + '"></div></div>' +
+        '</div>';
+    var foot = '<button class="act-btn" onclick="closeModal()">关闭</button>' +
+        '<button class="add-todo-btn" onclick="btnRun(this, function(btn){ return saveTodoTag(' + (id || 'null') + ',' + isNew + ',btn); })">保存</button>';
+    openModal(title, body, foot);
+}
+async function saveTodoTag(id, isNew, btn) {
+    var name = document.getElementById('tt_name').value.trim();
+    var color = document.getElementById('tt_color').value;
+    if (!name) { markErr(document.getElementById('tt_name'), '名称不能为空'); return; }
+    var action = isNew ? 'add' : 'update';
+    var body = { action: action, name: name, color: color };
+    if (!isNew) body.id = id;
+    var ret = await postJson('/api/todo_tag', body);
+    if (ret.code === 0) {
+        closeModal();
+        await reloadTodoTags();
+    }
+}
+async function deleteTodoTag(id, name, btn) {
+    if (!confirm('确定删除Tag「' + name + '」? 使用此Tag的待办将被移除Tag关联。')) return;
+    var ret = await postJson('/api/todo_tag', { action: 'delete', id: id });
+    if (ret.code === 0) await reloadTodoTags();
 }
 async function loadTeamStats() {
     var ret = await getJson('/api/admin_stats');
@@ -1770,7 +1988,7 @@ async function submitProject() {
     showPage(start);
     initMeteors();
     document.addEventListener('click', function(e) {
-        ['#assignDrop','#mmSkillDrop','#gmDrop'].forEach(function(sel) {
+        ['#assignDrop','#mmSkillDrop','#gmDrop','#atTagDrop','#pfSkillDrop'].forEach(function(sel) {
             var d = document.querySelector(sel);
             if (!d || d.classList.contains('hide')) return;
             if (!e.target.closest('.picker-wrap')) d.classList.add('hide');
@@ -1820,6 +2038,7 @@ function initMeteors() {
 }
 function pathToPage(p) {
     if (p === '/todos/add') return 'addtodo';
+    if (/^\/todos\/tag\/\d+$/.test(p)) return 'todo';
     if (p === '/todos' || p.indexOf('/todos/') === 0) return 'todo';
     for (var k in PAGE_PATH) { if (PAGE_PATH[k] === p) return k; }
     return null;

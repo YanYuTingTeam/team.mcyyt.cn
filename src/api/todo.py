@@ -12,7 +12,10 @@ def _ensure_col(db):
             if not cur.fetchone():
                 cur.execute("ALTER TABLE yyt_todo ADD COLUMN is_global TINYINT DEFAULT 0 AFTER content")
                 cur.execute("ALTER TABLE yyt_todo ADD KEY idx_global (is_global)")
-                db.commit()
+            cur.execute("SHOW COLUMNS FROM yyt_todo LIKE 'tag_id'")
+            if not cur.fetchone():
+                cur.execute("ALTER TABLE yyt_todo ADD COLUMN tag_id INT DEFAULT NULL AFTER is_global")
+            db.commit()
     except Exception:
         pass
     _col_ensured = True
@@ -66,9 +69,10 @@ def handle(request):
                 link = (data.get('link') or '').strip()
                 content = (data.get('content') or '').strip()
                 is_global = 1 if data.get('is_global') else 0
+                tag_id = int(data.get('tag_id') or 0) or None
                 cur.execute(
-                    "INSERT INTO yyt_todo (creator_id, title, link, content, is_global) VALUES (%s, %s, %s, %s, %s)",
-                    (user['id'], title, link or None, content or None, is_global)
+                    "INSERT INTO yyt_todo (creator_id, title, link, content, is_global, tag_id) VALUES (%s, %s, %s, %s, %s, %s)",
+                    (user['id'], title, link or None, content or None, is_global, tag_id)
                 )
                 new_id = cur.lastrowid
                 if not link:
@@ -95,16 +99,23 @@ def handle(request):
             db.commit()
             return {"code": 0, "message": "ok"}
         with db.cursor() as cur:
-            cur.execute(
-                "SELECT t.id, t.title, t.link, t.content, t.created_at, t.is_global, "
-                "COALESCE(a.is_done, 0) AS is_done, a.done_at AS my_done_at, u.name AS creator_name, u.avatar AS creator_avatar "
+            tag_filter = request.args.get('tag') or ''
+            sql = (
+                "SELECT t.id, t.title, t.link, t.content, t.created_at, t.is_global, t.tag_id, "
+                "COALESCE(a.is_done, 0) AS is_done, a.done_at AS my_done_at, u.name AS creator_name, u.avatar AS creator_avatar, "
+                "tg.name AS tag_name, tg.color AS tag_color "
                 "FROM yyt_todo t "
                 "JOIN yyt_user u ON t.creator_id = u.id "
                 "LEFT JOIN yyt_todo_assign a ON a.todo_id = t.id AND a.user_id = %s "
-                "WHERE t.is_global = 1 OR a.user_id = %s "
-                "ORDER BY t.id DESC",
-                (user['id'], user['id'])
+                "LEFT JOIN yyt_todo_tag tg ON t.tag_id = tg.id "
+                "WHERE (t.is_global = 1 OR a.user_id = %s)"
             )
+            params = [user['id'], user['id']]
+            if tag_filter:
+                sql += " AND t.tag_id = %s"
+                params.append(int(tag_filter))
+            sql += " ORDER BY t.id DESC"
+            cur.execute(sql, params)
             rows = cur.fetchall()
             if rows:
                 ids = [r['id'] for r in rows]

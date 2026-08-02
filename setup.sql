@@ -156,6 +156,12 @@ CREATE TABLE IF NOT EXISTS yyt_skill_meta (
     color VARCHAR(16) DEFAULT '#ef5777'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE IF NOT EXISTS yyt_todo_tag (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(64) NOT NULL UNIQUE,
+    color VARCHAR(16) DEFAULT '#ef5777'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 INSERT INTO yyt_skill_meta (name, color) VALUES
     ('策划', '#ef5777'),
     ('运维', '#4dabf7'),

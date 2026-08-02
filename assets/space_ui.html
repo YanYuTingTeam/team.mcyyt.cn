@@ -162,6 +162,7 @@
                 <button class="tf-btn" data-filter="incomplete" onclick="setTodoFilter('incomplete', this)">未完成</button>
                 <button class="tf-btn" data-filter="complete" onclick="setTodoFilter('complete', this)">已完成</button>
             </div>
+            <div class="todo-filters tag-filters" id="todoTagFilters"></div>
             <div class="scroll-indicator top" id="scrollTopIndicator">
                 <span id="scrollTopCount">0</span> 个未完成
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 15l-6-6-6 6"/></svg>
@@ -181,36 +182,53 @@
             <div class="page-mini">TO-DO CHECKLIST</div>
             <div class="page-title">添加待办</div>
             <div class="page-sub">填写待办详情, 并选择为谁添加</div>
-            <div class="form-box">
-                <div class="form-row">
-                    <label class="form-label"><b>*</b> 标题</label>
-                    <input class="form-input" id="atTitle" placeholder="待办标题">
-                </div>
-                <div class="form-row">
-                    <label class="form-label">URL <span style="color:#666;font-size:12px">(留空则自动分配)</span></label>
-                    <input class="form-input" id="atLink" placeholder="https://... 或留空">
-                </div>
-                <div class="form-row">
-                    <label class="form-label">内容</label>
-                    <textarea class="form-area" id="atContent" placeholder="详细说明"></textarea>
-                </div>
-                <div class="form-row">
-                    <label class="form-label" style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none">
-                        <input type="checkbox" id="atGlobal" onchange="toggleGlobalTodo()" style="width:16px;height:16px;accent-color:#ef5777">
-                        全局待办 <span style="color:#666;font-size:12px">(选中后所有有权限的成员都会收到此待办)</span>
-                    </label>
-                </div>
-                <div class="form-row" id="assignRow">
-                    <label class="form-label">为谁添加 <span style="color:#666;font-size:12px">(留空则添加给自己)</span></label>
-                    <div class="picker-wrap">
-                        <div class="picker" id="assignPicker" onclick="document.getElementById('assignInput').focus()">
-                            <input id="assignInput" placeholder="输入昵称搜索并选择" autocomplete="off" onfocus="searchUser(this.value)" oninput="searchUser(this.value)" onkeydown="assignKey(event)">
+            <div class="card td-card">
+                <div class="td-section">
+                    <div class="td-label">基础信息</div>
+                    <div class="form-row">
+                        <label class="form-label"><b>*</b> 标题</label>
+                        <input class="form-input" id="atTitle" placeholder="待办标题">
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label">URL <span style="color:#666;font-size:12px">(留空则自动分配)</span></label>
+                        <input class="form-input" id="atLink" placeholder="https://... 或留空">
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label">Tag <span style="color:#666;font-size:12px">(可选)</span></label>
+                        <div class="picker-wrap">
+                            <div class="picker" id="atTagPicker" onclick="document.getElementById('atTagInput').focus()">
+                                <input id="atTagInput" placeholder="选择Tag" autocomplete="off" onfocus="todoTagPickerSearch(this.value)" oninput="todoTagPickerSearch(this.value)" onkeydown="todoTagPickerKey(event)">
+                            </div>
+                            <div class="picker-drop hide" id="atTagDrop"></div>
                         </div>
-                        <div class="picker-drop hide" id="assignDrop"></div>
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label">内容</label>
+                        <textarea class="form-area" id="atContent" placeholder="详细说明"></textarea>
                     </div>
                 </div>
-                <div class="err-msg" id="atErr" style="color:#ff6b81;font-size:13px;min-height:18px;margin-bottom:8px"></div>
-                <button class="add-todo-btn" id="atSubmit" onclick="btnRun(this, submitTodo)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m-7-7h14"/></svg> 创建待办</button>
+                <div class="td-section">
+                    <div class="td-label">分配设置</div>
+                    <div class="form-row">
+                        <label class="form-label" style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none">
+                            <input type="checkbox" id="atGlobal" onchange="toggleGlobalTodo()" style="width:16px;height:16px;accent-color:#ef5777">
+                            全局待办 <span style="color:#666;font-size:12px">(选中后所有有权限的成员都会收到此待办)</span>
+                        </label>
+                    </div>
+                    <div class="form-row" id="assignRow">
+                        <label class="form-label">为谁添加 <span style="color:#666;font-size:12px">(留空则添加给自己)</span></label>
+                        <div class="picker-wrap">
+                            <div class="picker" id="assignPicker" onclick="document.getElementById('assignInput').focus()">
+                                <input id="assignInput" placeholder="输入昵称搜索并选择" autocomplete="off" onfocus="searchUser(this.value)" oninput="searchUser(this.value)" onkeydown="assignKey(event)">
+                            </div>
+                            <div class="picker-drop hide" id="assignDrop"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="td-actions">
+                    <div class="err-msg" id="atErr" style="color:#ff6b81;font-size:13px;min-height:18px;flex:1"></div>
+                    <button class="add-todo-btn" id="atSubmit" onclick="btnRun(this, submitTodo)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m-7-7h14"/></svg> 创建待办</button>
+                </div>
             </div>
         </div>
         <div class="page hide" id="pageNotice">
@@ -328,6 +346,14 @@
                     </div>
                     <div style="color:#999;font-size:13px;margin-bottom:14px">核心能力</div>
                     <div id="teamSkills"></div>
+                </div>
+                <div class="card">
+                    <div class="card-head-row">
+                        <div class="card-head">TODO TAGS</div>
+                        <button class="card-head-btn" onclick="btnRun(this, reloadTodoTags)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 11A8.1 8.1 0 0 0 4.5 9M4 5v4h4m-4 4a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg> 刷新</button>
+                    </div>
+                    <div style="color:#999;font-size:13px;margin-bottom:14px">待办Tag</div>
+                    <div id="teamTodoTags"></div>
                 </div>
                 <div class="card">
                     <div class="card-head-row">
