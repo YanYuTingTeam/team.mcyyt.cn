@@ -319,10 +319,11 @@ function renderTodoPage() {
             ? '<button class="act-btn" onclick="btnRun(this, function(){ return markDone(' + it.id + ', false) })">' + UNDO_SVG + ' 撤销确认</button>'
             : '<button class="act-btn" onclick="btnRun(this, function(){ return markDone(' + it.id + ', true) })">' + CHECK_SVG + ' 我已完成</button>';
         var tagHtml = '';
-        if (it.tag_id && __todoTagMeta[it.tag_id]) {
-            var tg = __todoTagMeta[it.tag_id];
-            var c = tg.color || '#ef5777';
-            tagHtml = '<a class="t-tag-chip" href="/todos/tag/' + tg.id + '" style="color:' + c + ';border-color:' + hexA(c,.45) + ';background:' + hexA(c,.08) + '" onclick="return navTodoTag(event,' + tg.id + ')">' + esc(tg.name) + '</a>';
+        if (it.tags && it.tags.length) {
+            tagHtml = '<div class="t-tags">' + it.tags.map(function(tg) {
+                var c = tg.color || '#ef5777';
+                return '<a class="t-tag-chip" href="/todos/tag/' + tg.id + '" style="color:' + c + ';border-color:' + hexA(c,.45) + ';background:' + hexA(c,.08) + '" onclick="return navTodoTag(event,' + tg.id + ')">' + esc(tg.name) + '</a>';
+            }).join(' ') + '</div>';
         }
         var desc = it.content ? '<div class="t-desc">' + esc(it.content) + '</div>' : '';
         var gTag = it.is_global ? '<span class="chip global-tag">全局</span>' : '';
@@ -499,9 +500,11 @@ function renderTodoDetail(d) {
     var icon = d.my_done ? OK_SVG : NO_SVG;
     var gTag = t.is_global ? '<span class="chip global-tag">全局</span>' : '';
     var tagChip = '';
-    if (t.tag_id && t.tag_name) {
-        var c = t.tag_color || '#ef5777';
-        tagChip = '<a class="t-tag-chip" href="/todos/tag/' + t.tag_id + '" style="color:' + c + ';border-color:' + hexA(c,.45) + ';background:' + hexA(c,.08) + '" onclick="return navTodoTag(event,' + t.tag_id + ')">' + esc(t.tag_name) + '</a>';
+    if (t.tags && t.tags.length) {
+        tagChip = t.tags.map(function(tg) {
+            var c = tg.color || '#ef5777';
+            return '<a class="t-tag-chip" href="/todos/tag/' + tg.id + '" style="color:' + c + ';border-color:' + hexA(c,.45) + ';background:' + hexA(c,.08) + '" onclick="return navTodoTag(event,' + tg.id + ')">' + esc(tg.name) + '</a>';
+        }).join(' ');
     }
     var head = '<div class="td-head">' + icon + '<span class="td-title">#' + esc(t.id) + ' · ' + esc(t.title) + '</span>' + gTag + '</div>';
     var creator = { id: t.creator_id, name: t.creator_name, avatar: t.creator_avatar };
@@ -511,7 +514,7 @@ function renderTodoDetail(d) {
         '<span class="td-sep">|</span>' +
         '<span class="td-time">创建时间 ' + esc(t.created_at) + '</span>' +
         '</div>';
-    var tagSection = tagChip ? '<div class="td-section"><div class="td-label">Tag</div>' + tagChip + '</div>' : '';
+    var tagSection = tagChip ? '<div class="td-section"><div class="td-label">Tag</div><div class="t-tags">' + tagChip + '</div></div>' : '';
     var assigneeHtml = '';
     if (t.is_global) {
         assigneeHtml = '<div class="td-section"><div class="td-label">目标</div><div class="td-assignees"><span class="chip global-tag">全体成员</span></div></div>';
@@ -564,34 +567,34 @@ async function resetAddTodo() {
     document.getElementById('assignRow').classList.remove('hide');
     assignUsers = [];
     renderChips();
-    __atTag = null;
+    __atTags = [];
     var tagInput = document.getElementById('atTagInput');
     if (tagInput) tagInput.value = '';
     var tagDrop = document.getElementById('atTagDrop');
     if (tagDrop) tagDrop.classList.add('hide');
     renderAtTagChip();
 }
-var __atTag = null;
+var __atTags = [];
 function renderAtTagChip() {
     var picker = document.getElementById('atTagPicker');
     if (!picker) return;
     picker.querySelectorAll('.u-chip').forEach(function(c) { c.remove(); });
-    if (__atTag) {
-        var c = __atTag.color || '#ef5777';
+    var inp = document.getElementById('atTagInput');
+    __atTags.forEach(function(t) {
+        var c = t.color || '#ef5777';
         var chip = document.createElement('span');
         chip.className = 'u-chip skill';
         chip.style.color = c;
         chip.style.borderColor = hexA(c, .45);
         chip.style.background = hexA(c, .08);
-        chip.innerHTML = '<span>' + esc(__atTag.name) + '</span><span class="rm">' + X_SVG + '</span>';
+        chip.innerHTML = '<span>' + esc(t.name) + '</span><span class="rm">' + X_SVG + '</span>';
         chip.querySelector('.rm').onclick = function(e) {
             e.stopPropagation();
-            __atTag = null;
+            __atTags = __atTags.filter(function(x) { return x.id !== t.id; });
             renderAtTagChip();
         };
-        var inp = document.getElementById('atTagInput');
         picker.insertBefore(chip, inp);
-    }
+    });
 }
 function todoTagPickerSearch(kw) {
     var drop = document.getElementById('atTagDrop');
@@ -600,7 +603,7 @@ function todoTagPickerSearch(kw) {
     var all = [];
     for (var k in __todoTagMeta) all.push(__todoTagMeta[k]);
     var filtered = kw ? all.filter(function(t) { return t.name.indexOf(kw) !== -1; }) : all;
-    if (__atTag) filtered = filtered.filter(function(t) { return t.id !== __atTag.id; });
+    filtered = filtered.filter(function(t) { return !__atTags.some(function(s) { return s.id === t.id; }); });
     if (!filtered.length) {
         drop.innerHTML = '<div class="drop-empty">' + (kw ? '没有匹配的Tag' : '暂无可选Tag') + '</div>';
         drop.classList.remove('hide');
@@ -613,8 +616,8 @@ function todoTagPickerSearch(kw) {
     drop.classList.remove('hide');
 }
 function todoTagPickerKey(e) {
-    if (e.key === 'Backspace' && !e.target.value && __atTag) {
-        __atTag = null;
+    if (e.key === 'Backspace' && !e.target.value && __atTags.length) {
+        __atTags.pop();
         renderAtTagChip();
     }
     if (e.key === 'Enter') e.preventDefault();
@@ -622,7 +625,8 @@ function todoTagPickerKey(e) {
 function pickAtTag(id) {
     var t = __todoTagMeta[id];
     if (!t) return;
-    __atTag = { id: t.id, name: t.name, color: t.color };
+    if (__atTags.some(function(s) { return s.id === id; })) return;
+    __atTags.push({ id: t.id, name: t.name, color: t.color });
     renderAtTagChip();
     var inp = document.getElementById('atTagInput');
     if (inp) { inp.value = ''; inp.focus(); }
@@ -695,7 +699,7 @@ async function submitTodo() {
         content: document.getElementById('atContent').value.trim(),
         is_global: isGlobal
     };
-    if (__atTag) body.tag_id = __atTag.id;
+    if (__atTags.length) body.tag_ids = __atTags.map(function(t) { return t.id; });
     if (!isGlobal) {
         body.assignees = assignUsers.map(function(u) { return u.id; });
     }

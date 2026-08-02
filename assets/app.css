@@ -492,11 +492,12 @@ a { color: #ef5777; }
 .todo-filters.tag-filters .tf-btn { display: flex; align-items: center; gap: 6px; }
 .todo-filters.tag-filters .tf-btn.active { background: transparent; color: #eee; }
 .tf-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+.t-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
 .t-tag-chip {
     display: inline-flex; align-items: center; gap: 4px;
     font-size: 12px; padding: 3px 10px; border-radius: 12px;
     border: 1px solid; text-decoration: none; cursor: pointer;
-    transition: opacity .15s; margin-top: 6px;
+    transition: opacity .15s;
 }
 .t-tag-chip:hover { opacity: .8; }
 .scroll-indicator {

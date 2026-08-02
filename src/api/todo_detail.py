@@ -13,17 +13,22 @@ def handle(request):
     try:
         with db.cursor() as cur:
             cur.execute(
-                "SELECT t.id, t.title, t.link, t.content, t.created_at, t.is_global, t.tag_id, "
-                "u.id AS creator_id, u.name AS creator_name, u.avatar AS creator_avatar, "
-                "tg.name AS tag_name, tg.color AS tag_color "
+                "SELECT t.id, t.title, t.link, t.content, t.created_at, t.is_global, "
+                "u.id AS creator_id, u.name AS creator_name, u.avatar AS creator_avatar "
                 "FROM yyt_todo t JOIN yyt_user u ON t.creator_id = u.id "
-                "LEFT JOIN yyt_todo_tag tg ON t.tag_id = tg.id "
                 "WHERE t.id = %s",
                 (tid,)
             )
             todo = cur.fetchone()
             if not todo:
                 return {"code": 404, "message": "待办不存在"}
+            cur.execute(
+                "SELECT r.tag_id AS id, t.name, t.color "
+                "FROM yyt_todo_tag_rel r JOIN yyt_todo_tag t ON r.tag_id = t.id "
+                "WHERE r.todo_id = %s",
+                (tid,)
+            )
+            todo['tags'] = cur.fetchall()
             if not todo['is_global']:
                 cur.execute(
                     "SELECT user_id FROM yyt_todo_assign WHERE todo_id = %s AND user_id = %s",

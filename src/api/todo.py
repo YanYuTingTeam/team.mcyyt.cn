@@ -12,9 +12,14 @@ def _ensure_col(db):
             if not cur.fetchone():
                 cur.execute("ALTER TABLE yyt_todo ADD COLUMN is_global TINYINT DEFAULT 0 AFTER content")
                 cur.execute("ALTER TABLE yyt_todo ADD KEY idx_global (is_global)")
-            cur.execute("SHOW COLUMNS FROM yyt_todo LIKE 'tag_id'")
-            if not cur.fetchone():
-                cur.execute("ALTER TABLE yyt_todo ADD COLUMN tag_id INT DEFAULT NULL AFTER is_global")
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS yyt_todo_tag_rel (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    todo_id INT NOT NULL,
+                    tag_id INT NOT NULL,
+                    UNIQUE KEY uq_todo_tag (todo_id, tag_id)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """)
             db.commit()
     except Exception:
         pass
@@ -69,16 +74,27 @@ def handle(request):
                 link = (data.get('link') or '').strip()
                 content = (data.get('content') or '').strip()
                 is_global = 1 if data.get('is_global') else 0
-                tag_id = int(data.get('tag_id') or 0) or None
+                tag_ids = data.get('tag_ids') or []
+                clean_tag_ids = []
+                for t in tag_ids:
+                    try:
+                        clean_tag_ids.append(int(t))
+                    except (ValueError, TypeError):
+                        pass
                 cur.execute(
-                    "INSERT INTO yyt_todo (creator_id, title, link, content, is_global, tag_id) VALUES (%s, %s, %s, %s, %s, %s)",
-                    (user['id'], title, link or None, content or None, is_global, tag_id)
+                    "INSERT INTO yyt_todo (creator_id, title, link, content, is_global) VALUES (%s, %s, %s, %s, %s)",
+                    (user['id'], title, link or None, content or None, is_global)
                 )
                 new_id = cur.lastrowid
                 if not link:
                     cur.execute(
                         "UPDATE yyt_todo SET link = %s WHERE id = %s",
                         ('/todos/' + str(new_id), new_id)
+                    )
+                for tid in clean_tag_ids:
+                    cur.execute(
+                        "INSERT IGNORE INTO yyt_todo_tag_rel (todo_id, tag_id) VALUES (%s, %s)",
+                        (new_id, tid)
                     )
                 if not is_global:
                     assignees = data.get('assignees') or []
@@ -101,18 +117,16 @@ def handle(request):
         with db.cursor() as cur:
             tag_filter = request.args.get('tag') or ''
             sql = (
-                "SELECT t.id, t.title, t.link, t.content, t.created_at, t.is_global, t.tag_id, "
-                "COALESCE(a.is_done, 0) AS is_done, a.done_at AS my_done_at, u.name AS creator_name, u.avatar AS creator_avatar, "
-                "tg.name AS tag_name, tg.color AS tag_color "
+                "SELECT t.id, t.title, t.link, t.content, t.created_at, t.is_global, "
+                "COALESCE(a.is_done, 0) AS is_done, a.done_at AS my_done_at, u.name AS creator_name, u.avatar AS creator_avatar "
                 "FROM yyt_todo t "
                 "JOIN yyt_user u ON t.creator_id = u.id "
                 "LEFT JOIN yyt_todo_assign a ON a.todo_id = t.id AND a.user_id = %s "
-                "LEFT JOIN yyt_todo_tag tg ON t.tag_id = tg.id "
                 "WHERE (t.is_global = 1 OR a.user_id = %s)"
             )
             params = [user['id'], user['id']]
             if tag_filter:
-                sql += " AND t.tag_id = %s"
+                sql += " AND EXISTS (SELECT 1 FROM yyt_todo_tag_rel r WHERE r.todo_id = t.id AND r.tag_id = %s)"
                 params.append(int(tag_filter))
             sql += " ORDER BY t.id DESC"
             cur.execute(sql, params)
@@ -132,8 +146,21 @@ def handle(request):
                     if tid not in done_map:
                         done_map[tid] = []
                     done_map[tid].append({'id': r['id'], 'name': r['name'], 'avatar': r['avatar']})
+                cur.execute(
+                    "SELECT r.todo_id, r.tag_id, t.name, t.color "
+                    "FROM yyt_todo_tag_rel r JOIN yyt_todo_tag t ON r.tag_id = t.id "
+                    "WHERE r.todo_id IN (" + placeholders + ")",
+                    ids
+                )
+                tag_map = {}
+                for r in cur.fetchall():
+                    tid = r['todo_id']
+                    if tid not in tag_map:
+                        tag_map[tid] = []
+                    tag_map[tid].append({'id': r['tag_id'], 'name': r['name'], 'color': r['color']})
                 for r in rows:
                     r['done_users'] = done_map.get(r['id'], [])
+                    r['tags'] = tag_map.get(r['id'], [])
         return {"code": 0, "data": rows}
     finally:
         db.close()
