@@ -598,15 +598,16 @@ async function loadOverview() {
     document.getElementById('apikeyInput').value = ovData.apikey;
     renderApikeyBox();
     renderOvInvites(ovData.invites);
+    renderOvTodos();
     var dvBox = document.getElementById('deviceList');
     dvBox.innerHTML = ovData.sessions.map(function(s) {
         var icon = /iPhone|iPad|Android/i.test(s.device || '') ? MOBILE_SVG : DESKTOP_SVG;
         var cur = s.is_current ? '<span class="chip ok">本机</span>' : '';
         return '<div class="dev-row">' + icon +
             '<div class="dv-main">' +
-                '<div class="dv-device">' + esc(s.device || '未知设备') + cur + '</div>' +
+                '<div class="dv-device">运行于 ' + esc(s.device || '未知设备') + cur + '</div>' +
                 '<div class="dv-ip-line">IP ' + esc(s.ip || '未知IP') + '</div>' +
-                '<div class="dv-time-line">初次登录 ' + esc(s.first_seen || s.created_at) + ' | 最近 ' + esc(s.created_at) + '</div>' +
+                '<div class="dv-time-line">初次登录 ' + esc(s.first_seen || s.created_at) + ' | 最近登录 ' + esc(s.created_at) + '</div>' +
             '</div>' +
             '<button class="act-btn" onclick="btnRun(this, function(){ return killSession(' + s.id + ', ' + s.is_current + ') })">' + LOGOUT_SVG + ' 登出</button>' +
         '</div>';
@@ -634,6 +635,36 @@ async function refreshOvInvite() {
     var ret = await getJson('/api/overview');
     ovData = ret.data;
     renderOvInvites(ovData.invites);
+}
+async function renderOvTodos() {
+    var box = document.getElementById('ovTodoList');
+    if (!box) return;
+    try {
+        var ret = await getJson('/api/todo');
+        if (!ret.data || !ret.data.length) {
+            box.innerHTML = '<div class="empty-tip">还没有待办</div>';
+            return;
+        }
+        var unfinished = ret.data.filter(function(t) { return !t.is_done; });
+        var display = unfinished.length ? unfinished : ret.data;
+        var shown = display.slice(0, 5);
+        box.innerHTML = shown.map(function(it) {
+            var statusIcon = it.is_done ? OK_SVG : NO_SVG;
+            var doneClass = it.is_done ? ' done' : '';
+            return '<div class="ov-todo-row' + doneClass + '">' +
+                statusIcon +
+                '<div class="ov-todo-info">' +
+                    '<a class="ov-todo-link" href="/todos/' + it.id + '" onclick="event.preventDefault(); openTodo(' + it.id + ')">' + esc(it.title) + '</a>' +
+                    '<div class="ov-todo-meta">#' + it.id + ' · ' + esc(it.creator_name) + ' · ' + esc(it.created_at) + '</div>' +
+                '</div>' +
+                '<button class="ov-todo-check" title="' + (it.is_done ? '撤销' : '完成') + '" onclick="btnRun(this, function(){ return markDone(' + it.id + ', ' + (!it.is_done) + ') })">' +
+                    (it.is_done ? UNDO_SVG : CHECK_SVG) +
+                '</button>' +
+            '</div>';
+        }).join('');
+    } catch (e) {
+        box.innerHTML = '<div class="empty-tip">加载失败</div>';
+    }
 }
 function openProfileModal() {
     if (!ovData) return;

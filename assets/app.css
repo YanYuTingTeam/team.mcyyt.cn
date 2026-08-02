@@ -419,14 +419,14 @@ a { color: #ef5777; }
     0% { background: rgba(239, 87, 119, .18); }
     100% { background: transparent; }
 }
-.trow .t-left { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 28px; flex-shrink: 0; }
-.trow .t-left > svg { width: 22px; height: 22px; color: #ef8c37; }
+.trow .t-left { display: flex; flex-direction: row; align-items: center; gap: 8px; flex-shrink: 0; }
+.trow .t-left > svg { width: 22px; height: 22px; color: #ef8c37; flex-shrink: 0; }
 .trow.done .t-left > svg { color: #4caf7d; }
 .trow .t-title { font-size: 15px; color: #eee; }
 .trow.done .t-title { color: #777; }
-.trow .t-done-avas { display: flex; flex-wrap: wrap; gap: 2px; justify-content: center; }
-.trow .t-done-ava { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid #2b2b2e; background: #1a1a1c; object-fit: cover; }
-.trow .t-done-more { font-size: 10px; color: #888; background: #1d1d20; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; line-height: 1; }
+.trow .t-done-avas { display: flex; flex-wrap: nowrap; gap: 3px; }
+.trow .t-done-ava { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid #2b2b2e; background: #1a1a1c; object-fit: cover; }
+.trow .t-done-more { font-size: 10px; color: #888; background: #1d1d20; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; line-height: 1; flex-shrink: 0; }
 .trow .t-body { flex: 1; min-width: 0; }
 .trow .t-line { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .trow .t-desc { font-size: 13px; color: #999; line-height: 1.6; margin-top: 6px; }
@@ -727,9 +727,10 @@ a { color: #ef5777; }
 .key-row input.err { border-color: #ef5777; box-shadow: 0 0 0 2px rgba(239,87,119,.15); }
 .key-eye-btn {
     background: transparent; border: 1px solid #2b2b2e; border-radius: 8px;
-    color: #888; cursor: pointer; padding: 0 10px; display: flex; align-items: center;
+    color: #888; cursor: pointer; padding: 8px 10px; display: flex; align-items: center;
     transition: color .2s, border-color .2s;
 }
+.key-eye-btn svg { width: 18px; height: 18px; }
 .key-eye-btn:hover { color: #eee; border-color: #444; }
 .dev-row {
     display: flex;
@@ -745,6 +746,48 @@ a { color: #ef5777; }
 .dev-row .dv-device .chip { margin-left: 6px; }
 .dev-row .dv-ip-line { font-size: 12px; color: #888; margin-top: 3px; }
 .dev-row .dv-time-line { font-size: 11px; color: #666; margin-top: 3px; }
+.ov-todo-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid #1e1e21;
+}
+.ov-todo-row:last-child { border-bottom: none; }
+.ov-todo-row > svg { width: 18px; height: 18px; flex-shrink: 0; color: #ef8c37; }
+.ov-todo-row.done > svg { color: #4caf7d; }
+.ov-todo-row .ov-todo-info { flex: 1; min-width: 0; }
+.ov-todo-row .ov-todo-link {
+    display: block;
+    color: #eee;
+    font-size: 14px;
+    text-decoration: none;
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: color .15s;
+}
+.ov-todo-row .ov-todo-link:hover { color: #ef5777; }
+.ov-todo-row.done .ov-todo-link { color: #777; text-decoration: line-through; }
+.ov-todo-row .ov-todo-meta { font-size: 11px; color: #666; margin-top: 2px; }
+.ov-todo-row.done .ov-todo-meta { color: #555; }
+.ov-todo-row .ov-todo-check {
+    background: transparent;
+    border: 1px solid #2b2b2e;
+    color: #888;
+    border-radius: 6px;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all .15s;
+}
+.ov-todo-row .ov-todo-check:hover { border-color: #ef5777; color: #ef5777; }
+.ov-todo-row .ov-todo-check svg { width: 14px; height: 14px; }
 .edit-row { display: flex; gap: 8px; margin-top: 10px; }
 .edit-row input {
     flex: 1;
@@ -1059,7 +1102,8 @@ input.input-error, select.input-error, textarea.input-error { border-color: #ef5
     .scroll-indicator.bottom { bottom: 16px; }
     .trow { flex-wrap: wrap; gap: 10px; }
     .trow > .act-btn { width: 100%; justify-content: center; }
-    .trow .t-left { flex-direction: row; width: auto; }
+    .trow .t-left { width: auto; }
+    .trow .t-done-ava, .trow .t-done-more { width: 18px; height: 18px; font-size: 9px; }
     .todo-filters { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
     .todo-filters .tf-btn { flex-shrink: 0; }
 }
