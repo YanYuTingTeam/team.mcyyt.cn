@@ -30,13 +30,14 @@ def handle(request):
                 (tid,)
             )
             todo['tags'] = cur.fetchall()
-            if not todo['is_global']:
+            if todo['is_global']:
+                todo['is_assigned'] = True
+            else:
                 cur.execute(
                     "SELECT user_id FROM yyt_todo_assign WHERE todo_id = %s AND user_id = %s",
                     (tid, user['id'])
                 )
-                if not cur.fetchone() and todo['creator_id'] != user['id']:
-                    return {"code": 403, "message": "无权查看此待办"}
+                todo['is_assigned'] = bool(cur.fetchone())
             cur.execute(
                 "SELECT a.user_id, a.is_done, a.done_at, u.name, u.avatar "
                 "FROM yyt_todo_assign a JOIN yyt_user u ON a.user_id = u.id "

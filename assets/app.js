@@ -385,9 +385,13 @@ function renderTodoPage() {
     }
     pageBox.innerHTML = data.map(function(it) {
         var t = todoLinkHtml(it);
-        var btn = it.is_done
-            ? '<button class="act-btn" onclick="btnRun(this, function(){ return markDone(' + it.id + ', false) })">' + UNDO_SVG + ' 撤销确认</button>'
-            : '<button class="act-btn" onclick="btnRun(this, function(){ return markDone(' + it.id + ', true) })">' + CHECK_SVG + ' 我已完成</button>';
+        var canDone = it.is_global || it.is_assigned;
+        var btn = '';
+        if (canDone) {
+            btn = it.is_done
+                ? '<button class="act-btn" onclick="btnRun(this, function(){ return markDone(' + it.id + ', false) })">' + UNDO_SVG + ' 撤销确认</button>'
+                : '<button class="act-btn" onclick="btnRun(this, function(){ return markDone(' + it.id + ', true) })">' + CHECK_SVG + ' 我已完成</button>';
+        }
         var tagHtml = '';
         if (it.tags && it.tags.length) {
             tagHtml = '<div class="t-tags">' + it.tags.map(function(tg) {
@@ -664,12 +668,12 @@ function renderTodoDetail(d) {
     var tagSection = tagChip ? '<div class="td-section"><div class="td-label">Tag</div><div class="t-tags">' + tagChip + '</div></div>' : '';
     var assigneeHtml = '';
     if (t.is_global) {
-        assigneeHtml = '<div class="td-section"><div class="td-label">目标</div><div class="td-assignees"><span class="chip global-tag">全体成员</span></div></div>';
+        assigneeHtml = '<div class="td-section"><div class="td-label">负责人</div><div class="td-assignees"><span class="chip global-tag">全体成员</span></div></div>';
     } else if (d.assignees && d.assignees.length) {
         var chips = d.assignees.map(function(u) {
             return '<div class="td-person"><img src="' + avatarUrl(u) + '" alt=""><span>' + esc(u.name) + '</span></div>';
         }).join('');
-        assigneeHtml = '<div class="td-section"><div class="td-label">目标</div><div class="td-assignees">' + chips + '</div></div>';
+        assigneeHtml = '<div class="td-section"><div class="td-label">负责人</div><div class="td-assignees">' + chips + '</div></div>';
     }
     var contentHtml = t.content ? '<div class="td-section"><div class="td-label">内容</div><div class="td-content">' + esc(t.content) + '</div></div>' : '';
     var doneHtml = '';
@@ -680,15 +684,17 @@ function renderTodoDetail(d) {
         doneHtml = '<div class="td-section"><div class="td-label">已完成的用户</div><div class="td-assignees">' + doneChips + '</div></div>';
     }
     var actionHtml = '';
-    if (d.my_done) {
-        actionHtml = '<div class="td-actions">' +
-            '<button class="act-btn" onclick="btnRun(this, function(){ return markTodoDetailDone(false) })">' + UNDO_SVG + ' 撤销确认</button>' +
-            '<span class="td-my-done">你已于 ' + esc(d.my_done_at) + ' 完成</span>' +
-            '</div>';
-    } else {
-        actionHtml = '<div class="td-actions">' +
-            '<button class="add-todo-btn" onclick="btnRun(this, function(){ return markTodoDetailDone(true) })">' + CHECK_SVG + ' 我已完成</button>' +
-            '</div>';
+    if (t.is_assigned) {
+        if (d.my_done) {
+            actionHtml = '<div class="td-actions">' +
+                '<button class="act-btn" onclick="btnRun(this, function(){ return markTodoDetailDone(false) })">' + UNDO_SVG + ' 撤销确认</button>' +
+                '<span class="td-my-done">你已于 ' + esc(d.my_done_at) + ' 完成</span>' +
+                '</div>';
+        } else {
+            actionHtml = '<div class="td-actions">' +
+                '<button class="add-todo-btn" onclick="btnRun(this, function(){ return markTodoDetailDone(true) })">' + CHECK_SVG + ' 我已完成</button>' +
+                '</div>';
+        }
     }
     document.getElementById('todoDetailBox').innerHTML = '<div class="card td-card">' + head + creatorLine + tagSection + assigneeHtml + contentHtml + doneHtml + actionHtml + '</div>';
 }

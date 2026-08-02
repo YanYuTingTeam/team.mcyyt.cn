@@ -147,6 +147,8 @@ def handle(request):
                         (todo_id, user['id'])
                     )
                     row = cur.fetchone()
+                    if not tr['is_global'] and not row:
+                        return {"code": 403, "message": "你不在该待办的负责人中"}
                     if row:
                         if is_done:
                             cur.execute(
@@ -226,7 +228,8 @@ def handle(request):
             scope = (request.args.get('scope') or '').strip()
             sql = (
                 "SELECT t.id, t.title, t.link, t.content, t.created_at, t.updated_at, t.is_global, t.creator_id, "
-                "COALESCE(a.is_done, 0) AS is_done, a.done_at AS my_done_at, u.name AS creator_name, u.avatar AS creator_avatar "
+                "COALESCE(a.is_done, 0) AS is_done, a.done_at AS my_done_at, "
+                "(a.user_id IS NOT NULL) AS is_assigned, u.name AS creator_name, u.avatar AS creator_avatar "
                 "FROM yyt_todo t "
                 "JOIN yyt_user u ON t.creator_id = u.id "
                 "LEFT JOIN yyt_todo_assign a ON a.todo_id = t.id AND a.user_id = %s "
@@ -239,7 +242,7 @@ def handle(request):
                 sql += " AND t.creator_id = %s"
                 params.append(user['id'])
             elif scope == 'assigned':
-                sql += " AND (t.is_global = 1 OR EXISTS (SELECT 1 FROM yyt_todo_assign a2 WHERE a2.todo_id = t.id AND a2.user_id = %s))"
+                sql += " AND EXISTS (SELECT 1 FROM yyt_todo_assign a2 WHERE a2.todo_id = t.id AND a2.user_id = %s)"
                 params.append(user['id'])
             else:
                 sql += " AND (t.is_global = 1 OR a.user_id = %s)"

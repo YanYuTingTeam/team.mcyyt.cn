@@ -18,11 +18,11 @@ def handle(request):
                         sets[k] = 1 if data.get(k) else 0
                 if sets:
                     parts = ','.join([f"{k} = %s" for k in sets])
-                    vals = list(sets.values()) + [user['id']]
+                    vals = list(sets.values())
                     cur.execute(
                         f"INSERT INTO yyt_notify_setting (user_id, {','.join(sets.keys())}) VALUES (%s, {','.join(['%s']*len(sets))}) "
                         f"ON DUPLICATE KEY UPDATE {parts}",
-                        [user['id']] + list(sets.values()) + vals
+                        [user['id']] + vals + vals
                     )
                     db.commit()
                 return {"code": 0, "message": "ok"}
