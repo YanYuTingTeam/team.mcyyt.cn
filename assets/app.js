@@ -336,14 +336,24 @@ function setTodoFilter(f, btn) {
 }
 function setTodoTagFilter(tagId, btn) {
     __todoTagFilter = tagId;
-    document.querySelectorAll('#todoTagFilters .tf-btn').forEach(function(b) { b.classList.remove('active'); });
-    if (btn) btn.classList.add('active');
     if (tagId) {
         history.pushState(null, '', '/todos/tag/' + tagId);
         loadTodoByTag(tagId);
     } else {
         history.pushState(null, '', '/todos');
         loadTodoAll();
+    }
+    renderTodoTagFilters();
+    if (tagId) {
+        var tagBtn = document.querySelector('#todoTagFilters .tf-btn[data-tag="' + tagId + '"]');
+        if (tagBtn) {
+            document.querySelectorAll('#todoTagFilters .tf-btn').forEach(function(b) { b.classList.remove('active'); });
+            tagBtn.classList.add('active');
+        }
+    } else {
+        document.querySelectorAll('#todoTagFilters .tf-btn').forEach(function(b) { b.classList.remove('active'); });
+        var allBtn = document.querySelector('#todoTagFilters .tf-btn[data-tag=""]');
+        if (allBtn) allBtn.classList.add('active');
     }
 }
 async function loadTodoAll() {
@@ -442,7 +452,7 @@ async function loadTodo() {
 function renderTodoHome() {
     var homeBox = document.getElementById('todoList');
     if (__trackTodoId && __trackTodoData) {
-        var t = __trackTodoData.todo;
+        var t = __trackTodoData;
         if (t) {
             var tagChip = '';
             if (t.tags && t.tags.length) {
