@@ -35,7 +35,7 @@ function markErr(input, msg) {
     input.classList.add('input-error');
 }
 function layoutMasonry() {
-    var grids = document.querySelectorAll('.card-grid, .masonry-grid');
+    var grids = document.querySelectorAll('.card-grid, .masonry-grid, .ov-cols');
     grids.forEach(function(box) {
         if (box.offsetParent === null) return;
         var rect = box.getBoundingClientRect();
@@ -1177,6 +1177,7 @@ async function loadOverview() {
             '<button class="act-btn" onclick="btnRun(this, function(){ return killSession(' + s.id + ', ' + s.is_current + ') })">' + LOGOUT_SVG + ' 登出</button>' +
         '</div>';
     }).join('');
+    _schedMasonry();
 }
 function renderOvInvites(invites) {
     var ivBox = document.getElementById('inviteList');
@@ -1200,6 +1201,7 @@ async function refreshOvInvite() {
     var ret = await getJson('/api/overview');
     ovData = ret.data;
     renderOvInvites(ovData.invites);
+    _schedMasonry();
 }
 async function renderOvTodos() {
     var box = document.getElementById('ovTodoList');
