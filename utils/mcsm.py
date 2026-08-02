@@ -10,8 +10,9 @@ from utils.auth import verify_sign, log_api_call
 
 PANEL_SESSIONS = {}
 SESSION_TTL = 6 * 3600
-SKIP_REQ_HEADERS = {'host', 'a', 'b', 'x-api-key', 'content-length', 'connection'}
-_STRIP_QUERY = {'sec', 'apikey', 'a', 'b'}
+SKIP_REQ_HEADERS = {'host', 'a', 'b', 'x-api-key', 'api-key', 'api_key', 'content-length', 'connection'}
+_STRIP_QUERY = {'sec', 'apikey', 'api_key', 'api-key', 'a', 'b'}
+_NATIVE_APIKEY = (MCSM_CONFIG.get('apikey') or '').strip()
 
 def _deny(msg):
     return Response(
@@ -27,17 +28,27 @@ def _clean_sessions():
 def _forward(request, subpath, extra_set_cookie=None):
     base = MCSM_CONFIG['base'].rstrip('/')
     target = base + '/' + subpath
-    if request.query_string:
-        pairs = parse_qsl(request.query_string.decode('utf-8', 'ignore'), keep_blank_values=True)
-        filtered = [(k, v) for k, v in pairs if k not in _STRIP_QUERY]
-        if filtered:
-            target += '?' + urlencode(filtered)
+    pairs = parse_qsl(request.query_string.decode('utf-8', 'ignore'), keep_blank_values=True) if request.query_string else []
+    filtered = [(k, v) for k, v in pairs if k not in _STRIP_QUERY]
+    filtered.insert(0, ('apikey', _NATIVE_APIKEY))
+    target += '?' + urlencode(filtered)
+    if not _NATIVE_APIKEY and subpath.startswith('api'):
+        return Response(
+            json.dumps({"status": 503, "data": None, "message": "服务端尚未配置 MCSManager 原生管理员 apikey, 请联系管理员在 config.py MCSM_CONFIG['apikey'] 填入后重启代理进程"}, ensure_ascii=False),
+            status=503, mimetype="application/json"
+        )
     body = request.get_data() if request.method in ('POST', 'PUT', 'DELETE') else None
     req = urllib.request.Request(target, data=body, method=request.method)
     for k, v in request.headers.items():
         if k.lower() in SKIP_REQ_HEADERS:
             continue
         req.add_header(k, v)
+    if not req.has_header('X-Requested-With'):
+        req.add_header('X-Requested-With', 'XMLHttpRequest')
+    if not req.has_header('Accept'):
+        req.add_header('Accept', 'application/json, text/plain, */*')
+    if not req.has_header('Content-Type'):
+        req.add_header('Content-Type', 'application/json; charset=utf-8')
     try:
         with urllib.request.urlopen(req, timeout=30) as resp:
             data = resp.read()

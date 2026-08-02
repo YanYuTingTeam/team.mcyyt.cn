@@ -65,9 +65,9 @@ def calc_sign(apikey, a, path, salt):
     return hmac.new(salt.encode('utf-8'), msg, hashlib.md5).hexdigest()
 
 def verify_sign(request, debug=False):
-    apikey = (request.headers.get('X-API-Key') or request.args.get('apikey') or request.cookies.get('mcsm_proxy_key') or '').strip()
-    a = (request.headers.get('a') or request.args.get('a') or '').strip()
-    b = (request.headers.get('b') or request.args.get('b') or '').strip()
+    apikey = (request.headers.get('X-API-Key') or request.headers.get('X-API-KEY') or request.headers.get('Api-Key') or request.args.get('apikey') or request.args.get('api_key') or request.args.get('api-key') or request.cookies.get('mcsm_proxy_key') or '').strip()
+    a = (request.headers.get('a') or request.headers.get('A') or request.args.get('a') or '').strip()
+    b = (request.headers.get('b') or request.headers.get('B') or request.args.get('b') or '').strip()
     if not apikey or not a or not b or not a.isdigit():
         reason = '缺少签名参数: ' + ','.join([
             'no-apikey' if not apikey else '',
