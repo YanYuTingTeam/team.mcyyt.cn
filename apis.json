@@ -10,6 +10,14 @@
     },
     {
       "method": "GET",
+      "path": "https://",
+      "title": "MCSManager API",
+      "desc": "请前往 https://docs.mcsmanager.com 查看API文档. 示例请求源码, 参考 https://github.com/YanYuTingTeam/qqbot. 公用mcsmkey: d9e138354f8840a19cbf0487a28d0813",
+      "params": [],
+      "example": "详见 MCSManager API 文档"
+    },
+    {
+      "method": "GET",
       "path": "/testAPI",
       "title": "这里是API标题",
       "desc": "api desc",
