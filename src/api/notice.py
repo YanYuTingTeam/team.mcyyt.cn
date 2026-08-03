@@ -29,19 +29,24 @@ def handle(request):
                 else:
                     cur.execute("SELECT id, email, name FROM yyt_user WHERE email IS NOT NULL")
                     users = cur.fetchall()
-                    cur.execute(
-                        "INSERT INTO yyt_notice (user_id, title, content) VALUES " + ','.join(["(%s, %s, %s)"] * len(users)),
-                        tuple(v for u in users for v in [u['id'], title, content or None])
-                    )
+                    for u in users:
+                        cur.execute(
+                            "INSERT INTO yyt_notice (user_id, title, content) VALUES (%s, %s, %s)",
+                            (u['id'], title, content or None)
+                        )
                     ids_to_notify = [u['id'] for u in users if u.get('email')]
                 db.commit()
             if ids_to_notify:
                 try:
                     with db.cursor() as cur2:
-                        cur2.execute(
-                            "SELECT id, email, name FROM yyt_user WHERE id IN (" + ','.join(['%s']*len(ids_to_notify)) + ")",
-                            ids_to_notify
-                        )
+                        if ids_to_notify:
+                            ph = ','.join(['%s'] * len(ids_to_notify))
+                            cur2.execute(
+                                f"SELECT id, email, name FROM yyt_user WHERE id IN ({ph})",
+                                ids_to_notify
+                            )
+                        else:
+                            cur2.execute("SELECT id, email, name FROM yyt_user WHERE 1=0")
                         rows = cur2.fetchall()
                     for u in rows:
                         if not u.get('email'):

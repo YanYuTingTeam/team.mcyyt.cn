@@ -2,6 +2,7 @@ import secrets
 import hmac
 import hashlib
 import time
+import ipaddress
 from utils.db import get_db
 from config import MCSM_CONFIG
 
@@ -33,14 +34,27 @@ def _ensure_avatar_col():
 def make_token():
     return secrets.token_hex(32)
 
+def _is_private_ip(ip):
+    try:
+        addr = ipaddress.ip_address(ip)
+        return addr.is_private or addr.is_loopback or addr.is_link_local
+    except ValueError:
+        return True
+
 def get_client_info(request):
-    ip = (request.headers.get('X-Forwarded-For') or '').split(',')[0].strip()
-    if not ip:
-        ip = (request.headers.get('X-Real-IP') or '').strip()
-    if not ip:
-        ip = request.remote_addr or ''
+    ip = (request.remote_addr or '').strip()
+    if ip and not _is_private_ip(ip):
+        pass
+    else:
+        real_ip = (request.headers.get('X-Real-IP') or '').strip()
+        if real_ip and not _is_private_ip(real_ip):
+            ip = real_ip
+        else:
+            xff = (request.headers.get('X-Forwarded-For') or '').split(',')[0].strip()
+            if xff and not _is_private_ip(xff):
+                ip = xff
     ua = (request.headers.get('User-Agent') or '')[:255]
-    return ip[:64], ua
+    return ip[:64] or '0.0.0.0', ua
 
 def check_login(request):
     token = request.cookies.get('yyt_token')
@@ -65,7 +79,7 @@ def calc_sign(apikey, a, path, salt):
     return hmac.new(salt.encode('utf-8'), msg, hashlib.md5).hexdigest()
 
 def verify_sign(request, debug=False):
-    apikey = (request.headers.get('X-API-Key') or request.headers.get('X-API-KEY') or request.headers.get('Api-Key') or request.args.get('apikey') or request.args.get('api_key') or request.args.get('api-key') or request.cookies.get('mcsm_proxy_key') or '').strip()
+    apikey = (request.headers.get('X-API-Key') or request.headers.get('X-API-KEY') or request.headers.get('Api-Key') or request.args.get('apikey') or request.args.get('api_key') or request.args.get('api-key') or '').strip()
     a = (request.headers.get('a') or request.headers.get('A') or request.args.get('a') or '').strip()
     b = (request.headers.get('b') or request.headers.get('B') or request.args.get('b') or '').strip()
     if not apikey or not a or not b or not a.isdigit():

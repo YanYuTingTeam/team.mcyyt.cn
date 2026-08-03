@@ -53,8 +53,9 @@ def security_guard():
     if banned:
         if is_ajax_api(request):
             return json_response("404 page not found", 404)
+        ban_msg = '请求过于频繁' if btype == 'rate' else '已被封禁'
         return Response(
-            f"<html><body style='background:#000;color:#eee;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0'><div style='text-align:center'><h2 style='color:#ef5777'>访问被拒绝</h2><p>{msg}</p></div></body></html>",
+            f"<html><body style='background:#000;color:#eee;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0'><div style='text-align:center'><h2 style='color:#ef5777'>访问被拒绝</h2><p>{ban_msg}</p></div></body></html>",
             status=404, mimetype='text/html'
         )
     is_logged_in = bool(request.cookies.get('yyt_token') and check_login(request))
@@ -66,6 +67,24 @@ def security_guard():
             return json_response("401 auth required", 401)
         if path != '/':
             return redirect('/')
+
+@app.after_request
+def add_security_headers(response):
+    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    response.headers['Content-Security-Policy'] = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline'; "
+        "style-src 'self' 'unsafe-inline'; "
+        "img-src 'self' data: https:; "
+        "font-src 'self' data:; "
+        "connect-src 'self' https://*.mcsm.mcyyt.cn; "
+        "frame-src 'self' https://*.mcsm.mcyyt.cn"
+    )
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    response.headers['Server'] = 'yyt'
+    return response
 
 class EnhancedJSONEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -88,15 +107,10 @@ def json_response(data, status=200):
 @app.errorhandler(Exception)
 def handle_exception(e):
     print(e)
-    error_trace = traceback.format_exc()
-    print(f"--- SERVER ERROR ---\n{error_trace}")
+    # 生产环境只返回通用错误信息，防止信息泄露
     return json_response({
         "code": 500,
-        "message": str(e),
-        "debug": {
-            "type": e.__class__.__name__,
-            "traceback": error_trace.split('\n')
-        }
+        "message": "服务器内部错误"
     }, 500)
 
 @app.route('/amusource/img/<uuid>/<filename>')
@@ -110,6 +124,9 @@ def serve_image(uuid, filename):
     if param and 'y' in param:
         try:
             w, h = map(int, param.split('y'))
+            # 限制最大宽高，防止资源耗尽攻击 (DoS)
+            w = min(w, 4096)
+            h = min(h, 4096)
             img = Image.open(file_path)
             img = img.resize((w, h), Image.Resampling.LANCZOS)
             img_io = BytesIO()
@@ -198,5 +215,5 @@ def page_not_found(e):
     return json_response("404 page not found", 404)
 
 if __name__ == "__main__":
-    print("Server started on http://0.0.0.0:4999")
-    app.run(host='0.0.0.0', port=4999, debug=False, use_reloader=False)
+    print("Server started on http://127.0.0.1:4999")
+    app.run(host='127.0.0.1', port=4999, debug=False, use_reloader=False)

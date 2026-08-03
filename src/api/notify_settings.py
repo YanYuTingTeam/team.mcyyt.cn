@@ -17,10 +17,12 @@ def handle(request):
                     if k in data:
                         sets[k] = 1 if data.get(k) else 0
                 if sets:
-                    parts = ','.join([f"{k} = %s" for k in sets])
+                    cols = ','.join(sets.keys())
+                    placeholders = ','.join(['%s'] * len(sets))
                     vals = list(sets.values())
+                    parts = ','.join([f"{k} = %s" for k in sets])
                     cur.execute(
-                        f"INSERT INTO yyt_notify_setting (user_id, {','.join(sets.keys())}) VALUES (%s, {','.join(['%s']*len(sets))}) "
+                        f"INSERT INTO yyt_notify_setting (user_id, {cols}) VALUES (%s, {placeholders}) "
                         f"ON DUPLICATE KEY UPDATE {parts}",
                         [user['id']] + vals + vals
                     )

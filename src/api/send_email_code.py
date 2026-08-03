@@ -1,4 +1,5 @@
 import secrets
+import re
 from utils.auth import check_login
 from utils.db import get_db
 from utils.security import (
@@ -8,6 +9,7 @@ from utils.security import (
 from utils.mailer import send_code_email
 
 CODE_EXPIRE_MINUTES = 5
+_EMAIL_RE = re.compile(r'^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$')
 
 def handle(request):
     if request.method != 'POST':
@@ -18,7 +20,9 @@ def handle(request):
     data = request.get_json(silent=True) or {}
     email = (data.get('email') or '').strip()
     purpose = (data.get('purpose') or '').strip()
-    if not email:
+    if not email or not _EMAIL_RE.match(email):
+        return {"code": 400, "message": "参数错误"}
+    if len(email) > 254:
         return {"code": 400, "message": "参数错误"}
     if purpose == 'change_pwd':
         user = check_login(request)
@@ -53,5 +57,6 @@ def handle(request):
         db.close()
     ok, err = send_code_email(email, code, purpose)
     if not ok:
-        return {"code": 500, "message": "邮件发送失败: " + err}
+        print(f"[send_email_code] send fail to {email}: {err}")
+        return {"code": 500, "message": "邮件发送失败, 请稍后重试或联系管理员"}
     return {"code": 0, "message": "验证码已发送至邮箱"}

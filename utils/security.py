@@ -2,14 +2,24 @@ import ipaddress
 from datetime import datetime, timedelta
 from utils.db import get_db
 
+def _is_private_ip(ip):
+    try:
+        addr = ipaddress.ip_address(ip)
+        return addr.is_private or addr.is_loopback or addr.is_link_local
+    except ValueError:
+        return True
 
 def get_client_ip(request):
-    ip = (request.headers.get('X-Forwarded-For') or '').split(',')[0].strip()
-    if not ip:
-        ip = (request.headers.get('X-Real-IP') or '').strip()
-    if not ip:
-        ip = request.remote_addr or ''
-    return ip.strip() or '0.0.0.0'
+    ip = (request.remote_addr or '').strip()
+    if ip and not _is_private_ip(ip):
+        return ip
+    real_ip = (request.headers.get('X-Real-IP') or '').strip()
+    if real_ip and not _is_private_ip(real_ip):
+        return real_ip
+    xff = (request.headers.get('X-Forwarded-For') or '').split(',')[0].strip()
+    if xff and not _is_private_ip(xff):
+        return xff
+    return ip or real_ip or xff or '0.0.0.0'
 
 
 def ip_segment(ip):

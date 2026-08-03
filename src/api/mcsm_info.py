@@ -56,7 +56,11 @@ def consume_token(token):
                 "WHERE token = %s AND expire_time > NOW()",
                 (token,)
             )
-            return cur.fetchone()
+            row = cur.fetchone()
+            if row:
+                cur.execute("DELETE FROM yyt_mcsm_token WHERE token = %s", (token,))
+                db.commit()
+            return row
     finally:
         db.close()
 

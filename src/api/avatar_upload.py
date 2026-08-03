@@ -56,7 +56,8 @@ def handle(request):
             db.close()
         return {"code": 0, "data": {"avatar": cdn_url}}
     except Exception as e:
-        return {"code": 500, "message": str(e)}
+        print(f"[avatar_upload] fail: {e}")
+        return {"code": 500, "message": "上传失败, 请稍后重试"}
     finally:
         try:
             os.close(tmp_fd)

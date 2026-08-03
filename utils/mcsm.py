@@ -66,8 +66,9 @@ def _forward(request, subpath, extra_set_cookie=None):
         ctype = e.headers.get('Content-Type', 'application/json')
         return Response(data, status=e.code, mimetype=ctype.split(';')[0])
     except Exception as e:
+        print(f"[mcsm_proxy] forward fail: {e}")
         return Response(
-            json.dumps({"status": 502, "data": None, "message": "代理请求失败: " + str(e)}, ensure_ascii=False),
+            json.dumps({"status": 502, "data": None, "message": "代理请求失败, 请稍后重试"}, ensure_ascii=False),
             status=502, mimetype="application/json"
         )
 

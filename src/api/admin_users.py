@@ -9,7 +9,7 @@ def _one(cur, sql, args=None):
 def _detail(db, uid):
     with db.cursor() as cur:
         cur.execute(
-            "SELECT id, email, name, role, level, skill, apikey, panel_host, avatar, bio, created_at "
+            "SELECT id, email, name, role, level, skill, panel_host, avatar, bio, created_at "
             "FROM yyt_user WHERE id = %s", (uid,)
         )
         user = cur.fetchone()
@@ -109,7 +109,7 @@ def handle(request):
             return {"code": 0, "data": d}
         with db.cursor() as cur:
             cur.execute(
-                "SELECT id, email, name, role, level, skill, apikey, panel_host, avatar, bio, created_at "
+                "SELECT id, email, name, role, level, skill, panel_host, avatar, bio, created_at "
                 "FROM yyt_user ORDER BY level DESC, id ASC"
             )
             rows = cur.fetchall()

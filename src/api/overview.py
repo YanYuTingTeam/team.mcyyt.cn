@@ -27,7 +27,6 @@ def handle(request):
     db = get_db()
     try:
         with db.cursor() as cur:
-            apikey = user['apikey']
             cur.execute(
                 "SELECT SUM(DATE(created_at) = DATE_SUB(CURDATE(), INTERVAL 1 DAY)) AS yesterday, "
                 "SUM(DATE(created_at) = CURDATE()) AS today, "
@@ -57,7 +56,8 @@ def handle(request):
                 s['is_current'] = int(s['is_current'] or 0)
                 s['device'] = _parse_device(s.get('ua'))
                 s['first_seen'] = str(s['first_seen']) if s.get('first_seen') else str(s.get('created_at'))
+            safe_user = {k: v for k, v in user.items() if k not in ('apikey', 'password_hash')}
         db.commit()
-        return {"code": 0, "data": {"user": user, "apikey": apikey, "calls": calls, "invites": invites, "sessions": sessions}}
+        return {"code": 0, "data": {"user": safe_user, "calls": calls, "invites": invites, "sessions": sessions}}
     finally:
         db.close()

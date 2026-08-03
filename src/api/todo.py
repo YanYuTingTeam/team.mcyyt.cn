@@ -218,7 +218,12 @@ def handle(request):
                             deleter_ava_html = ''
                             if deleter_avatar:
                                 deleter_ava_html = f'<img src="{deleter_avatar}" style="width:20px;height:20px;border-radius:50%;vertical-align:middle">'
-                            content = f'{td["creator_name"]} 你好！你创建的待办 #{todo_id} | {td["title"]} 已被 {deleter_ava_html} {user.get("name","")} 删除.'
+                            # 对动态内容进行 HTML 转义，防止存储型 XSS
+                            import html
+                            safe_creator_name = html.escape(td["creator_name"] or "")
+                            safe_title = html.escape(td["title"] or "")
+                            safe_deleter_name = html.escape(user.get("name", "") or "")
+                            content = f'{safe_creator_name} 你好！你创建的待办 #{todo_id} | {safe_title} 已被 {deleter_ava_html} {safe_deleter_name} 删除.'
                             add_user_notice(td['creator_id'], f'待办 #{todo_id} 已被删除', content)
                         except Exception:
                             pass
@@ -279,7 +284,10 @@ def handle(request):
             )
             params = [user['id']]
             if scope == 'all':
-                pass
+                # 只有管理员(level>=4)才能查看所有待办，防止普通用户越权获取所有数据
+                if (user.get('level') or 0) < 4:
+                    sql += " AND (t.is_global = 1 OR a.user_id = %s)"
+                    params.append(user['id'])
             elif scope == 'created':
                 sql += " AND t.creator_id = %s"
                 params.append(user['id'])
