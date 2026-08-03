@@ -47,26 +47,21 @@ def _is_public(path):
 @app.before_request
 def security_guard():
     path = request.path or '/'
-    banned, btype, exp, seg = check_ban(request, 'auth')
-    if not banned:
-        banned, btype, exp, seg = check_ban(request, 'rate')
-    if banned:
-        if is_ajax_api(request):
-            return json_response("404 page not found", 404)
-        ban_msg = '请求过于频繁' if btype == 'rate' else '已被封禁'
-        return Response(
-            f"<html><body style='background:#000;color:#eee;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0'><div style='text-align:center'><h2 style='color:#ef5777'>访问被拒绝</h2><p>{ban_msg}</p></div></body></html>",
-            status=404, mimetype='text/html'
-        )
     is_logged_in = bool(request.cookies.get('yyt_token') and check_login(request))
-    if not is_logged_in and not _is_public(path):
-        r_banned, r_type, r_exp = rate_tick(request)
-        if r_banned:
-            return redirect('/')
-        if is_ajax_api(request):
-            return json_response("401 auth required", 401)
-        if path != '/':
-            return redirect('/')
+    if not is_logged_in:
+        banned, btype, exp, seg = check_ban(request, 'auth')
+        if not banned:
+            banned, btype, exp, seg = check_ban(request, 'rate')
+        if banned:
+            return json_response("404 page not found", 404)
+        if not _is_public(path):
+            r_banned, r_type, r_exp = rate_tick(request)
+            if r_banned:
+                return json_response("404 page not found", 404)
+            if is_ajax_api(request):
+                return json_response("401 auth required", 401)
+            if path != '/':
+                return redirect('/')
 
 @app.after_request
 def add_security_headers(response):
