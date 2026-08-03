@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS yyt_invite (
     created_by INT DEFAULT NULL,
     used_by INT DEFAULT NULL,
     used_at DATETIME DEFAULT NULL,
+    disabled TINYINT DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -53,6 +54,7 @@ CREATE TABLE IF NOT EXISTS yyt_todo (
     updated_at DATETIME DEFAULT NULL,
     all_done_at DATETIME DEFAULT NULL,
     done_notify_sent TINYINT DEFAULT 0,
+    deleted_at DATETIME DEFAULT NULL,
     KEY idx_creator (creator_id),
     KEY idx_global (is_global)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -69,9 +71,11 @@ CREATE TABLE IF NOT EXISTS yyt_todo_assign (
 
 CREATE TABLE IF NOT EXISTS yyt_notice (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT DEFAULT NULL,
     title VARCHAR(255) NOT NULL,
     content TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    KEY idx_user (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS yyt_project (
@@ -99,7 +103,8 @@ CREATE TABLE IF NOT EXISTS yyt_visit (
 
 INSERT INTO yyt_page_access (page_key, min_level, show_in_nav) VALUES
     ('home', 0, 1), ('overview', 0, 1), ('todo', 1, 1), ('notice', 1, 1),
-    ('project', 1, 1), ('apis', 1, 1), ('mcsm', 4, 1), ('team', 5, 1), ('settings', 0, 1)
+    ('project', 1, 1), ('apis', 1, 1), ('mcsm', 4, 1), ('team', 5, 1), ('settings', 0, 1),
+    ('delete_todo', 4, 0)
 ON DUPLICATE KEY UPDATE page_key = page_key;
 
 INSERT INTO yyt_invite (code) VALUES ('YYT-WELCOME-001');
@@ -164,6 +169,13 @@ CREATE TABLE IF NOT EXISTS yyt_todo_tag (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(64) NOT NULL UNIQUE,
     color VARCHAR(16) DEFAULT '#ef5777'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS yyt_todo_tag_rel (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    todo_id INT NOT NULL,
+    tag_id INT NOT NULL,
+    UNIQUE KEY uq_todo_tag (todo_id, tag_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 INSERT INTO yyt_skill_meta (name, color) VALUES

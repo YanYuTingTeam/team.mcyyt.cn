@@ -16,13 +16,14 @@ def _detail(db, uid):
         if not user:
             return None
         sessions = cur.execute(
-            "SELECT id, token, ip, ua, expire_time, created_at "
-            "FROM yyt_session WHERE user_id = %s ORDER BY expire_time DESC LIMIT 20",
-            (uid,)
+            "SELECT s1.id, s1.token, s1.ip, s1.ua, s1.expire_time, s1.created_at, "
+            "(SELECT MIN(created_at) FROM yyt_session s2 WHERE s2.user_id = %s AND s2.ip = s1.ip) AS first_seen "
+            "FROM yyt_session s1 WHERE s1.user_id = %s AND s1.expire_time > NOW() ORDER BY s1.id DESC LIMIT 20",
+            (uid, uid)
         )
         sessions = cur.fetchall()
         invites_created = cur.execute(
-            "SELECT i.code, i.created_at, i.used_at, "
+            "SELECT i.code, i.created_at, i.used_at, i.disabled, "
             "uu.name AS used_name, uu.email AS used_email "
             "FROM yyt_invite i LEFT JOIN yyt_user uu ON i.used_by = uu.id "
             "WHERE i.created_by = %s ORDER BY i.created_at DESC",

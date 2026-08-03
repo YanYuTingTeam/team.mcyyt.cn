@@ -1,7 +1,9 @@
 from utils.db import get_db
 from utils.mailer import send_template_email
+import threading, time
 
 _notify_inited = False
+_poller_started = False
 
 NOTIFY_KEYS = ('todo_done', 'todo_new', 'online', 'invite_used')
 DEFAULT_NOTIFY = {k: 1 for k in NOTIFY_KEYS}
@@ -64,9 +66,32 @@ def _init_table(cur):
     _ensure_invite_cols(cur)
     _notify_inited = True
 
+def _done_notify_poller():
+    while True:
+        time.sleep(60)
+        try:
+            db = get_db()
+            try:
+                with db.cursor() as cur:
+                    try_send_done_emails(cur)
+                db.commit()
+            finally:
+                db.close()
+        except Exception:
+            pass
+
+def ensure_poller():
+    global _poller_started
+    if _poller_started:
+        return
+    _poller_started = True
+    t = threading.Thread(target=_done_notify_poller, daemon=True)
+    t.start()
+
 def add_user_notice(user_id, title, content=None):
     if not user_id:
         return False
+    ensure_poller()
     ok = False
     db = get_db()
     try:
@@ -167,6 +192,7 @@ def _load_todo_basic(cur, todo_id):
     return t
 
 def notify_new_todo(todo_id, creator_id, assignee_ids):
+    ensure_poller()
     db = get_db()
     try:
         with db.cursor() as cur:

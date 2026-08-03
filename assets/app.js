@@ -118,10 +118,11 @@ var DEFAULT_PAGE_ACCESS = {
     todo: { min_level: 1, show_in_nav: 1 }, notice: { min_level: 1, show_in_nav: 1 },
     project: { min_level: 1, show_in_nav: 1 }, apis: { min_level: 1, show_in_nav: 1 },
     mcsm: { min_level: 4, show_in_nav: 1 }, team: { min_level: 5, show_in_nav: 1 },
-    invite_create: { min_level: 4, show_in_nav: 0 }, settings: { min_level: 0, show_in_nav: 1 }
+    invite_create: { min_level: 4, show_in_nav: 0 }, settings: { min_level: 0, show_in_nav: 1 },
+    delete_todo: { min_level: 4, show_in_nav: 0 }
 };
-var PAGE_LABEL = { home: '空间首页', overview: '个人概览', todo: '待办事项', notice: '通知动态', project: '项目展示', apis: 'API 文档', mcsm: 'MCSManager', team: '团队管理', invite_create: '生成邀请码', settings: '设置' };
-var PAGE_KIND = { invite_create: 'feature' };
+var PAGE_LABEL = { home: '空间首页', overview: '个人概览', todo: '待办事项', notice: '通知动态', project: '项目展示', apis: 'API 文档', mcsm: 'MCSManager', team: '团队管理', invite_create: '生成邀请码', settings: '设置', delete_todo: '删除待办' };
+var PAGE_KIND = { invite_create: 'feature', delete_todo: 'feature' };
 var meUser = null;
 var pageAccess = {};
 function hexA(hex, a) {
@@ -153,6 +154,21 @@ function pageCfg(page) {
     return { min_level: c.min_level || 0, show_in_nav: c.show_in_nav ? 1 : 0 };
 }
 function canAccess(page) { return myLevel() >= pageCfg(page).min_level; }
+var _UA_PATTERNS = [
+    ['Windows', /Windows NT/i],
+    ['Mac', /Mac OS X|Macintosh/i],
+    ['Linux', /Linux/i],
+    ['Android', /Android/i],
+    ['iPhone', /iPhone/i],
+    ['iPad', /iPad/i]
+];
+function _parseDevice(ua) {
+    if (!ua) return '未知设备';
+    for (var i = 0; i < _UA_PATTERNS.length; i++) {
+        if (_UA_PATTERNS[i][1].test(ua)) return _UA_PATTERNS[i][0];
+    }
+    return '其他';
+}
 function levelOptions(sel) {
     var o = '';
     for (var i = 0; i <= 5; i++) {
@@ -305,7 +321,8 @@ var CHECK_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><pa
 var UNDO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m9 14l-4-4l4-4"/><path d="M5 10h11a4 4 0 1 1 0 8h-1"/></g></svg>';
 var LINK_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6m-7 1l9-9m-5 0h5v5"/></svg>';
 var X_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 6L6 18M6 6l12 12"/></svg>';
-function chipHtml(done) {
+function chipHtml(done, exempt) {
+    if (exempt) return '<span class="chip exempt-tag">Exempt</span>';
     return done ? '<span class="chip ok">Complete</span>' : '<span class="chip no">Incomplete</span>';
 }
 function isInnerTodo(href) {
@@ -391,8 +408,6 @@ function renderTodoPage() {
             btn = it.is_done
                 ? '<button class="act-btn" onclick="btnRun(this, function(){ return markDone(' + it.id + ', false) })">' + UNDO_SVG + ' 撤销确认</button>'
                 : '<button class="act-btn" onclick="btnRun(this, function(){ return markDone(' + it.id + ', true) })">' + CHECK_SVG + ' 我已完成</button>';
-        } else {
-            btn = '<span class="chip exempt-tag">无需完成</span>';
         }
         var tagHtml = '';
         if (it.tags && it.tags.length) {
@@ -419,7 +434,7 @@ function renderTodoPage() {
         }
         return '<div class="trow' + (it.is_done ? ' done' : '') + '" data-tid="' + it.id + '">' +
             (it.is_done ? OK_SVG : NO_SVG) +
-            '<div class="t-body"><div class="t-line">' + t + chipHtml(it.is_done) + doneAvas + '</div>' + tagHtml + desc + meta + '</div>' + btn + '</div>';
+            '<div class="t-body"><div class="t-line">' + t + chipHtml(it.is_done, !canDone) + doneAvas + '</div>' + tagHtml + desc + meta + '</div>' + btn + '</div>';
     }).join('');
     updateScrollIndicators();
 }
@@ -531,22 +546,22 @@ function renderTodoHome() {
     var LINK_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14"><g fill="none" stroke="#ef5777" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></g></svg>';
     homeBox.innerHTML = shown.map(function(it) {
         var doneClass = it.is_done ? ' done' : '';
-        var statusChip = it.is_done
-            ? '<span class="chip ok" style="padding:2px 8px;font-size:12px">Complete</span>'
-            : '<span class="chip no" style="padding:2px 8px;font-size:12px">Incomplete</span>';
+        var canDone = it.is_global || it.is_assigned;
+        var statusChip = canDone
+            ? (it.is_done
+                ? '<span class="chip ok" style="padding:2px 8px;font-size:12px">Complete</span>'
+                : '<span class="chip no" style="padding:2px 8px;font-size:12px">Incomplete</span>')
+            : '<span class="chip exempt-tag" style="padding:2px 8px;font-size:12px">Exempt</span>';
         return '<div class="ov-todo-row' + doneClass + '" style="padding:10px 4px">' +
             (it.is_done ? OK_SVG : NO_SVG) +
             '<div class="ov-todo-info">' +
                 '<div style="display:flex;align-items:center;gap:6px">' +
                     '<a class="ov-todo-link" href="/todos/' + it.id + '" onclick="event.preventDefault(); openTodo(' + it.id + ')" style="color:#ef5777;font-weight:600">' + esc(it.title) + '</a>' +
                     '<a href="/todos/' + it.id + '" onclick="event.preventDefault(); openTodo(' + it.id + ')" title="打开待办 #' + it.id + '" style="display:inline-flex">' + LINK_SVG + '</a>' +
-                    statusChip +
                 '</div>' +
                 '<div class="ov-todo-meta">#' + it.id + ' · ' + esc(it.creator_name) + ' · ' + esc(it.created_at) + '</div>' +
             '</div>' +
-            '<button class="ov-todo-check" title="' + (it.is_done ? '撤销' : '完成') + '" onclick="btnRun(this, function(){ return markDone(' + it.id + ', ' + (!it.is_done) + ') })">' +
-                (it.is_done ? UNDO_SVG : CHECK_SVG) +
-            '</button>' +
+            statusChip +
         '</div>';
     }).join('');
     _schedMasonry();
@@ -1229,8 +1244,11 @@ function renderOvInvites(invites) {
     }
     ivBox.innerHTML = invites.map(function(iv) {
         var used = !!iv.used_at;
-        var top = '<div class="iv-top"><span class="iv-code">#' + esc(iv.code) + '</span>' +
-            (used ? '<span class="chip no">已被使用</span>' : '<span class="chip ok">未使用</span>') + '</div>';
+        var disabled = !!iv.disabled;
+        var statusChip = used
+            ? '<span class="chip no">已被使用</span>'
+            : (disabled ? '<span class="chip no" style="background:rgba(239,87,119,.1);border-color:rgba(239,87,119,.4);color:#ef5777">失效</span>' : '<span class="chip ok">未使用</span>');
+        var top = '<div class="iv-top"><span class="iv-code">#' + esc(iv.code) + '</span>' + statusChip + '</div>';
         var mid = used
         ? '<div class="iv-user"><img src="' + avatarUrl({name: iv.used_name, avatar: iv.used_avatar}) + '" alt=""><div><div class="iv-un">' + esc(iv.used_name) + '</div><div class="iv-ue">' + esc(iv.used_email) + '</div></div></div>' +
           '<div class="iv-date">创建日期: ' + esc(iv.created_at) + '<br>使用日期: ' + esc(iv.used_at) + '</div>'
@@ -2030,10 +2048,15 @@ async function openMemberDetail(uid) {
             sesHtml += '<div class="empty-tip">无活跃会话</div>';
         } else {
             sesHtml += ses.map(function(si) {
-                return '<div class="dev-row">' + DESKTOP_SVG +
-                    '<div class="dv-main"><div class="dv-ip">' + esc(si.ip || '未知IP') + '</div>' +
-                    '<div class="dv-ua">' + esc(si.ua || '未知设备') + '</div>' +
-                    '<div class="dv-time">创建: ' + esc(si.created_at || '--') + ' · 到期: ' + esc(si.expire_time || '--') + '</div></div>' +
+                var siDevice = _parseDevice(si.ua || '');
+                var siIcon = /iPhone|iPad|Android/i.test(siDevice) ? MOBILE_SVG : DESKTOP_SVG;
+                var siFirst = si.first_seen ? String(si.first_seen) : String(si.created_at);
+                return '<div class="dev-row">' + siIcon +
+                    '<div class="dv-main">' +
+                    '<div class="dv-device">运行于 ' + esc(siDevice) + '</div>' +
+                    '<div class="dv-ip-line">IP ' + esc(si.ip || '未知IP') + '</div>' +
+                    '<div class="dv-time-line">初次登录 ' + esc(siFirst || si.created_at) + ' | 最近登录 ' + esc(si.created_at || '--') + '</div>' +
+                    '</div>' +
                     '<button class="act-btn" onclick="btnRun(this, function(btn){ return mmKillSession(' + u.id + ',' + si.id + ',btn); })">' + LOGOUT_SVG + ' 踢下线</button></div>';
             }).join('');
         }
@@ -2045,7 +2068,10 @@ async function openMemberDetail(uid) {
         } else {
             invHtml += inv.map(function(iv) {
                 var used = !!iv.used_at;
-                var tag = used ? '<span class="chip no">已使用</span>' : '<span class="chip ok">未使用</span>';
+                var disabled = !!iv.disabled;
+                var tag = used
+                    ? '<span class="chip no">已使用</span>'
+                    : (disabled ? '<span class="chip no" style="background:rgba(239,87,119,.1);border-color:rgba(239,87,119,.4);color:#ef5777">失效</span>' : '<span class="chip ok">未使用</span>');
                 var ux = used ? '<div class="iv-user" style="margin-top:6px"><img src="' + avatarUrl({name: iv.used_name, avatar: iv.used_avatar}) + '" style="width:22px;height:22px" alt=""><span>' + esc(iv.used_name || '--') + ' · ' + esc(iv.used_email || '--') + '</span></div>' : '';
                 return '<div class="invite-box" style="margin-bottom:8px"><div class="iv-top"><span class="iv-code">#' + esc(iv.code) + '</span>' + tag + '</div>' +
                     '<div class="iv-date">创建: ' + esc(iv.created_at || '--') + (used ? '<br>使用: ' + esc(iv.used_at || '--') : '') + '</div>' + ux + '</div>';

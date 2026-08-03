@@ -1,6 +1,5 @@
 from utils.auth import check_login
 from utils.db import get_db
-import threading
 
 _col_ensured = False
 def _ensure_col(db):
@@ -76,19 +75,11 @@ def _refresh_all_done_state(cur, todo_id):
             "UPDATE yyt_todo SET all_done_at = NOW(), done_notify_sent = 0 WHERE id = %s AND all_done_at IS NULL",
             (todo_id,)
         )
-        threading.Timer(300, _delayed_done_notify, args=(todo_id,)).start()
     else:
         cur.execute(
             "UPDATE yyt_todo SET all_done_at = NULL WHERE id = %s",
             (todo_id,)
         )
-
-def _delayed_done_notify(todo_id):
-    try:
-        from utils.todo_notify import send_done_notify
-        send_done_notify(todo_id)
-    except Exception:
-        pass
 
 def handle(request):
     user = check_login(request)
@@ -275,12 +266,6 @@ def handle(request):
                 pass
             return ret
         with db.cursor() as cur:
-            try:
-                from utils.todo_notify import try_send_done_emails
-                try_send_done_emails(cur)
-                db.commit()
-            except Exception:
-                pass
             tag_filter = request.args.get('tag') or ''
             scope = (request.args.get('scope') or '').strip()
             sql = (
