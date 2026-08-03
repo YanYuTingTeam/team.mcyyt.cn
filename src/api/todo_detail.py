@@ -16,13 +16,17 @@ def handle(request):
                 "SELECT t.id, t.title, t.link, t.content, t.created_at, t.updated_at, t.is_global, "
                 "u.id AS creator_id, u.name AS creator_name, u.avatar AS creator_avatar "
                 "FROM yyt_todo t JOIN yyt_user u ON t.creator_id = u.id "
-                "WHERE t.id = %s",
+                "WHERE t.id = %s AND t.deleted_at IS NULL",
                 (tid,)
             )
             todo = cur.fetchone()
             if not todo:
                 return {"code": 404, "message": "待办不存在"}
             todo['is_creator'] = (todo['creator_id'] == user['id'])
+            cur.execute("SELECT min_level FROM yyt_page_access WHERE page_key = 'delete_todo'")
+            pa = cur.fetchone()
+            min_del_lv = pa['min_level'] if pa else 4
+            todo['can_delete'] = (user.get('level') or 0) >= min_del_lv
             cur.execute(
                 "SELECT r.tag_id AS id, t.name, t.color "
                 "FROM yyt_todo_tag_rel r JOIN yyt_todo_tag t ON r.tag_id = t.id "
@@ -41,7 +45,7 @@ def handle(request):
             cur.execute(
                 "SELECT a.user_id, a.is_done, a.done_at, u.name, u.avatar "
                 "FROM yyt_todo_assign a JOIN yyt_user u ON a.user_id = u.id "
-                "WHERE a.todo_id = %s ORDER BY a.is_done DESC, u.name ASC",
+                "WHERE a.todo_id = %s ORDER BY a.is_done DESC, a.done_at ASC, u.name ASC",
                 (tid,)
             )
             assigns = cur.fetchall()

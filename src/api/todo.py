@@ -1,5 +1,6 @@
 from utils.auth import check_login
 from utils.db import get_db
+import threading
 
 _col_ensured = False
 def _ensure_col(db):
@@ -19,6 +20,9 @@ def _ensure_col(db):
             if not cur.fetchone():
                 cur.execute("ALTER TABLE yyt_todo ADD COLUMN all_done_at DATETIME DEFAULT NULL")
                 cur.execute("ALTER TABLE yyt_todo ADD COLUMN done_notify_sent TINYINT DEFAULT 0")
+            cur.execute("SHOW COLUMNS FROM yyt_todo LIKE 'deleted_at'")
+            if not cur.fetchone():
+                cur.execute("ALTER TABLE yyt_todo ADD COLUMN deleted_at DATETIME DEFAULT NULL")
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS yyt_todo_tag_rel (
                     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -27,6 +31,10 @@ def _ensure_col(db):
                     UNIQUE KEY uq_todo_tag (todo_id, tag_id)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """)
+            try:
+                cur.execute("INSERT IGNORE INTO yyt_page_access (page_key, min_level, show_in_nav) VALUES ('delete_todo', 4, 0)")
+            except Exception:
+                pass
             db.commit()
     except Exception:
         pass
@@ -65,14 +73,22 @@ def _refresh_all_done_state(cur, todo_id):
     s = cur.fetchone()
     if s and s['total'] > 0 and s['total'] == s['done_cnt']:
         cur.execute(
-            "UPDATE yyt_todo SET all_done_at = NOW() WHERE id = %s AND all_done_at IS NULL",
+            "UPDATE yyt_todo SET all_done_at = NOW(), done_notify_sent = 0 WHERE id = %s AND all_done_at IS NULL",
             (todo_id,)
         )
+        threading.Timer(300, _delayed_done_notify, args=(todo_id,)).start()
     else:
         cur.execute(
             "UPDATE yyt_todo SET all_done_at = NULL WHERE id = %s",
             (todo_id,)
         )
+
+def _delayed_done_notify(todo_id):
+    try:
+        from utils.todo_notify import send_done_notify
+        send_done_notify(todo_id)
+    except Exception:
+        pass
 
 def handle(request):
     user = check_login(request)
@@ -138,7 +154,7 @@ def handle(request):
                 if 'id' in data:
                     todo_id = int(data['id'])
                     is_done = 1 if data.get('done') else 0
-                    cur.execute("SELECT is_global FROM yyt_todo WHERE id = %s", (todo_id,))
+                    cur.execute("SELECT is_global, deleted_at FROM yyt_todo WHERE id = %s", (todo_id,))
                     tr = cur.fetchone()
                     if not tr:
                         return {"code": 404, "message": "待办不存在"}
@@ -174,6 +190,47 @@ def handle(request):
                     if not tr['is_global']:
                         _refresh_all_done_state(cur, todo_id)
                     db.commit()
+                    return {"code": 0, "message": "ok"}
+                if data.get('action') == 'delete':
+                    todo_id = int(data.get('todo_id') or data.get('id') or 0)
+                    if not todo_id:
+                        return {"code": 400, "message": "缺少待办ID"}
+                    cur.execute(
+                        "SELECT page_key FROM yyt_page_access WHERE page_key = 'delete_todo'"
+                    )
+                    pa = cur.fetchone()
+                    min_lv = pa['min_level'] if pa else 4
+                    if (user.get('level') or 0) < min_lv:
+                        return {"code": 403, "message": "无权删除待办"}
+                    cur.execute(
+                        "SELECT t.id, t.title, t.creator_id, t.deleted_at, u.name AS creator_name "
+                        "FROM yyt_todo t JOIN yyt_user u ON t.creator_id = u.id WHERE t.id = %s",
+                        (todo_id,)
+                    )
+                    td = cur.fetchone()
+                    if not td:
+                        return {"code": 404, "message": "待办不存在"}
+                    if td['deleted_at']:
+                        return {"code": 400, "message": "待办已被删除"}
+                    cur.execute("UPDATE yyt_todo SET deleted_at = NOW() WHERE id = %s", (todo_id,))
+                    db.commit()
+                    if td['creator_id'] != user['id']:
+                        try:
+                            from utils.todo_notify import add_user_notice, get_base_url
+                            deleter_avatar = ''
+                            try:
+                                cur.execute("SELECT avatar FROM yyt_user WHERE id = %s", (user['id'],))
+                                du = cur.fetchone()
+                                deleter_avatar = du['avatar'] if du else ''
+                            except Exception:
+                                pass
+                            deleter_ava_html = ''
+                            if deleter_avatar:
+                                deleter_ava_html = f'<img src="{deleter_avatar}" style="width:20px;height:20px;border-radius:50%;vertical-align:middle">'
+                            content = f'{td["creator_name"]} 你好！你创建的待办 #{todo_id} | {td["title"]} 已被 {deleter_ava_html} {user.get("name","")} 删除.'
+                            add_user_notice(td['creator_id'], f'待办 #{todo_id} 已被删除', content)
+                        except Exception:
+                            pass
                     return {"code": 0, "message": "ok"}
                 title = (data.get('title') or '').strip()
                 if not title:
@@ -233,7 +290,7 @@ def handle(request):
                 "FROM yyt_todo t "
                 "JOIN yyt_user u ON t.creator_id = u.id "
                 "LEFT JOIN yyt_todo_assign a ON a.todo_id = t.id AND a.user_id = %s "
-                "WHERE 1 = 1"
+                "WHERE t.deleted_at IS NULL AND 1 = 1"
             )
             params = [user['id']]
             if scope == 'all':
@@ -259,7 +316,7 @@ def handle(request):
                 cur.execute(
                     "SELECT ta.todo_id, u.id, u.name, u.avatar "
                     "FROM yyt_todo_assign ta JOIN yyt_user u ON ta.user_id = u.id "
-                    "WHERE ta.todo_id IN (" + placeholders + ") AND ta.is_done = 1",
+                    "WHERE ta.todo_id IN (" + placeholders + ") AND ta.is_done = 1 ORDER BY ta.done_at ASC",
                     ids
                 )
                 done_map = {}

@@ -35,7 +35,7 @@ def handle(request):
                 cur.execute(
                     "SELECT t.id, t.title, t.link, t.content, t.created_at, t.is_global, "
                     "u.id AS creator_id, u.name AS creator_name, u.avatar AS creator_avatar "
-                    "FROM yyt_todo t JOIN yyt_user u ON t.creator_id = u.id WHERE t.id = %s",
+                    "FROM yyt_todo t JOIN yyt_user u ON t.creator_id = u.id WHERE t.id = %s AND t.deleted_at IS NULL",
                     (tid,)
                 )
                 track = cur.fetchone()

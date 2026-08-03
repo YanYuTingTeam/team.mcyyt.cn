@@ -205,48 +205,78 @@ def notify_new_todo(todo_id, creator_id, assignee_ids):
 def try_send_done_emails(cur):
     _init_table(cur)
     cur.execute(
-        "SELECT t.id, t.done_notify_sent, t.all_done_at, t.creator_id, u.email AS creator_email "
-        "FROM yyt_todo t JOIN yyt_user u ON t.creator_id = u.id "
-        "WHERE t.all_done_at IS NOT NULL AND t.done_notify_sent = 0 "
+        "SELECT t.id FROM yyt_todo t WHERE t.all_done_at IS NOT NULL AND t.done_notify_sent = 0 "
         "AND t.all_done_at < DATE_SUB(NOW(), INTERVAL 5 MINUTE) "
         "LIMIT 20"
     )
     rows = cur.fetchall()
-    if not rows:
-        return
     for r in rows:
-        tid = r['id']
-        try:
-            if not should_notify(cur, r['creator_id'], 'todo_done'):
-                cur.execute("UPDATE yyt_todo SET done_notify_sent = 1 WHERE id = %s", (tid,))
-                continue
-            t = _load_todo_basic(cur, tid)
-            if not t:
-                continue
-            cur.execute(
-                "SELECT a.user_id, a.is_done, a.done_at, u.name, u.avatar, u.email "
-                "FROM yyt_todo_assign a JOIN yyt_user u ON a.user_id = u.id "
-                "WHERE a.todo_id = %s",
-                (tid,)
-            )
-            assigns = cur.fetchall()
-            done_list = [x for x in assigns if x['is_done']]
-            base_url = get_base_url()
-            link = t.get('link') or ('/todos/' + str(t['id']))
-            if not link.startswith('http'):
-                link = base_url + link
-            vars = {
-                'TODO_URL': link,
-                'TODO_TITLE': t['title'] or '',
-                'TODO_TAGS': _tag_chips_html(t.get('tags')),
-                'ALL_DONE_AT': str(r['all_done_at'])[:19],
-                'DONE_COUNT': len(done_list),
-                'ASSIGN_COUNT': len(assigns),
-                'DONE_AVATARS': ''.join([_avatar_img({'name': x['name'], 'avatar': x['avatar']}) for x in done_list]),
-                'BASE_URL': base_url,
-            }
-            subject = f'[@team] 待办已完成: {t["title"]}'
-            send_template_email(r['creator_email'], subject, 'todo_all_done.html', vars)
-            cur.execute("UPDATE yyt_todo SET done_notify_sent = 1 WHERE id = %s", (tid,))
-        except Exception:
-            pass
+        send_done_notify(r['id'], cur)
+
+def send_done_notify(todo_id, cur=None):
+    own_cur = cur is None
+    db = None
+    if own_cur:
+        db = get_db()
+        cur = db.cursor()
+    try:
+        _init_table(cur)
+        cur.execute(
+            "SELECT t.id, t.done_notify_sent, t.all_done_at, t.creator_id, u.email AS creator_email "
+            "FROM yyt_todo t JOIN yyt_user u ON t.creator_id = u.id "
+            "WHERE t.id = %s AND t.deleted_at IS NULL",
+            (todo_id,)
+        )
+        r = cur.fetchone()
+        if not r or r['done_notify_sent'] or not r['all_done_at']:
+            return
+        if not should_notify(cur, r['creator_id'], 'todo_done'):
+            cur.execute("UPDATE yyt_todo SET done_notify_sent = 1 WHERE id = %s", (todo_id,))
+            return
+        t = _load_todo_basic(cur, todo_id)
+        if not t:
+            return
+        cur.execute(
+            "SELECT a.user_id, a.is_done, a.done_at, u.name, u.avatar, u.email "
+            "FROM yyt_todo_assign a JOIN yyt_user u ON a.user_id = u.id "
+            "WHERE a.todo_id = %s ORDER BY a.done_at ASC",
+            (todo_id,)
+        )
+        assigns = cur.fetchall()
+        done_list = [x for x in assigns if x['is_done']]
+        all_done = len(assigns) > 0 and len(done_list) == len(assigns)
+        if not all_done:
+            return
+        base_url = get_base_url()
+        link = t.get('link') or ('/todos/' + str(t['id']))
+        if not link.startswith('http'):
+            link = base_url + link
+        vars = {
+            'TODO_URL': link,
+            'TODO_TITLE': t['title'] or '',
+            'TODO_TAGS': _tag_chips_html(t.get('tags')),
+            'ALL_DONE_AT': str(r['all_done_at'])[:19],
+            'DONE_COUNT': len(done_list),
+            'ASSIGN_COUNT': len(assigns),
+            'DONE_AVATARS': ''.join([_avatar_img({'name': x['name'], 'avatar': x['avatar']}) for x in done_list]),
+            'BASE_URL': base_url,
+        }
+        subject = f'[@team] 待办已完成: {t["title"]}'
+        send_template_email(r['creator_email'], subject, 'todo_all_done.html', vars)
+        cur.execute("UPDATE yyt_todo SET done_notify_sent = 1 WHERE id = %s", (todo_id,))
+    except Exception:
+        pass
+    finally:
+        if own_cur:
+            try:
+                db.commit()
+            except Exception:
+                pass
+            try:
+                cur.close()
+            except Exception:
+                pass
+            try:
+                db.close()
+            except Exception:
+                pass

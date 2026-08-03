@@ -59,12 +59,21 @@ def handle(request):
             return {"code": 0, "message": "ok"}
         with db.cursor() as cur:
             _init_table(cur)
-            cur.execute(
-                "SELECT id, title, content, created_at FROM yyt_notice "
-                "WHERE user_id = %s OR user_id IS NULL "
-                "ORDER BY id DESC LIMIT 20",
-                (user['id'],)
-            )
+            since = request.args.get('since') or ''
+            if since and since.isdigit():
+                cur.execute(
+                    "SELECT id, title, content, created_at FROM yyt_notice "
+                    "WHERE (user_id = %s OR user_id IS NULL) AND id > %s "
+                    "ORDER BY id DESC LIMIT 20",
+                    (user['id'], int(since))
+                )
+            else:
+                cur.execute(
+                    "SELECT id, title, content, created_at FROM yyt_notice "
+                    "WHERE user_id = %s OR user_id IS NULL "
+                    "ORDER BY id DESC LIMIT 20",
+                    (user['id'],)
+                )
             rows = cur.fetchall()
         return {"code": 0, "data": rows}
     finally:
