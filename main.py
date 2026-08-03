@@ -76,6 +76,7 @@ def add_security_headers(response):
         "script-src 'self' 'unsafe-inline'; "
         "style-src 'self' 'unsafe-inline'; "
         "img-src 'self' data: https:; "
+        "media-src 'self' https:; "
         "font-src 'self' data:; "
         "connect-src 'self' https://*.mcsm.mcyyt.cn; "
         "frame-src 'self' https://*.mcsm.mcyyt.cn"
