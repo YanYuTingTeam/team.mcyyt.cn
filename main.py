@@ -30,7 +30,7 @@ import_lock = threading.Lock()
 
 PUBLIC_PATHS = {
     '/', '/login', '/register', '/space.html', '/login.html',
-    '/api/login', '/api/register', '/api/send_email_code',
+    '/api/login', '/api/register', '/api/send_email_code', '/api/heartbeat',
 }
 
 PROTECTED_ASSETS = {'/assets/space_ui.html', '/assets/app.js'}

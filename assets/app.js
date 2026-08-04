@@ -122,7 +122,7 @@ var DEFAULT_PAGE_ACCESS = {
     delete_todo: { min_level: 4, show_in_nav: 0 },
     datatools: { min_level: 1, show_in_nav: 1 }
 };
-var PAGE_LABEL = { home: '空间首页', overview: '个人概览', todo: '待办事项', notice: '通知动态', project: '项目展示', apis: 'API 文档', mcsm: 'MCSManager', team: '团队管理', invite_create: '生成邀请码', settings: '设置', delete_todo: '删除待办' };
+var PAGE_LABEL = { home: '空间首页', overview: '个人概览', todo: '待办事项', notice: '通知动态', project: '项目展示', apis: 'API 文档', logs: '请求日志', datatools: '数据收集', mcsm: 'MCSManager', team: '团队管理', invite_create: '生成邀请码', settings: '设置', delete_todo: '删除待办' };
 var PAGE_KIND = { invite_create: 'feature', delete_todo: 'feature' };
 var meUser = null;
 var pageAccess = {};
@@ -2522,7 +2522,7 @@ async function submitProject() {
     if (location.pathname === '/logs') { showPage('logs'); loadLogs(); }
     if (location.pathname === '/datatools') { showPage('datatools'); loadDataTools(); }
     requestNotifyPermission();
-    startNoticePoll();
+    startHeartbeatPoll();
 })();
 function initMeteors() {
     var layer = document.getElementById('meteorsLayer');
@@ -2639,6 +2639,67 @@ function dismissToast(el) {
 }
 var __lastNoticeId = 0;
 var __noticePollTimer = null;
+// === heartbeat / version / disconnect ===
+var __heartbeatTimer = null;
+var __heartbeatTick = null;
+var __lastVersion = '';
+var __prevDisconnected = false;
+var __showedVersionNotif = false;
+var __showedDisconnectedNotif = false;
+var __showedReconnectedNotif = false;
+function notifyPersistent(title, msg) { notify(null, title, msg, 0, '', false); }
+function notifyTimed(title, msg, dur) { notify(null, title, msg, Math.max(1, Number(dur) || 0), '', false); }
+function startHeartbeatPoll() {
+    __prevDisconnected = false;
+    __heartbeatTick = 0;
+    heartbeatTick();
+    if (__heartbeatTimer) clearInterval(__heartbeatTimer);
+    __heartbeatTimer = setInterval(heartbeatTick, 1000);
+}
+function stopHeartbeatPoll() {
+    if (__heartbeatTimer) { clearInterval(__heartbeatTimer); __heartbeatTimer = null; }
+    if (__heartbeatTick) { clearTimeout(__heartbeatTick); __heartbeatTick = null; }
+}
+function heartbeatTick() {
+    if (!__heartbeatTick) __heartbeatTick = setTimeout(heartbeatTick, 1000);
+    heartbeat();
+}
+async function heartbeat() {
+    try {
+        var ret = await getJson('/api/heartbeat');
+        var d = ret.data || {};
+        var v = (d.version || '').toString().trim();
+        // 版本更新
+        if (v && v !== __lastVersion && !__showedVersionNotif) {
+            var lastVer = sessionStorage.getItem('__lastVersion') || __lastVersion;
+            if (lastVer && lastVer !== v) notifyPersistent('检查到新版本', '当前版本 ' + lastVer + '，最新版本 ' + v + '，请刷新页面');
+            sessionStorage.setItem('__lastVersion', v);
+            __showedVersionNotif = true;
+        }
+        // 断开重连
+        if (__prevDisconnected) {
+            notifyTimed('已重新连接到服务器', '', 5000);
+            __prevDisconnected = false;
+            __showedReconnectedNotif = true;
+        }
+        // 通知
+        if (d.notices && d.notices.length) {
+            var newOnes = d.notices.slice().reverse();
+            if (newOnes[0] && newOnes[0].id) __lastNoticeId = newOnes[0].id;
+            newOnes.forEach(function(n) {
+                notify(null, n.title || '通知', (n.content || '').slice(0, 100), 6000, '/space', true);
+                try { if ('Notification' in window && Notification.permission === 'granted') new Notification(n.title || '通知动态', { body: (n.content || '').slice(0, 200) }); } catch(e) {}
+            });
+            loadNotice();
+        }
+        __lastVersion = v;
+        if (__heartbeatTick) { clearTimeout(__heartbeatTick); __heartbeatTick = null; }
+    } catch (e) {
+        if (!__prevDisconnected) { notifyPersistent('与服务器断开连接', '服务器目前处于宕机状态'); __prevDisconnected = true; __showedDisconnectedNotif = true; __showedReconnectedNotif = false; }
+        if (__heartbeatTick) { clearTimeout(__heartbeatTick); __heartbeatTick = null; }
+    }
+}
+window.addEventListener('beforeunload', stopHeartbeatPoll);
 function startNoticePoll() {
     try {
         var first = (window.__noticeData || [])[0];
