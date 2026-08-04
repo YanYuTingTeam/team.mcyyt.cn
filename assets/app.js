@@ -634,6 +634,7 @@ function todoLinkClick(e, a) {
     return false;
 }
 var __todoDetailId = null;
+var __todoDetailData = null;
 async function openTodo(tid, el) {
     if (el) {
         topBarOn();
@@ -655,6 +656,7 @@ async function loadTodoDetail(tid) {
             box.innerHTML = '<div class="empty-tip">' + esc(ret.message || '加载失败') + '</div>';
             return;
         }
+        __todoDetailData = ret.data.todo;
         renderTodoDetail(ret.data);
     } catch (e) {
         box.innerHTML = '<div class="empty-tip">网络错误, 请重试</div>';
@@ -767,6 +769,7 @@ function _hideEtOverlays() {
 }
 function openTodoEditModal(id) {
     var it = (__todoData || []).find(function(x) { return x.id == id; });
+    if (!it && __todoDetailData && __todoDetailData.id == id) it = __todoDetailData;
     if (!it) { alert('待办未加载'); return; }
     __editTodoId = id;
     __editTags = (it.tags || []).map(function(x) { return { id: x.id, name: x.name, color: x.color }; });
