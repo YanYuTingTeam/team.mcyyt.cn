@@ -1474,12 +1474,12 @@ function setApikeyValue(realKey) {
     }
 }
 function renderApikeyBox() {
-    var has = !!(ovData && ovData.apikey);
+    var has = !!(ovData && ovData.user && ovData.user.apikey);
     document.getElementById('apikeyHas').classList.toggle('hide', !has);
     document.getElementById('apikeyNone').classList.toggle('hide', has);
     document.getElementById('apikeyResetBtn').classList.toggle('hide', !has);
     document.getElementById('apikeyApplyBtn').classList.toggle('hide', has);
-    if (has) setApikeyValue(ovData.apikey);
+    if (has) setApikeyValue(ovData.user.apikey);
 }
 async function resetApikey() {
     var ret = await postJson('/api/apikey_reset', {});
@@ -2670,11 +2670,15 @@ async function heartbeat() {
         var d = ret.data || {};
         var v = (d.version || '').toString().trim();
         // 版本更新
-        if (v && v !== __lastVersion && !__showedVersionNotif) {
-            var lastVer = sessionStorage.getItem('__lastVersion') || __lastVersion;
-            if (lastVer && lastVer !== v) notifyPersistent('检查到新版本', '当前版本 ' + lastVer + '，最新版本 ' + v + '，请刷新页面');
-            sessionStorage.setItem('__lastVersion', v);
-            __showedVersionNotif = true;
+        if (v) {
+            var lastVer = sessionStorage.getItem('__lastVersion');
+            if (lastVer && lastVer !== v && !__showedVersionNotif) {
+                notifyPersistent('检查到新版本', '当前版本 ' + lastVer + '，最新版本 ' + v + '，请刷新页面');
+                sessionStorage.setItem('__lastVersion', v);
+                __showedVersionNotif = true;
+            } else if (!lastVer || lastVer === v) {
+                __showedVersionNotif = false;
+            }
         }
         // 断开重连
         if (__prevDisconnected) {
