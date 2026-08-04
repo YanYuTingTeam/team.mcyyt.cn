@@ -186,13 +186,9 @@ def handle(request):
                     todo_id = int(data.get('todo_id') or data.get('id') or 0)
                     if not todo_id:
                         return {"code": 400, "message": "缺少待办ID"}
-                    cur.execute(
-                        "SELECT page_key FROM yyt_page_access WHERE page_key = 'delete_todo'"
-                    )
+                    cur.execute("SELECT min_level FROM yyt_page_access WHERE page_key = 'delete_todo'")
                     pa = cur.fetchone()
                     min_lv = pa['min_level'] if pa else 4
-                    if (user.get('level') or 0) < min_lv:
-                        return {"code": 403, "message": "无权删除待办"}
                     cur.execute(
                         "SELECT t.id, t.title, t.creator_id, t.deleted_at, u.name AS creator_name "
                         "FROM yyt_todo t JOIN yyt_user u ON t.creator_id = u.id WHERE t.id = %s",
@@ -203,6 +199,8 @@ def handle(request):
                         return {"code": 404, "message": "待办不存在"}
                     if td['deleted_at']:
                         return {"code": 400, "message": "待办已被删除"}
+                    if (user.get('level') or 0) < min_lv and td['creator_id'] != user['id']:
+                        return {"code": 403, "message": "无权删除待办"}
                     cur.execute("UPDATE yyt_todo SET deleted_at = NOW() WHERE id = %s", (todo_id,))
                     db.commit()
                     if td['creator_id'] != user['id']:
@@ -271,6 +269,9 @@ def handle(request):
                 pass
             return ret
         with db.cursor() as cur:
+            cur.execute("SELECT min_level FROM yyt_page_access WHERE page_key = 'delete_todo'")
+            _pa = cur.fetchone()
+            _del_min_lv = _pa['min_level'] if _pa else 4
             tag_filter = request.args.get('tag') or ''
             scope = (request.args.get('scope') or '').strip()
             sql = (
@@ -332,6 +333,7 @@ def handle(request):
                     tag_map[tid].append({'id': r['tag_id'], 'name': r['name'], 'color': r['color']})
                 for r in rows:
                     r['is_creator'] = (r.get('creator_id') == user['id'])
+                    r['can_delete'] = r['is_creator'] or ((user.get('level') or 0) >= _del_min_lv)
                     r['done_users'] = done_map.get(r['id'], [])
                     r['tags'] = tag_map.get(r['id'], [])
         return {"code": 0, "data": rows}
