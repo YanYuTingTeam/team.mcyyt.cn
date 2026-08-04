@@ -3,7 +3,8 @@ from utils.db import get_db
 
 PAGE_DEFAULTS = {
     'home': (0, 1), 'overview': (0, 1), 'todo': (1, 1), 'notice': (1, 1),
-    'project': (1, 1), 'apis': (1, 1), 'mcsm': (4, 1), 'team': (5, 1),
+    'project': (1, 1), 'apis': (1, 1), 'logs': (1, 1),
+    'datatools': (1, 1), 'mcsm': (4, 1), 'team': (5, 1),
     'invite_create': (4, 0), 'settings': (0, 1)
 }
 

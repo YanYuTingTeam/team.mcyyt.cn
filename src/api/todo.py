@@ -32,6 +32,8 @@ def _ensure_col(db):
             """)
             try:
                 cur.execute("INSERT IGNORE INTO yyt_page_access (page_key, min_level, show_in_nav) VALUES ('delete_todo', 4, 0)")
+                cur.execute("INSERT IGNORE INTO yyt_page_access (page_key, min_level, show_in_nav) VALUES ('logs', 1, 1)")
+                cur.execute("INSERT IGNORE INTO yyt_page_access (page_key, min_level, show_in_nav) VALUES ('datatools', 1, 1)")
             except Exception:
                 pass
             db.commit()

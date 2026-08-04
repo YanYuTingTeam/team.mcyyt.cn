@@ -106,9 +106,9 @@ async function postJson(url, body) {
     return res.json();
 }
 var PAGE_PATH = { home: '/', overview: '/overview', todo: '/todos', notice: '/notice', project: '/projects', apis: '/apis', logs: '/logs', mcsm: '/mcsmanager', team: '/team', addtodo: '/todos/add', tododetail: '/todos', settings: '/settings' };
-var NAV_OF = { home: 'home', overview: 'overview', todo: 'todo', notice: 'notice', project: 'project', apis: 'apis', logs: 'overview', mcsm: 'mcsm', team: 'team', addtodo: 'todo', tododetail: 'todo', settings: 'settings' };
+var NAV_OF = { home: 'home', overview: 'overview', todo: 'todo', notice: 'notice', project: 'project', apis: 'apis', logs: 'logs', mcsm: 'mcsm', team: 'team', addtodo: 'todo', tododetail: 'todo', settings: 'settings', datatools: 'datatools' };
 var PAGE_LOADER = { home: loadOverview, overview: loadOverview, todo: loadTodo, notice: loadNotice, project: loadProject, apis: loadApis, logs: loadLogs, mcsm: loadMcsm, team: loadTeam, addtodo: resetAddTodo, tododetail: null, settings: loadSettings };
-var SPIN_SVG = '<svg xmlns="http://www.w3.org/2000/svg" class="spin" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3a9 9 0 1 0 9 9"/></svg>';
+var SPIN_SVG = '<svg xmlns="http://www.w3.org/2000/svg" class="spin" style="display:inline-block;width:1em;height:1em;vertical-align:-.125em" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3a9 9 0 1 0 9 9"/></svg>';
 var LEVEL_NAME = { 0: '待定', 1: '志愿者 | 初级', 2: '志愿者 | 中级', 3: '志愿者 | 高级', 4: '管理员', 5: '服主' };
 var LEVEL_COLOR = { 0: '#888', 1: '#4caf7d', 2: '#4dabf7', 3: '#cc5de8', 4: '#f59f00', 5: '#ef5777' };
 var levelMeta = {};
@@ -117,9 +117,10 @@ var DEFAULT_PAGE_ACCESS = {
     home: { min_level: 0, show_in_nav: 1 }, overview: { min_level: 0, show_in_nav: 1 },
     todo: { min_level: 1, show_in_nav: 1 }, notice: { min_level: 1, show_in_nav: 1 },
     project: { min_level: 1, show_in_nav: 1 }, apis: { min_level: 1, show_in_nav: 1 },
-    mcsm: { min_level: 4, show_in_nav: 1 }, team: { min_level: 5, show_in_nav: 1 },
+    logs: { min_level: 1, show_in_nav: 1 }, mcsm: { min_level: 4, show_in_nav: 1 }, team: { min_level: 5, show_in_nav: 1 },
     invite_create: { min_level: 4, show_in_nav: 0 }, settings: { min_level: 0, show_in_nav: 1 },
-    delete_todo: { min_level: 4, show_in_nav: 0 }
+    delete_todo: { min_level: 4, show_in_nav: 0 },
+    datatools: { min_level: 1, show_in_nav: 1 }
 };
 var PAGE_LABEL = { home: '空间首页', overview: '个人概览', todo: '待办事项', notice: '通知动态', project: '项目展示', apis: 'API 文档', mcsm: 'MCSManager', team: '团队管理', invite_create: '生成邀请码', settings: '设置', delete_todo: '删除待办' };
 var PAGE_KIND = { invite_create: 'feature', delete_todo: 'feature' };
@@ -273,6 +274,8 @@ function pageFromPath() {
     if (/^\/todos\/tag\/\d+$/.test(p)) return 'todo';
     if (/^\/todos\/\d+$/.test(p)) return 'tododetail';
     if (p === '/todos' || p.indexOf('/todos/') === 0) return 'todo';
+    if (p === '/logs') return 'logs';
+    if (p === '/datatools') return 'datatools';
     for (var k in PAGE_PATH) {
         if (PAGE_PATH[k] === p) return k;
     }
@@ -1498,6 +1501,9 @@ async function loadLogs() {
             '<div class="t-meta">IP: ' + esc(it.ip || '未知') + ' · ' + esc(it.created_at) + '</div></div></div>';
     }).join('');
 }
+async function loadDataTools() {
+    document.getElementById('dataToolsBox').innerHTML = '<div class="empty-tip">功能开发中，敬请期待 ~</div>';
+}
 function _add32(a, b) { return (a + b) & 0xFFFFFFFF; }
 function _cmn(q, a, b, x, s, t) { a = _add32(_add32(a, q), _add32(x, t)); return _add32((a << s) | (a >>> (32 - s)), b); }
 function _ff(a,b,c,d,x,s,t){ return _cmn((b&c)|((~b)&d), a, b, x, s, t); }
@@ -2495,7 +2501,7 @@ async function submitProject() {
     try {
         await loadSkillsMeta();
         var jobs = [loadMe(), loadPagesConfig(), loadTodo(), loadNotice(), loadProject(), loadTrackTodo(), document.fonts.ready];
-        if (start === 'overview') jobs.push(loadOverview());
+        if (start === 'overview' || start === 'home') jobs.push(loadOverview());
         if (start === 'apis') jobs.push(loadApis());
         if (start === 'logs') jobs.push(loadLogs());
         if (start === 'mcsm') jobs.push(loadMcsm());
@@ -2513,6 +2519,8 @@ async function submitProject() {
     }
     var m = location.pathname.match(/^\/todos\/(\d+)$/);
     if (m) { await loadTodoDetail(m[1]); showPage('tododetail'); }
+    if (location.pathname === '/logs') { showPage('logs'); loadLogs(); }
+    if (location.pathname === '/datatools') { showPage('datatools'); loadDataTools(); }
     requestNotifyPermission();
     startNoticePoll();
 })();
@@ -2542,6 +2550,8 @@ function pathToPage(p) {
     if (p === '/todos/add') return 'addtodo';
     if (/^\/todos\/tag\/\d+$/.test(p)) return 'todo';
     if (p === '/todos' || p.indexOf('/todos/') === 0) return 'todo';
+    if (p === '/logs') return 'logs';
+    if (p === '/datatools') return 'datatools';
     for (var k in PAGE_PATH) { if (PAGE_PATH[k] === p) return k; }
     return null;
 }
