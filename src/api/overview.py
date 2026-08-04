@@ -56,7 +56,7 @@ def handle(request):
                 s['is_current'] = int(s['is_current'] or 0)
                 s['device'] = _parse_device(s.get('ua'))
                 s['first_seen'] = str(s['first_seen']) if s.get('first_seen') else str(s.get('created_at'))
-            safe_user = {k: v for k, v in user.items() if k not in ('apikey', 'password_hash')}
+            safe_user = {k: v for k, v in user.items() if k not in ('password_hash',)}
         db.commit()
         return {"code": 0, "data": {"user": safe_user, "calls": calls, "invites": invites, "sessions": sessions}}
     finally:
