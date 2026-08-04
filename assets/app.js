@@ -2670,11 +2670,15 @@ async function heartbeat() {
         var d = ret.data || {};
         var v = (d.version || '').toString().trim();
         // 版本更新
-        if (v && v !== __lastVersion && !__showedVersionNotif) {
-            var lastVer = sessionStorage.getItem('__lastVersion') || __lastVersion;
-            if (lastVer && lastVer !== v) notifyPersistent('检查到新版本', '当前版本 ' + lastVer + '，最新版本 ' + v + '，请刷新页面');
-            sessionStorage.setItem('__lastVersion', v);
-            __showedVersionNotif = true;
+        if (v) {
+            var lastVer = sessionStorage.getItem('__lastVersion');
+            if (lastVer && lastVer !== v && !__showedVersionNotif) {
+                notifyPersistent('检查到新版本', '当前版本 ' + lastVer + '，最新版本 ' + v + '，请刷新页面');
+                sessionStorage.setItem('__lastVersion', v);
+                __showedVersionNotif = true;
+            } else if (!lastVer || lastVer === v) {
+                __showedVersionNotif = false;
+            }
         }
         // 断开重连
         if (__prevDisconnected) {
