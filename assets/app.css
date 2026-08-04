@@ -454,7 +454,7 @@ a { color: #ef5777; }
 .act-btn:hover { border-color: #ef5777; color: #ef5777; }
 .act-btn.danger { color: #ef5777; border-color: rgba(239,87,119,.45); background: rgba(239,87,119,.06); }
 .act-btn.danger:hover { background: rgba(239,87,119,.14); }
-.exempt-tag { background: rgba(136,136,136,.1); border: 1px solid rgba(136,136,136,.3); color: #888; padding: 4px 10px; border-radius: 8px; font-size: 12px; white-space: nowrap; }
+.exempt-tag { background: rgba(136,136,136,.1); border: 1px solid rgba(136,136,136,.3); color: #888; }
 .panel .add-row { margin: 8px 0 14px; }
 .page-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
 .page-head .htxt { min-width: 0; }

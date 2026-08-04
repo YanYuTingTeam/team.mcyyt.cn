@@ -393,8 +393,8 @@ async function loadTodoPage(scope) {
 function renderTodoPage() {
     var pageBox = document.getElementById('todoPageList');
     var data = __todoPageData || [];
-    if (__todoFilter === 'incomplete') data = data.filter(function(it) { return !it.is_done; });
-    else if (__todoFilter === 'complete') data = data.filter(function(it) { return it.is_done; });
+    if (__todoFilter === 'incomplete') data = data.filter(function(it) { return !it.is_done && (it.is_global || it.is_assigned); });
+    else if (__todoFilter === 'complete') data = data.filter(function(it) { return it.is_done || (!it.is_global && !it.is_assigned && it.all_done); });
     if (!data.length) {
         pageBox.innerHTML = '<div class="empty-tip">暂时没有待办, 很清闲喵</div>';
         updateScrollIndicators();
@@ -433,7 +433,7 @@ function renderTodoPage() {
             doneAvas = '<div class="t-done-avas">' + avas + more + '</div>';
         }
         return '<div class="trow' + (it.is_done ? ' done' : '') + '" data-tid="' + it.id + '">' +
-            (it.is_done ? OK_SVG : NO_SVG) +
+            ((canDone ? it.is_done : it.all_done) ? OK_SVG : NO_SVG) +
             '<div class="t-body"><div class="t-line">' + t + chipHtml(it.is_done, !canDone) + doneAvas + '</div>' + tagHtml + desc + meta + '</div>' + btn + '</div>';
     }).join('');
     updateScrollIndicators();
@@ -540,7 +540,7 @@ function renderTodoHome() {
         _schedMasonry();
         return;
     }
-    var unfinished = __todoData.filter(function(t) { return !t.is_done; });
+    var unfinished = __todoData.filter(function(t) { return !t.is_done && (t.is_global || t.is_assigned); });
     var display = unfinished.length ? unfinished : __todoData;
     var shown = display.slice(0, 5);
     var LINK_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14"><g fill="none" stroke="#ef5777" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></g></svg>';
@@ -549,11 +549,11 @@ function renderTodoHome() {
         var canDone = it.is_global || it.is_assigned;
         var statusChip = canDone
             ? (it.is_done
-                ? '<span class="chip ok" style="padding:2px 8px;font-size:12px">Complete</span>'
-                : '<span class="chip no" style="padding:2px 8px;font-size:12px">Incomplete</span>')
-            : '<span class="chip exempt-tag" style="padding:2px 8px;font-size:12px">Exempt</span>';
+                ? '<span class="chip ok">Complete</span>'
+                : '<span class="chip no">Incomplete</span>')
+            : '<span class="chip exempt-tag">Exempt</span>';
         return '<div class="ov-todo-row' + doneClass + '" style="padding:10px 4px">' +
-            (it.is_done ? OK_SVG : NO_SVG) +
+            ((canDone ? it.is_done : it.all_done) ? OK_SVG : NO_SVG) +
             '<div class="ov-todo-info">' +
                 '<div style="display:flex;align-items:center;gap:6px">' +
                     '<a class="ov-todo-link" href="/todos/' + it.id + '" onclick="event.preventDefault(); openTodo(' + it.id + ')" style="color:#ef5777;font-weight:600">' + esc(it.title) + '</a>' +
@@ -598,7 +598,7 @@ function updateScrollIndicators() {
     }
     var rows = pageList.querySelectorAll('.trow');
     var incompleteIds = {};
-    (__todoPageData || []).forEach(function(it) { if (!it.is_done) incompleteIds[it.id] = true; });
+    (__todoPageData || []).forEach(function(it) { if (!it.is_done && (it.is_global || it.is_assigned)) incompleteIds[it.id] = true; });
     if (!Object.keys(incompleteIds).length) {
         topEl.classList.remove('show');
         botEl.classList.remove('show');
@@ -664,7 +664,7 @@ async function loadTodoDetail(tid) {
 }
 function renderTodoDetail(d) {
     var t = d.todo;
-    var icon = d.my_done ? OK_SVG : NO_SVG;
+    var icon = (d.my_done || d.todo.all_done) ? OK_SVG : NO_SVG;
     var gTag = t.is_global ? '<span class="chip global-tag">全局</span>' : '';
     var tagChip = '';
     if (t.tags && t.tags.length) {

@@ -276,6 +276,7 @@ def handle(request):
             scope = (request.args.get('scope') or '').strip()
             sql = (
                 "SELECT t.id, t.title, t.link, t.content, t.created_at, t.updated_at, t.is_global, t.creator_id, "
+                "t.all_done_at, "
                 "COALESCE(a.is_done, 0) AS is_done, a.done_at AS my_done_at, "
                 "(a.user_id IS NOT NULL) AS is_assigned, u.name AS creator_name, u.avatar AS creator_avatar "
                 "FROM yyt_todo t "
@@ -333,6 +334,7 @@ def handle(request):
                     tag_map[tid].append({'id': r['tag_id'], 'name': r['name'], 'color': r['color']})
                 for r in rows:
                     r['is_creator'] = (r.get('creator_id') == user['id'])
+                    r['all_done'] = bool(r.get('all_done_at'))
                     r['can_delete'] = r['is_creator'] or ((user.get('level') or 0) >= _del_min_lv)
                     r['done_users'] = done_map.get(r['id'], [])
                     r['tags'] = tag_map.get(r['id'], [])

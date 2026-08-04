@@ -14,6 +14,7 @@ def handle(request):
         with db.cursor() as cur:
             cur.execute(
                 "SELECT t.id, t.title, t.link, t.content, t.created_at, t.updated_at, t.is_global, "
+                "t.all_done_at, "
                 "u.id AS creator_id, u.name AS creator_name, u.avatar AS creator_avatar "
                 "FROM yyt_todo t JOIN yyt_user u ON t.creator_id = u.id "
                 "WHERE t.id = %s AND t.deleted_at IS NULL",
@@ -23,6 +24,7 @@ def handle(request):
             if not todo:
                 return {"code": 404, "message": "待办不存在"}
             todo['is_creator'] = (todo['creator_id'] == user['id'])
+            todo['all_done'] = bool(todo.get('all_done_at'))
             cur.execute("SELECT min_level FROM yyt_page_access WHERE page_key = 'delete_todo'")
             pa = cur.fetchone()
             min_del_lv = pa['min_level'] if pa else 4
