@@ -1753,7 +1753,7 @@ async function loadTeam() {
         });
         return;
     }
-    ALL_USERS = (ru.data || []).filter(function(u) { return !isBanned(u); });
+    ALL_USERS = (ru.data || []).filter(function(u) { return !isBanned(u) && !isDeactivated(u); });
     var ret = await Promise.all([
         getJson('/api/admin_invites'),
         getJson('/api/admin_stats'),
@@ -2145,7 +2145,7 @@ async function openMemberDetail(uid) {
         var foot = (isDeactivated(u) ? '' : '<button class="act-btn" onclick="btnRun(this, function(btn){ return mmSave(' + u.id + ',btn); })">保存修改</button>') +
             '<button class="act-btn" onclick="closeModal()">关闭</button>' +
             '<button class="act-btn" onclick="btnRun(this, function(btn){ return mmBanUser(' + u.id + ',btn); })">' + (isDeactivated(u) ? '解除封禁' : '封禁账号') + '</button>' +
-            '<button class="act-btn" onclick="btnRun(this, function(btn){ return mmKickUser(' + u.id + ',btn); })">踢出团队</button>';
+            (isDeactivated(u) ? '' : '<button class="act-btn" onclick="btnRun(this, function(btn){ return mmKickUser(' + u.id + ',btn); })">踢出团队</button>');
         openModal('成员详情 · ' + esc(displayName(u)), avatarHtml + infoHtml + statsHtml + sesHtml + invHtml + pgsHtml + logsHtml + banStatusHtml, foot);
         setTimeout(function() {
             try { initSkillPicker('mm', u.skill || ''); } catch(e) { console.error('initSkillPicker error:', e); }
