@@ -65,12 +65,24 @@ def check_login(request):
     try:
         with db.cursor() as cur:
             cur.execute(
-                "SELECT u.id, u.email, u.name, u.role, u.level, u.skill, u.apikey, u.panel_host, u.avatar, u.bio, u.created_at "
+                "SELECT u.id, u.email, u.name, u.role, u.level, u.skill, u.apikey, u.panel_host, u.avatar, u.bio, u.banned_until, u.created_at "
                 "FROM yyt_session s JOIN yyt_user u ON s.user_id = u.id "
                 "WHERE s.token = %s AND s.expire_time > NOW()",
                 (token,)
             )
-            return cur.fetchone()
+            user = cur.fetchone()
+            if user:
+                ban_until = user.get('banned_until')
+                if ban_until:
+                    import datetime
+                    try:
+                        if isinstance(ban_until, str):
+                            ban_until = datetime.datetime.strptime(ban_until, '%Y-%m-%d %H:%M:%S')
+                        if datetime.datetime.now() < ban_until:
+                            return None
+                    except (ValueError, TypeError):
+                        pass
+            return user
     finally:
         db.close()
 
@@ -122,6 +134,16 @@ def verify_sign(request, debug=False):
         if debug:
             print(f'[verify_sign FAIL(db-no-user)] host={request.host} {reason}', flush=True)
         return None, '该APIKey未在系统中登记'
+    ban_until = row.get('banned_until')
+    if ban_until:
+        import datetime
+        try:
+            if isinstance(ban_until, str):
+                ban_until = datetime.datetime.strptime(ban_until, '%Y-%m-%d %H:%M:%S')
+            if datetime.datetime.now() < ban_until:
+                return None, '该APIKey已被封禁'
+        except (ValueError, TypeError):
+            pass
     if (row.get('level') or 0) < 1:
         reason = f'用户等级不足: level={row.get("level")} user={row.get("name")}'
         if debug:

@@ -9,7 +9,7 @@ def _one(cur, sql, args=None):
 def _detail(db, uid):
     with db.cursor() as cur:
         cur.execute(
-            "SELECT id, email, name, role, level, skill, panel_host, avatar, bio, created_at "
+            "SELECT id, email, name, role, level, skill, panel_host, avatar, bio, created_at, banned_until "
             "FROM yyt_user WHERE id = %s", (uid,)
         )
         user = cur.fetchone()
@@ -98,6 +98,20 @@ def handle(request):
                     cur.execute("UPDATE yyt_user SET bio = %s WHERE id = %s", (bo or None, uid))
                 if 'kill_session' in data:
                     cur.execute("DELETE FROM yyt_session WHERE id = %s AND user_id = %s", (data['kill_session'], uid))
+                if 'ban' in data:
+                    days = int(data.get('days') or 0)
+                    if days <= 0:
+                        cur.execute("UPDATE yyt_user SET banned_until = NULL WHERE id = %s", (uid,))
+                    elif days >= 1000:
+                        cur.execute("UPDATE yyt_user SET banned_until = '9999-12-31 23:59:59' WHERE id = %s", (uid,))
+                    else:
+                        cur.execute(
+                            "UPDATE yyt_user SET banned_until = DATE_ADD(NOW(), INTERVAL %s DAY) WHERE id = %s",
+                            (days, uid)
+                        )
+                if 'kick' in data:
+                    cur.execute("UPDATE yyt_user SET banned_until = '9999-12-31 23:59:59' WHERE id = %s", (uid,))
+                    cur.execute("DELETE FROM yyt_session WHERE user_id = %s", (uid,))
             db.commit()
             return {"code": 0, "message": "ok"}
         args = request.args if hasattr(request, 'args') else {}

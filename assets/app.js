@@ -3,7 +3,16 @@ function esc(s) {
     d.textContent = s == null ? '' : String(s);
     return d.innerHTML;
 }
+function isBanned(u) {
+    if (!u || !u.banned_until) return false;
+    try { var b = new Date(u.banned_until); return b < new Date(); } catch(e) { return false; }
+}
+function isDeactivated(u) {
+    if (!u || !u.banned_until) return false;
+    try { var b = new Date(u.banned_until); return b > new Date(); } catch(e) { return false; }
+}
 function avatarUrl(u) {
+    if (isDeactivated(u)) return '/assets/normal.png';
     if (u && u.avatar) return u.avatar;
     var name = (u && u.name) || '?';
     var ch = name.charAt(0).toUpperCase();
@@ -13,6 +22,9 @@ function avatarUrl(u) {
     var color = palette[Math.abs(hash) % palette.length];
     var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="64" height="64" rx="32" fill="' + color + '"/><text x="32" y="34" text-anchor="middle" dominant-baseline="central" font-size="30" fill="#fff" font-family="sans-serif" font-weight="bold">' + esc(ch) + '</text></svg>';
     return 'data:image/svg+xml,' + encodeURIComponent(svg);
+}
+function displayName(u) {
+    return isDeactivated(u) ? '账号已注销' : (u && u.name || '?');
 }
 function escAttr(s) { return String(s == null ? '' : s).replace(/\"/g, '&quot;').replace(/'/g, '&#39;').replace(/\\/g, '\\\\'); }
 function markErr(input, msg) {
@@ -1741,7 +1753,7 @@ async function loadTeam() {
         });
         return;
     }
-    ALL_USERS = ru.data || [];
+    ALL_USERS = (ru.data || []).filter(function(u) { return !isBanned(u); });
     var ret = await Promise.all([
         getJson('/api/admin_invites'),
         getJson('/api/admin_stats'),
@@ -1954,10 +1966,11 @@ function renderTeamMembers(users) {
     }
     var html = users.map(function(u) {
         var skillTxt = renderSkillHtml(u.skill);
+        var dn = displayName(u);
         return '<div class="member-bar">' +
             '<img class="mb-ava" src="' + avatarUrl(u) + '" alt="">' +
             '<div class="mb-main">' +
-            '<div class="mb-name">' + esc(u.name) + ' ' + lvlBadge(u.level || 0) + '</div>' +
+            '<div class="mb-name">' + esc(dn) + ' ' + lvlBadge(u.level || 0) + '</div>' +
             '<div class="mb-mail">' + esc(u.email) + '</div>' +
             '<div class="mb-skill">' + skillTxt + '</div>' +
             '</div>' +
@@ -2034,10 +2047,10 @@ async function openMemberDetail(uid) {
         var s = d.stats || {};
         var pages = d.pages || [];
         var avatarHtml = '<div class="mem-avatar-row"><img src="' + avatarUrl(u) + '" alt=""><div>' +
-            '<div class="ma-name">' + esc(u.name) + ' ' + lvlBadge(u.level || 0) + '</div>' +
+            '<div class="ma-name">' + esc(displayName(u)) + ' ' + lvlBadge(u.level || 0) + '</div>' +
             '<div class="ma-mail">' + esc(u.email) + '</div></div></div>';
         var infoHtml = '<div class="md-section"><div class="md-label">基础信息</div>' +
-            '<div class="md-row"><div class="md-k">昵称</div><div class="md-v"><input id="mm_name" value="' + esc(u.name || '') + '"></div></div>' +
+            '<div class="md-row"><div class="md-k">昵称</div><div class="md-v">' + esc(displayName(u)) + '</div></div>' +
             '<div class="md-row"><div class="md-k">邮箱</div><div class="md-v">' + esc(u.email) + '</div></div>' +
             '<div class="md-row"><div class="md-k">账号ID</div><div class="md-v">' + esc(u.id) + '</div></div>' +
             '<div class="md-row"><div class="md-k">核心能力</div><div class="md-v"><div class="picker-wrap"><div class="picker" id="mmSkillPicker" onclick="document.getElementById(\'mmSkillInput\').focus()"><input id="mmSkillInput" placeholder="选择核心能力" autocomplete="off" onfocus="skillPickerSearch(this.value,\'mm\')" oninput="skillPickerSearch(this.value,\'mm\')" onkeydown="skillPickerKey(event,\'mm\')"></div><div class="picker-drop hide" id="mmSkillDrop"></div></div></div></div>' +
@@ -2125,8 +2138,10 @@ async function openMemberDetail(uid) {
                 }).join('') + '</div></div>';
         }
         var foot = '<button class="act-btn" onclick="closeModal()">关闭</button>' +
-            '<button class="add-todo-btn" onclick="btnRun(this, function(btn){ return mmSave(' + u.id + ',btn); })">保存修改</button>';
-        openModal('成员详情 · ' + u.name, avatarHtml + infoHtml + statsHtml + sesHtml + invHtml + pgsHtml + logsHtml, foot);
+            (isDeactivated(u) ? '' : '<button class="add-todo-btn" onclick="btnRun(this, function(btn){ return mmSave(' + u.id + ',btn); })">保存修改</button>') +
+            '<button class="act-btn" style="background:#ef5777" onclick="btnRun(this, function(btn){ return mmBanUser(' + u.id + ',btn); })">' + (isDeactivated(u) ? '解除封禁' : '封禁账号') + '</button>' +
+            '<button class="act-btn" style="background:#748ffc" onclick="btnRun(this, function(btn){ return mmKickUser(' + u.id + ',btn); })">踢出团队</button>';
+        openModal('成员详情 · ' + esc(displayName(u)), avatarHtml + infoHtml + statsHtml + sesHtml + invHtml + pgsHtml + logsHtml + banStatusHtml, foot);
         setTimeout(function() { initSkillPicker('mm', u.skill || ''); }, 0);
     } catch (e) {
         closeModal();
@@ -2249,6 +2264,32 @@ async function mmKillSession(uid, sid, btn) {
     await postJson('/api/admin_users', { id: uid, kill_session: sid });
     var row = btn.closest('.dev-row');
     if (row) row.remove();
+}
+async function mmBanUser(uid, btn) {
+    if (!isDeactivated((ALL_USERS || []).find(function(u){ return u.id == uid; }))) {
+        if (!confirm('确认封禁此账号？封禁后该用户无法登录。')) return;
+    }
+    var options = [1, 3, 7, 15, 30, 180, 365, 1000];
+    var labels = ['1天', '3天', '7天', '15天', '30天', '180天', '365天', '永久'];
+    var html = '<div class="md-section"><div class="md-label">选择封禁时长</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">' +
+        options.map(function(d, i) {
+            return '<button class="act-btn" style="background:' + (d === 1000 ? '#ef5777' : '#4dabf7') + '" onclick="document.getElementById(\'banResult\').value=' + d + '">' + labels[i] + '</button>';
+        }).join('') +
+        '<input type="hidden" id="banResult" value="365">' +
+        '</div></div>';
+    var foot = '<button class="act-btn" onclick="closeModal()">取消</button>' +
+        '<button class="add-todo-btn" onclick="btnRun(this, function(btn){ return submitBan(' + uid + ',btn); })">确认</button>';
+    openModal((isDeactivated((ALL_USERS || []).find(function(u){ return u.id == uid; })) ? '解除封禁' : '封禁账号'), html, foot);
+}
+async function submitBan(uid, btn) {
+    var days = parseInt(document.getElementById('banResult').value) || 365;
+    var ret = await postJson('/api/admin_users', { id: uid, ban: 1, days: days });
+    if (ret.code === 0) { closeModal(); await loadTeam(); }
+}
+async function mmKickUser(uid, btn) {
+    if (!confirm('确认踢出此账号？该账号将无法再登录，所有数据保留。')) return;
+    var ret = await postJson('/api/admin_users', { id: uid, kick: 1 });
+    if (ret.code === 0) { closeModal(); await loadTeam(); }
 }
 async function openGroupEdit(lv) {
     var color = levelColor(lv);
