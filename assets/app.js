@@ -2144,10 +2144,10 @@ async function openMemberDetail(uid) {
             banStatusHtml = '<div class="md-section" style="margin-top:14px"><div class="md-label" style="color:#ef5777">' + (isPermanent ? '永久封禁' : '封禁中') + '</div>' +
                 '<div class="md-row"><div class="md-k">封禁截止</div><div class="md-v" style="color:#ef5777">' + esc(bannedUntil) + '</div></div></div>';
         }
-        var foot = '<button class="act-btn" onclick="closeModal()">关闭</button>' +
-            (isDeactivated(u) ? '' : '<button class="add-todo-btn" onclick="btnRun(this, function(btn){ return mmSave(' + u.id + ',btn); })">保存修改</button>') +
-            '<button class="act-btn" style="background:#ef5777" onclick="btnRun(this, function(btn){ return mmBanUser(' + u.id + ',btn); })">' + (isDeactivated(u) ? '解除封禁' : '封禁账号') + '</button>' +
-            '<button class="act-btn" style="background:#748ffc" onclick="btnRun(this, function(btn){ return mmKickUser(' + u.id + ',btn); })">踢出团队</button>';
+        var foot = (isDeactivated(u) ? '' : '<button class="act-btn" onclick="btnRun(this, function(btn){ return mmSave(' + u.id + ',btn); })">保存修改</button>') +
+            '<button class="act-btn" onclick="closeModal()">关闭</button>' +
+            '<button class="act-btn" onclick="btnRun(this, function(btn){ return mmBanUser(' + u.id + ',btn); })">' + (isDeactivated(u) ? '解除封禁' : '封禁账号') + '</button>' +
+            '<button class="act-btn" onclick="btnRun(this, function(btn){ return mmKickUser(' + u.id + ',btn); })">踢出团队</button>';
         openModal('成员详情 · ' + esc(displayName(u)), avatarHtml + infoHtml + statsHtml + sesHtml + invHtml + pgsHtml + logsHtml + banStatusHtml, foot);
         setTimeout(function() {
             try { initSkillPicker('mm', u.skill || ''); } catch(e) { console.error('initSkillPicker error:', e); }
