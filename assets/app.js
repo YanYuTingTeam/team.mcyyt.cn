@@ -2297,7 +2297,7 @@ async function submitBan(uid, btn) {
     if (ret.code === 0) { closeModal(); await loadTeam(); }
 }
 async function mmKickUser(uid, btn) {
-    if (!confirm('确认踢出此账号？该账号将无法再登录，所有数据保留。')) return;
+    if (!confirm('确认踢出此账号？该账号将被永久封禁，所有数据将被清除，昵称将显示为"账号已注销"。')) return;
     var ret = await postJson('/api/admin_users', { id: uid, kick: 1 });
     if (ret.code === 0) { closeModal(); await loadTeam(); }
 }

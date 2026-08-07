@@ -1,8 +1,11 @@
 import os
 import re
 from flask import Response
-from utils.auth import check_login
+from utils.auth import check_login, get_user_kick_reason
 from utils.db import get_db
+
+_KICK_PAGE = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'pages', 'bye.html')
+_BANNED_PAGE = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'pages', 'banned.html')
 
 PAGE_DEFAULTS = {
     'home': (0, 1), 'overview': (0, 1), 'todo': (1, 1), 'notice': (1, 1),
@@ -101,7 +104,14 @@ def _split_pages(html):
 def handle(request):
     user = check_login(request)
     if not user:
+        if request.cookies.get('yyt_token'):
+            with open(_BANNED_PAGE, 'r', encoding='utf-8') as f:
+                return Response(f.read(), mimetype='text/html')
         return {"code": 401, "message": "未登录"}
+    kick = user.get('_kick_reason', False)
+    if kick:
+        with open(_KICK_PAGE, 'r', encoding='utf-8') as f:
+            return Response(f.read(), mimetype='text/html')
     user_level = user.get('level') or 0
     allowed = _get_allowed_pages(user_level)
     html = _load_html()

@@ -110,8 +110,8 @@ def handle(request):
                             (days, uid)
                         )
                 if 'kick' in data:
-                    cur.execute("UPDATE yyt_user SET banned_until = '9999-12-31 23:59:59' WHERE id = %s", (uid,))
-                    cur.execute("DELETE FROM yyt_session WHERE user_id = %s", (uid,))
+                    cur.execute("UPDATE yyt_user SET name='账号已注销', bio=NULL, skill=NULL, panel_host=NULL, avatar=NULL, apikey=NULL, banned_until='9999-12-31 23:59:59' WHERE id=%s", (uid,))
+                    cur.execute("DELETE FROM yyt_session WHERE user_id=%s", (uid,))
             db.commit()
             return {"code": 0, "message": "ok"}
         args = request.args if hasattr(request, 'args') else {}

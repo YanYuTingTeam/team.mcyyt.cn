@@ -2,11 +2,12 @@ import secrets
 import hmac
 import hashlib
 import time
-import ipaddress
 from utils.db import get_db
 from config import MCSM_CONFIG
 
 _avatar_col_ensured = False
+_kick_users = set()
+
 def _ensure_avatar_col():
     global _avatar_col_ensured
     if _avatar_col_ensured:
@@ -31,30 +32,25 @@ def _ensure_avatar_col():
         pass
     _avatar_col_ensured = True
 
-def make_token():
-    return secrets.token_hex(32)
-
-def _is_private_ip(ip):
+def _load_kicked_users():
+    global _kick_users
     try:
-        addr = ipaddress.ip_address(ip)
-        return addr.is_private or addr.is_loopback or addr.is_link_local
-    except ValueError:
-        return True
-
-def get_client_info(request):
-    ip = (request.remote_addr or '').strip()
-    if ip and not _is_private_ip(ip):
+        db = get_db()
+        try:
+            with db.cursor() as cur:
+                cur.execute(
+                    "SELECT id, name FROM yyt_user WHERE name = '账号已注销' AND apikey IS NULL AND banned_until IS NOT NULL"
+                )
+                rows = cur.fetchall()
+                _kick_users = set(int(r['id']) for r in rows if r.get('name') == '账号已注销')
+        finally:
+            db.close()
+    except Exception:
         pass
-    else:
-        real_ip = (request.headers.get('X-Real-IP') or '').strip()
-        if real_ip and not _is_private_ip(real_ip):
-            ip = real_ip
-        else:
-            xff = (request.headers.get('X-Forwarded-For') or '').split(',')[0].strip()
-            if xff and not _is_private_ip(xff):
-                ip = xff
-    ua = (request.headers.get('User-Agent') or '')[:255]
-    return ip[:64] or '0.0.0.0', ua
+
+def is_kicked_user(uid):
+    _load_kicked_users()
+    return int(uid) in _kick_users
 
 def check_login(request):
     token = request.cookies.get('yyt_token')
@@ -71,20 +67,16 @@ def check_login(request):
                 (token,)
             )
             user = cur.fetchone()
-            if user:
-                ban_until = user.get('banned_until')
-                if ban_until:
-                    import datetime
-                    try:
-                        if isinstance(ban_until, str):
-                            ban_until = datetime.datetime.strptime(ban_until, '%Y-%m-%d %H:%M:%S')
-                        if datetime.datetime.now() < ban_until:
-                            return None
-                    except (ValueError, TypeError):
-                        pass
+            if user and user.get('name') == '账号已注销':
+                return None
             return user
     finally:
         db.close()
+
+def get_user_kick_reason(user):
+    if user and isinstance(user, dict):
+        return user.get('_kick_reason', False)
+    return False
 
 def calc_sign(apikey, a, path, salt):
     msg = (apikey + a + path).encode('utf-8')
@@ -130,20 +122,12 @@ def verify_sign(request, debug=False):
     finally:
         db.close()
     if not row:
-        reason = f'apikey不存在: apikey_prefix={apikey[:8] + "..."}'
+        reason = f'apikey不存在: apikey_prefix={apikey[:8] + "..." if apikey else "empty"}'
         if debug:
             print(f'[verify_sign FAIL(db-no-user)] host={request.host} {reason}', flush=True)
         return None, '该APIKey未在系统中登记'
-    ban_until = row.get('banned_until')
-    if ban_until:
-        import datetime
-        try:
-            if isinstance(ban_until, str):
-                ban_until = datetime.datetime.strptime(ban_until, '%Y-%m-%d %H:%M:%S')
-            if datetime.datetime.now() < ban_until:
-                return None, '该APIKey已被封禁'
-        except (ValueError, TypeError):
-            pass
+    if row.get('name') == '账号已注销':
+        return None, 'kick'
     if (row.get('level') or 0) < 1:
         reason = f'用户等级不足: level={row.get("level")} user={row.get("name")}'
         if debug:
@@ -159,9 +143,26 @@ def log_api_call(request, user):
     try:
         with db.cursor() as cur:
             cur.execute(
-                "INSERT INTO yyt_api_log (user_id, ip, path) VALUES (%s, %s, %s)",
-                (user['id'], ip, request.path[:128])
+                "INSERT INTO yyt_api_log (user_id, path, ip, user_agent) VALUES (%s, %s, %s, %s)",
+                (user['id'], request.path, ip, (request.headers.get('User-Agent') or '')[:200])
             )
-        db.commit()
     finally:
         db.close()
+
+def get_client_info(request):
+    forward = request.headers.get('X-Forwarded-For', '')
+    if forward:
+        ip = forward.split(',')[0].strip()
+    else:
+        ip = request.headers.get('X-Real-IP', request.remote_addr or '')
+    return ip, request.headers.get('User-Agent', '')[:500]
+
+def login_success(db, user_id, ip, ua, token):
+    from datetime import datetime
+    db.execute(
+        "INSERT INTO yyt_session (token, user_id, ip, ua, expire_time) VALUES (%s, %s, %s, %s, DATE_ADD(NOW(), INTERVAL 7 DAY))",
+        (token, user_id, ip, ua[:500])
+    )
+
+def logout_by_token(db, token):
+    db.execute("DELETE FROM yyt_session WHERE token = %s", (token,))

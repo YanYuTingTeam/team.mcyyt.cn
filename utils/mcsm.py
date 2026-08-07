@@ -6,7 +6,7 @@ import urllib.error
 from urllib.parse import parse_qsl, urlencode
 from flask import Response
 from config import MCSM_CONFIG
-from utils.auth import verify_sign, log_api_call
+from utils.auth import verify_sign, log_api_call, is_kicked_user
 
 PANEL_SESSIONS = {}
 SESSION_TTL = 6 * 3600
@@ -91,6 +91,8 @@ def proxy_api(request, subpath):
             return _forward(request, subpath, extra_set_cookie=cookie)
     user, reason = verify_sign(request, debug=True)
     if not user:
+        if reason == 'kick':
+            return _deny("该账号已被踢出，数据已清除")
         msg = reason or "apikey或签名校验失败"
         print(f"[proxy_api] auth=sign FAIL msg={msg}", flush=True)
         return _deny(msg)
@@ -121,6 +123,8 @@ def proxy_panel(request, subpath):
         return _forward(request, subpath, extra_set_cookie=cookie)
     user, reason = verify_sign(request)
     if not user:
+        if reason == 'kick':
+            return _deny("该账号已被踢出，数据已清除")
         return _deny("")
     host_prefix = (request.host or '').split(':')[0].split('.')[0]
     if not user.get('panel_host') or host_prefix != user['panel_host']:
