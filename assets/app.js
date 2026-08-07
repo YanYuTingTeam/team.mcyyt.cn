@@ -190,6 +190,31 @@ function levelOptions(sel) {
     }
     return o;
 }
+function showConfirm(title, msg, btnYes, btnYesText) {
+    btnYesText = btnYesText || '确认';
+    var root = document.getElementById('modalRoot');
+    root.classList.remove('closing');
+    document.getElementById('modalTitle').textContent = title || '确认';
+    document.getElementById('modalBody').innerHTML = '<div style="color:#bbb;font-size:14px;line-height:1.7">' + msg + '</div>';
+    document.getElementById('modalFoot').innerHTML = '<button class="act-btn" onclick="closeModal()">取消</button>' +
+        '<button class="add-todo-btn" id="confirmYesBtn">' + btnYesText + '</button>';
+    root.classList.remove('hide');
+    return new Promise(function(resolve) {
+        setTimeout(function() {
+            var btn = document.getElementById('confirmYesBtn');
+            if (!btn) return resolve(false);
+            btn.onclick = function() { closeModal(); resolve(true); };
+        }, 50);
+    });
+}
+function showAlert(title, msg) {
+    var root = document.getElementById('modalRoot');
+    root.classList.remove('closing');
+    document.getElementById('modalTitle').textContent = title || '提示';
+    document.getElementById('modalBody').innerHTML = '<div style="color:#bbb;font-size:14px;line-height:1.7">' + msg + '</div>';
+    document.getElementById('modalFoot').innerHTML = '<button class="add-todo-btn" onclick="closeModal()">知道了</button>';
+    root.classList.remove('hide');
+}
 function openModal(title, bodyHtml, footHtml) {
     var root = document.getElementById('modalRoot');
     root.classList.remove('closing');
@@ -745,7 +770,8 @@ async function markTodoDetailDone(done) {
     renderTodoHome();
 }
 async function deleteTodo(id, title) {
-    if (!confirm('确定删除待办 #' + id + ' · ' + title + ' ?\n删除后所有用户将不再看到此待办.')) return;
+    var ret = await showConfirm('确认删除', '确定删除待办 #' + id + ' · ' + title + '？\n删除后所有用户将不再看到此待办。', '删除', '确认删除');
+    if (!ret) return;
     var ret = await postJson('/api/todo', { action: 'delete', todo_id: id });
     if (ret.code === 0) {
         notify(null, '已删除', '待办 #' + id + ' 已删除', 2500, '', false);
@@ -754,7 +780,7 @@ async function deleteTodo(id, title) {
         history.pushState(null, '', '/todos');
         showPage('todo');
     } else {
-        alert(ret.message || '删除失败');
+        showAlert('错误', ret.message || '删除失败');
     }
 }
 var __editTodoId = null;
@@ -785,7 +811,7 @@ function _hideEtOverlays() {
 function openTodoEditModal(id) {
     var it = (__todoData || []).find(function(x) { return x.id == id; });
     if (!it && __todoDetailData && __todoDetailData.id == id) it = __todoDetailData;
-    if (!it) { alert('待办未加载'); return; }
+    if (!it) { showAlert('提示', '待办未加载'); return; }
     __editTodoId = id;
     __editTags = (it.tags || []).map(function(x) { return { id: x.id, name: x.name, color: x.color }; });
     __editAssigns = [];
@@ -1866,9 +1892,10 @@ async function saveSkill(id, isNew, btn) {
     }
 }
 async function deleteSkill(id, name, btn) {
-    if (!confirm('确定删除能力「' + name + '」? 所有成员的该能力会被移除。')) return;
-    var ret = await postJson('/api/admin_skills', { action: 'delete', id: id });
-    if (ret.code === 0) await reloadSkills();
+    var ret = await showConfirm('确认删除', '确定删除能力「' + name + '」？所有成员的该能力会被移除。', '删除', '确认删除');
+    if (!ret) return;
+    var r = await postJson('/api/admin_skills', { action: 'delete', id: id });
+    if (r.code === 0) await reloadSkills();
 }
 async function reloadTodoTags() {
     await loadTodoTagMeta();
@@ -1924,7 +1951,8 @@ async function saveTodoTag(id, isNew, btn) {
     }
 }
 async function deleteTodoTag(id, name, btn) {
-    if (!confirm('确定删除Tag「' + name + '」? 使用此Tag的待办将被移除Tag关联。')) return;
+    var ret = await showConfirm('确认删除', '确定删除Tag「' + name + '」？使用此Tag的待办将被移除Tag关联。', '删除', '确认删除');
+    if (!ret) return;
     var ret = await postJson('/api/todo_tag', { action: 'delete', id: id });
     if (ret.code === 0) await reloadTodoTags();
 }
@@ -2275,7 +2303,8 @@ async function mmKillSession(uid, sid, btn) {
 }
 async function mmBanUser(uid, btn) {
     if (!isDeactivated((ALL_USERS || []).find(function(u){ return u.id == uid; }))) {
-        if (!confirm('确认封禁此账号？封禁后该用户无法登录。')) return;
+        var r = await showConfirm('确认封禁', '确认封禁此账号？封禁后该用户无法登录。', '封禁', '确认封禁');
+        if (!r) return;
     }
     var options = [1, 3, 7, 15, 30, 180, 365, 1000];
     var labels = ['1天', '3天', '7天', '15天', '30天', '180天', '365天', '永久'];
@@ -2295,7 +2324,8 @@ async function submitBan(uid, btn) {
     if (ret.code === 0) { closeModal(); await loadTeam(); }
 }
 async function mmKickUser(uid, btn) {
-    if (!confirm('确认踢出此账号？该账号将被永久封禁，所有数据将被清除，昵称将显示为"账号已注销"。')) return;
+    var r = await showConfirm('确认踢出', '确认踢出此账号？该账号将被永久封禁，所有数据将被清除，昵称将显示为"账号已注销"。', '踢出', '确认踢出');
+    if (!r) return;
     var ret = await postJson('/api/admin_users', { id: uid, kick: 1 });
     if (ret.code === 0) { closeModal(); await loadTeam(); }
 }

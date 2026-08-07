@@ -913,6 +913,7 @@ input.input-error, select.input-error, textarea.input-error { border-color: #ef5
 .modal-close:hover { color: #ef5777; transform: translateY(-50%) scale(1.1); }
 .modal-body { padding: 18px 22px; overflow-y: auto; }
 .modal-foot { padding: 14px 22px; border-top: 1px solid #1e1e21; display: flex; justify-content: flex-end; gap: 10px; }
+.confirm-confirm-btn { background: linear-gradient(90deg, #d9436b, #ef5777); }
 .md-section { margin-bottom: 24px; }
 .md-section:last-child { margin-bottom: 0; }
 .md-label { font-size: 12px; color: #ef5777; letter-spacing: 0px; margin-bottom: 10px; font-family: 'Orbixbeta'; }
