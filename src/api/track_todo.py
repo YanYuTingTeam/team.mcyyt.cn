@@ -40,6 +40,7 @@ def handle(request):
                 )
                 track = cur.fetchone()
                 if track:
+                    track['creator_deactivated'] = (track.get('creator_name') == '账号已注销')
                     cur.execute(
                         "SELECT r.tag_id AS id, tg.name, tg.color "
                         "FROM yyt_todo_tag_rel r JOIN yyt_todo_tag tg ON r.tag_id = tg.id WHERE r.todo_id = %s",
@@ -53,8 +54,8 @@ def handle(request):
                         (tid,)
                     )
                     assigns = cur.fetchall()
-                    track['assignees'] = [{'id': r['user_id'], 'name': r['name'], 'avatar': r['avatar']} for r in assigns]
-                    track['done_users'] = [{'id': r['user_id'], 'name': r['name'], 'avatar': r['avatar'], 'done_at': str(r['done_at']) if r['done_at'] else None} for r in assigns if r['is_done']]
+                    track['assignees'] = [{'id': r['user_id'], 'name': r['name'], 'avatar': r['avatar'], 'deactivated': r['name'] == '账号已注销'} for r in assigns]
+                    track['done_users'] = [{'id': r['user_id'], 'name': r['name'], 'avatar': r['avatar'], 'done_at': str(r['done_at']) if r['done_at'] else None, 'deactivated': r['name'] == '账号已注销'} for r in assigns if r['is_done']]
                     my_assign = next((r for r in assigns if r['user_id'] == user['id']), None)
                     track['my_done'] = bool(my_assign and my_assign['is_done']) if my_assign else False
                     total = len(assigns)

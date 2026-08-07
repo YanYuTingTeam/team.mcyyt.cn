@@ -340,6 +340,7 @@ def handle(request):
                     r['can_delete'] = r['is_creator'] or ((user.get('level') or 0) >= _del_min_lv)
                     r['done_users'] = done_map.get(r['id'], [])
                     r['tags'] = tag_map.get(r['id'], [])
+                    r['creator_deactivated'] = (r.get('creator_name') == '账号已注销')
         return {"code": 0, "data": rows}
     finally:
         db.close()

@@ -8,8 +8,11 @@ function isBanned(u) {
     try { var b = new Date(u.banned_until); return b < new Date(); } catch(e) { return false; }
 }
 function isDeactivated(u) {
-    if (!u || !u.banned_until) return false;
-    try { var b = new Date(u.banned_until); return b > new Date(); } catch(e) { return false; }
+    if (!u) return false;
+    if (u.banned_until) {
+        try { var b = new Date(u.banned_until); return b > new Date(); } catch(e) { return false; }
+    }
+    return u.deactivated === true;
 }
 function avatarUrl(u) {
     if (isDeactivated(u)) return '/assets/normal.png';
@@ -458,7 +461,7 @@ function renderTodoPage() {
         }
         var desc = it.content ? '<div class="t-desc">' + esc(it.content) + '</div>' : '';
         var gTag = it.is_global ? '<span class="chip global-tag">全局</span>' : '';
-        var avaHtml = '<img class="t-creator-ava" src="' + avatarUrl({ id: it.creator_id, name: it.creator_name, avatar: it.creator_avatar }) + '" alt="">';
+        var avaHtml = '<img class="t-creator-ava" src="' + avatarUrl({ id: it.creator_id, name: it.creator_name, avatar: it.creator_avatar, deactivated: it.creator_deactivated }) + '" alt="">';
         var doneExtra = '';
         if (it.is_done && it.my_done_at) {
             doneExtra = ' <span class="t-done-time">· 你已于 ' + esc(it.my_done_at) + ' 完成</span>';
@@ -553,8 +556,8 @@ function renderTodoHome() {
             var updatedHtml = t.updated_at ? ' <span class="td-sep">|</span> <span class="td-time">最后修改于 ' + esc(t.updated_at) + '</span>' : '';
             var gTag = t.is_global ? '<span class="chip global-tag">全局</span>' : '';
             var creatorAva = t.creator_avatar
-                ? ('<img class="t-creator-ava" src="' + avatarUrl({id:t.creator_id,name:t.creator_name,avatar:t.creator_avatar}) + '" alt="">')
-                : ('<img class="t-creator-ava" src="' + avatarUrl({id:t.creator_id,name:t.creator_name}) + '" alt="">');
+                ? ('<img class="t-creator-ava" src="' + avatarUrl({id:t.creator_id,name:t.creator_name,avatar:t.creator_avatar,deactivated:t.creator_deactivated}) + '" alt="">')
+                : ('<img class="t-creator-ava" src="' + avatarUrl({id:t.creator_id,name:t.creator_name,deactivated:t.creator_deactivated}) + '" alt="">');
             var creatorLine = creatorAva + ' <span class="t-creator-name" style="color:#ccc">' + esc(t.creator_name) + '</span>';
             var html = '<div class="tracked-todo">' +
                 '<div class="tracked-head">' +
@@ -720,7 +723,7 @@ function renderTodoDetail(d) {
     var delBtn = t.can_delete ? '<button class="td-edit-btn danger" onclick="deleteTodo(' + t.id + ',\'' + escAttr(t.title) + '\')" title="删除待办"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M10 11v6M14 11v6"/></g></svg></button>' : '';
     var headRight = '<div style="display:flex;gap:8px;align-items:center;flex-shrink:0">' + editBtn + trackBtn + delBtn + '</div>';
     var head = '<div class="td-head"><div class="td-head-left">' + icon + '<span class="td-title">#' + esc(t.id) + ' · ' + esc(t.title) + '</span>' + gTag + '</div>' + headRight + '</div>';
-    var creator = { id: t.creator_id, name: t.creator_name, avatar: t.creator_avatar };
+    var creator = { id: t.creator_id, name: t.creator_name, avatar: t.creator_avatar, deactivated: t.creator_deactivated };
     var updatedHtml = t.updated_at ? '<span class="td-sep">|</span><span class="td-time">最后修改于 ' + esc(t.updated_at) + '</span>' : '';
     var creatorLine = '<div class="td-meta">' +
         '<img class="td-ava" src="' + avatarUrl(creator) + '" alt="">' +
