@@ -125,10 +125,10 @@ def proxy_panel(request, subpath):
     if not user:
         if reason == 'kick':
             return _deny("该账号已被踢出，数据已清除")
-        return _deny("")
+        return _deny("认证失败")
     host_prefix = (request.host or '').split(':')[0].split('.')[0]
     if not user.get('panel_host') or host_prefix != user['panel_host']:
-        return _deny("")
+        return _deny("认证失败")
     new_sid = secrets.token_hex(16)
     PANEL_SESSIONS[new_sid] = time.time() + SESSION_TTL
     cookie = 'mcsm_sid=' + new_sid + '; Path=/; Max-Age=' + str(SESSION_TTL) + '; HttpOnly; SameSite=Lax; Secure'

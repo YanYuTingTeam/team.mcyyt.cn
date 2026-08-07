@@ -1268,7 +1268,7 @@ function renderOvInvites(invites) {
             : (disabled ? '<span class="chip no" style="background:rgba(239,87,119,.1);border-color:rgba(239,87,119,.4);color:#ef5777">失效</span>' : '<span class="chip ok">未使用</span>');
         var top = '<div class="iv-top"><span class="iv-code">#' + esc(iv.code) + '</span>' + statusChip + '</div>';
         var mid = used
-        ? '<div class="iv-user"><img src="' + avatarUrl({name: iv.used_name, avatar: iv.used_avatar}) + '" alt=""><div><div class="iv-un">' + esc(iv.used_name) + '</div><div class="iv-ue">' + esc(iv.used_email) + '</div></div></div>' +
+        ? '<div class="iv-user"><img src="' + avatarUrl({name: iv.used_name, avatar: iv.used_avatar}) + '" alt=""><div><div class="iv-un">' + esc(iv.used_name) + '</div></div></div>' +
           '<div class="iv-date">创建日期: ' + esc(iv.created_at) + '<br>使用日期: ' + esc(iv.used_at) + '</div>'
         : '<div class="iv-date">创建日期: ' + esc(iv.created_at) + '</div>' +
           '<div style="margin-top:10px"><button class="act-btn" style="width:100%;justify-content:center" onclick="copyText(\'' + esc(iv.code) + '\', this)">' + '复制邀请码</button></div>';
@@ -1832,7 +1832,6 @@ function openSkillMembers(sName) {
             return '<div class="member-bar">' +
                 '<img class="mb-ava" src="' + avatarUrl(u) + '" alt=""><div class="mb-main">' +
                 '<div class="mb-name">' + esc(u.name) + ' ' + lvlBadge(u.level || 0) + '</div>' +
-                '<div class="mb-mail">' + esc(u.email) + '</div>' +
                 '<div class="mb-skill">' + renderSkillHtml(u.skill) + '</div></div>' +
                 '<button class="act-btn" onclick="openMemberDetail(' + u.id + ')">详情</button></div>';
         }).join('');
@@ -1971,7 +1970,6 @@ function renderTeamMembers(users) {
             '<img class="mb-ava" src="' + avatarUrl(u) + '" alt="">' +
             '<div class="mb-main">' +
             '<div class="mb-name">' + esc(dn) + ' ' + lvlBadge(u.level || 0) + '</div>' +
-            '<div class="mb-mail">' + esc(u.email) + '</div>' +
             '<div class="mb-skill">' + skillTxt + '</div>' +
             '</div>' +
             '<button class="act-btn" onclick="openMemberDetail(' + u.id + ')">编辑</button>' +
@@ -1996,7 +1994,7 @@ function renderTeamInvites(invites) {
         if (!used) actions.push('<button class="act-btn" style="flex:1;justify-content:center" onclick="copyText(\'' + esc(iv.code) + '\', this)">复制邀请码</button>');
         if (!used && !disabled) actions.push('<button class="act-btn danger" style="flex:1;justify-content:center" onclick="btnRun(this, function(){ return disableInvite(\'' + escAttr(iv.code) + '\') })">标记失效</button>');
         var mid = used
-            ? '<div class="iv-user"><img src="' + avatarUrl({name: iv.used_name, avatar: iv.used_avatar}) + '" alt=""><div><div class="iv-un">' + esc(iv.used_name || '--') + '</div><div class="iv-ue">' + esc(iv.used_email || '--') + '</div></div></div>' +
+            ? '<div class="iv-user"><img src="' + avatarUrl({name: iv.used_name, avatar: iv.used_avatar}) + '" alt=""><div><div class="iv-un">' + esc(iv.used_name || '--') + '</div></div></div>' +
               '<div class="iv-date">' + creator + '<br>创建: ' + esc(iv.created_at) + '<br>使用: ' + esc(iv.used_at) + '</div>'
             : '<div class="iv-date">' + creator + '<br>创建: ' + esc(iv.created_at) + '</div>' +
               (actions.length ? ('<div style="margin-top:10px;display:flex;gap:8px">' + actions.join('') + '</div>') : '');

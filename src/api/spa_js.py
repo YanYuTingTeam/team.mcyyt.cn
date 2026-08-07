@@ -16,5 +16,7 @@ def handle(request):
     if kick:
         with open(_KICK_PAGE, 'r', encoding='utf-8') as f:
             return Response(f.read(), mimetype='text/html')
-    with open(_BANNED_PAGE, 'r', encoding='utf-8') as f:
-        return Response(f.read(), mimetype='text/html')
+    # 返回 JS 内容类型
+    js_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'assets', 'app.js')
+    with open(js_path, 'r', encoding='utf-8') as f:
+        return Response(f.read(), mimetype='text/javascript; charset=utf-8')

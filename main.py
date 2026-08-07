@@ -62,6 +62,12 @@ def security_guard():
                 return json_response("401 auth required", 401)
             if path != '/':
                 return redirect('/')
+    else:
+        # 已登录用户：仅对 send_email_code 检查 email ban（邮件滥用防护）
+        if path == '/api/send_email_code':
+            banned, btype, exp, _ = check_ban(request, 'email')
+            if banned:
+                return json_response({"code": 429, "message": "请求过于频繁, 请稍后再试"}, 429)
 
 @app.after_request
 def add_security_headers(response):
@@ -79,6 +85,7 @@ def add_security_headers(response):
     response.headers['X-Frame-Options'] = 'SAMEORIGIN'
     response.headers['X-Content-Type-Options'] = 'nosniff'
     response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate'
     response.headers['Server'] = 'yyt'
     return response
 

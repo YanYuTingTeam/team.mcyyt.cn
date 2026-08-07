@@ -13,7 +13,9 @@ def _list(db):
 
 
 def handle(request):
-    check_login(request)
+    user = check_login(request)
+    if not user:
+        return {"code": 401, "message": "未登录"}
     db = get_db()
     try:
         return {"code": 0, "message": "ok", "data": _list(db)}

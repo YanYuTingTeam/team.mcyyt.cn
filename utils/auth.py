@@ -67,8 +67,10 @@ def check_login(request):
                 (token,)
             )
             user = cur.fetchone()
-            if user and user.get('name') == '账号已注销':
-                return None
+            if user:
+                if user.get('name') == '账号已注销':
+                    user['_kick_reason'] = True
+                    return None
             return user
     finally:
         db.close()
