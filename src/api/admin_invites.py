@@ -48,8 +48,8 @@ def handle(request):
                 "cu.id AS creator_id, cu.name AS creator_name, cu.avatar AS creator_avatar, "
                 "uu.name AS used_name, uu.email AS used_email, uu.avatar AS used_avatar "
                 "FROM yyt_invite i "
-                "LEFT JOIN yyt_user cu ON i.created_by = cu.id "
-                "LEFT JOIN yyt_user uu ON i.used_by = uu.id "
+                "LEFT JOIN yyt_user cu ON i.created_by = cu.id AND cu.status != 3 "
+                "LEFT JOIN yyt_user uu ON i.used_by = uu.id AND uu.status != 3 "
                 "ORDER BY i.created_at DESC"
             )
             rows = cur.fetchall()

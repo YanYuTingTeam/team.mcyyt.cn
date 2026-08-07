@@ -17,7 +17,7 @@ def handle(request):
         with db.cursor() as cur:
             cur.execute(
                 "SELECT l.id, l.user_id, l.ip, l.path, l.created_at, u.name AS user_name "
-                "FROM yyt_api_log l LEFT JOIN yyt_user u ON l.user_id = u.id "
+                "FROM yyt_api_log l LEFT JOIN yyt_user u ON l.user_id = u.id AND u.status != 3 "
                 "ORDER BY l.id DESC LIMIT %s",
                 (limit,)
             )

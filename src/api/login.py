@@ -48,6 +48,8 @@ def handle(request):
                 return {"code": 429, "message": "badly request"}
             if not ok:
                 return {"code": 401, "message": f"邮箱或密码错误"}
+            if user.get('status') == 3:
+                return {"code": 403, "message": "账号已注销"}
             # 检测异地异设备
             cur_ip, cur_ua = get_client_info(request)
             cur_seg = ip_segment(cur_ip)

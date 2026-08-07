@@ -107,7 +107,7 @@ def add_user_notice(user_id, title, content=None):
         try:
             cur2 = None
             with db.cursor() as cur2:
-                cur2.execute("SELECT email, name FROM yyt_user WHERE id = %s AND email IS NOT NULL", (int(user_id),))
+                cur2.execute("SELECT email, name FROM yyt_user WHERE id = %s AND email IS NOT NULL AND status != 3", (int(user_id),))
                 u = cur2.fetchone()
             if u and u.get('email'):
                 vars = {
@@ -201,7 +201,7 @@ def notify_new_todo(todo_id, creator_id, assignee_ids):
             if not t:
                 return
             cur.execute(
-                "SELECT id, name, email FROM yyt_user WHERE id IN (" + ','.join(['%s']*len(assignee_ids)) + ")",
+                "SELECT id, name, email FROM yyt_user WHERE id IN (" + ','.join(['%s']*len(assignee_ids)) + ") AND status != 3",
                 list(assignee_ids)
             )
             users = cur.fetchall()

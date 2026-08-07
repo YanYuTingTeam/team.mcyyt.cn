@@ -39,10 +39,10 @@ def _load_kicked_users():
         try:
             with db.cursor() as cur:
                 cur.execute(
-                    "SELECT id, name FROM yyt_user WHERE name = '账号已注销' AND apikey IS NULL AND banned_until IS NOT NULL"
+                    "SELECT id FROM yyt_user WHERE status = 3"
                 )
                 rows = cur.fetchall()
-                _kick_users = set(int(r['id']) for r in rows if r.get('name') == '账号已注销')
+                _kick_users = set(int(r['id']) for r in rows)
         finally:
             db.close()
     except Exception:
@@ -61,14 +61,14 @@ def check_login(request):
     try:
         with db.cursor() as cur:
             cur.execute(
-                "SELECT u.id, u.email, u.name, u.role, u.level, u.skill, u.apikey, u.panel_host, u.avatar, u.bio, u.banned_until, u.created_at "
+                "SELECT u.id, u.email, u.name, u.role, u.level, u.skill, u.apikey, u.panel_host, u.avatar, u.bio, u.banned_until, u.status, u.created_at "
                 "FROM yyt_session s JOIN yyt_user u ON s.user_id = u.id "
                 "WHERE s.token = %s AND s.expire_time > NOW()",
                 (token,)
             )
             user = cur.fetchone()
             if user:
-                if user.get('name') == '账号已注销':
+                if user.get('status') == 3:
                     user['_kick_reason'] = True
                     return None
             return user
@@ -117,7 +117,7 @@ def verify_sign(request, debug=False):
     try:
         with db.cursor() as cur:
             cur.execute(
-                "SELECT id, email, name, role, level, skill, apikey, panel_host, avatar, bio, created_at FROM yyt_user WHERE apikey = %s",
+                "SELECT id, email, name, role, level, skill, apikey, panel_host, avatar, bio, status, created_at FROM yyt_user WHERE apikey = %s",
                 (apikey,)
             )
             row = cur.fetchone()
@@ -128,7 +128,7 @@ def verify_sign(request, debug=False):
         if debug:
             print(f'[verify_sign FAIL(db-no-user)] host={request.host} {reason}', flush=True)
         return None, '该APIKey未在系统中登记'
-    if row.get('name') == '账号已注销':
+    if row.get('status') == 3:
         return None, 'kick'
     if (row.get('level') or 0) < 1:
         reason = f'用户等级不足: level={row.get("level")} user={row.get("name")}'

@@ -11,12 +11,12 @@ def handle(request):
         with db.cursor() as cur:
             if q:
                 cur.execute(
-                    "SELECT id, name, avatar FROM yyt_user WHERE name LIKE %s AND (banned_until IS NULL OR banned_until < NOW()) ORDER BY name ASC LIMIT 8",
+                    "SELECT id, name, avatar FROM yyt_user WHERE name LIKE %s AND status = 1 ORDER BY name ASC LIMIT 8",
                     ('%' + q + '%',)
                 )
             else:
                 cur.execute(
-                    "SELECT id, name, avatar FROM yyt_user WHERE (banned_until IS NULL OR banned_until < NOW()) ORDER BY name ASC LIMIT 8"
+                    "SELECT id, name, avatar FROM yyt_user WHERE status = 1 ORDER BY name ASC LIMIT 8"
                 )
             rows = cur.fetchall()
         return {"code": 0, "data": rows}

@@ -39,7 +39,7 @@ def handle(request):
             calls = {k: int(v or 0) for k, v in calls.items()}
             cur.execute(
                 "SELECT i.code, i.created_at, i.used_at, i.disabled, u.name AS used_name, u.email AS used_email, u.avatar AS used_avatar "
-                "FROM yyt_invite i LEFT JOIN yyt_user u ON i.used_by = u.id "
+                "FROM yyt_invite i LEFT JOIN yyt_user u ON i.used_by = u.id AND u.status != 3 "
                 "WHERE i.created_by = %s ORDER BY i.created_at DESC",
                 (user['id'],)
             )

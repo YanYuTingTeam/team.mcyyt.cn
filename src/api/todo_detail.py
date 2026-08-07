@@ -15,7 +15,7 @@ def handle(request):
             cur.execute(
                 "SELECT t.id, t.title, t.link, t.content, t.created_at, t.updated_at, t.is_global, "
                 "t.all_done_at, "
-                "u.id AS creator_id, u.name AS creator_name, u.avatar AS creator_avatar "
+                "u.id AS creator_id, u.name AS creator_name, u.avatar AS creator_avatar, u.status AS creator_status "
                 "FROM yyt_todo t JOIN yyt_user u ON t.creator_id = u.id "
                 "WHERE t.id = %s AND t.deleted_at IS NULL",
                 (tid,)
@@ -25,7 +25,7 @@ def handle(request):
                 return {"code": 404, "message": "待办不存在"}
             todo['is_creator'] = (todo['creator_id'] == user['id'])
             todo['all_done'] = bool(todo.get('all_done_at'))
-            todo['creator_deactivated'] = (todo.get('creator_name') == '账号已注销')
+            todo['creator_deactivated'] = (todo.get('creator_status') == 3)
             cur.execute("SELECT min_level FROM yyt_page_access WHERE page_key = 'delete_todo'")
             pa = cur.fetchone()
             min_del_lv = pa['min_level'] if pa else 4
@@ -46,14 +46,14 @@ def handle(request):
                 )
                 todo['is_assigned'] = bool(cur.fetchone())
             cur.execute(
-                "SELECT a.user_id, a.is_done, a.done_at, u.name, u.avatar "
+                "SELECT a.user_id, a.is_done, a.done_at, u.name, u.avatar, u.status AS user_status "
                 "FROM yyt_todo_assign a JOIN yyt_user u ON a.user_id = u.id "
                 "WHERE a.todo_id = %s ORDER BY a.is_done DESC, a.done_at ASC, u.name ASC",
                 (tid,)
             )
             assigns = cur.fetchall()
-        assignees = [{"id": r["user_id"], "name": r["name"], "avatar": r["avatar"], "deactivated": r["name"] == "账号已注销"} for r in assigns]
-        done_users = [{"id": r["user_id"], "name": r["name"], "avatar": r["avatar"], "done_at": str(r["done_at"]) if r["done_at"] else None, "deactivated": r["name"] == "账号已注销"} for r in assigns if r["is_done"]]
+        assignees = [{"id": r["user_id"], "name": r["name"], "avatar": r["avatar"], "deactivated": r["user_status"] == 3} for r in assigns]
+        done_users = [{"id": r["user_id"], "name": r["name"], "avatar": r["avatar"], "done_at": str(r["done_at"]) if r["done_at"] else None, "deactivated": r["user_status"] == 3} for r in assigns if r["is_done"]]
         my_assign = next((r for r in assigns if r["user_id"] == user['id']), None)
         my_done = bool(my_assign and my_assign["is_done"]) if my_assign else False
         my_done_at = str(my_assign["done_at"]) if my_assign and my_assign["done_at"] else None

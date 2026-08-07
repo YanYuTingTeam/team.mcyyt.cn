@@ -27,7 +27,7 @@ def handle(request):
                     cur.execute("INSERT INTO yyt_notice (user_id, title, content) VALUES (%s, %s, %s)", (uid, title, content or None))
                     ids_to_notify.append(uid)
                 else:
-                    cur.execute("SELECT id, email, name FROM yyt_user WHERE email IS NOT NULL")
+                    cur.execute("SELECT id, email, name FROM yyt_user WHERE email IS NOT NULL AND status != 3")
                     users = cur.fetchall()
                     for u in users:
                         cur.execute(
@@ -42,7 +42,7 @@ def handle(request):
                         if ids_to_notify:
                             ph = ','.join(['%s'] * len(ids_to_notify))
                             cur2.execute(
-                                f"SELECT id, email, name FROM yyt_user WHERE id IN ({ph})",
+                                f"SELECT id, email, name FROM yyt_user WHERE id IN ({ph}) AND status != 3",
                                 ids_to_notify
                             )
                         else:

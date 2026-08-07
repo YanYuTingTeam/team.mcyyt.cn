@@ -12,6 +12,7 @@ function isDeactivated(u) {
     if (u.banned_until) {
         try { var b = new Date(u.banned_until); return b > new Date(); } catch(e) { return false; }
     }
+    if (u.status === 3) return true;
     return u.deactivated === true;
 }
 function avatarUrl(u) {
@@ -1782,7 +1783,7 @@ async function loadTeam() {
         });
         return;
     }
-    ALL_USERS = (ru.data || []).filter(function(u) { return !isBanned(u) && !isDeactivated(u); });
+    ALL_USERS = ru.data || [];
     var ret = await Promise.all([
         getJson('/api/admin_invites'),
         getJson('/api/admin_stats'),

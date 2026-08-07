@@ -1,15 +1,22 @@
 from utils.auth import check_login
 from utils.db import get_db
 
+STATUS_ACTIVE = 1
+STATUS_BANNED = 2
+STATUS_KICKED = 3
+
 def _one(cur, sql, args=None):
     cur.execute(sql, args or ())
     r = cur.fetchone()
     return int((r or {}).get('c') or 0)
 
+def _is_kicked(u):
+    return u and u.get('status') == STATUS_KICKED
+
 def _detail(db, uid):
     with db.cursor() as cur:
         cur.execute(
-            "SELECT id, email, name, role, level, skill, panel_host, avatar, bio, created_at, banned_until "
+            "SELECT id, email, name, role, level, skill, panel_host, avatar, bio, created_at, banned_until, status "
             "FROM yyt_user WHERE id = %s", (uid,)
         )
         user = cur.fetchone()
@@ -25,7 +32,7 @@ def _detail(db, uid):
         invites_created = cur.execute(
             "SELECT i.code, i.created_at, i.used_at, i.disabled, "
             "uu.name AS used_name, uu.email AS used_email "
-            "FROM yyt_invite i LEFT JOIN yyt_user uu ON i.used_by = uu.id "
+            "FROM yyt_invite i LEFT JOIN yyt_user uu ON i.used_by = uu.id AND uu.status != 3 "
             "WHERE i.created_by = %s ORDER BY i.created_at DESC",
             (uid,)
         )
@@ -33,7 +40,7 @@ def _detail(db, uid):
         cur.execute(
             "SELECT i.code, i.created_at, i.used_at, "
             "cu.name AS creator_name "
-            "FROM yyt_invite i LEFT JOIN yyt_user cu ON i.created_by = cu.id "
+            "FROM yyt_invite i LEFT JOIN yyt_user cu ON i.created_by = cu.id AND cu.status != 3 "
             "WHERE i.used_by = %s LIMIT 1", (uid,)
         )
         invite_used = cur.fetchone()
@@ -101,16 +108,16 @@ def handle(request):
                 if 'ban' in data:
                     days = int(data.get('days') or 0)
                     if days <= 0:
-                        cur.execute("UPDATE yyt_user SET banned_until = NULL WHERE id = %s", (uid,))
+                        cur.execute("UPDATE yyt_user SET banned_until = NULL, status = %s WHERE id = %s", (STATUS_ACTIVE, uid))
                     elif days >= 1000:
-                        cur.execute("UPDATE yyt_user SET banned_until = '9999-12-31 23:59:59' WHERE id = %s", (uid,))
+                        cur.execute("UPDATE yyt_user SET banned_until = '9999-12-31 23:59:59', status = %s WHERE id = %s", (STATUS_BANNED, uid))
                     else:
                         cur.execute(
-                            "UPDATE yyt_user SET banned_until = DATE_ADD(NOW(), INTERVAL %s DAY) WHERE id = %s",
-                            (days, uid)
+                            "UPDATE yyt_user SET banned_until = DATE_ADD(NOW(), INTERVAL %s DAY), status = %s WHERE id = %s",
+                            (days, STATUS_BANNED, uid)
                         )
                 if 'kick' in data:
-                    cur.execute("UPDATE yyt_user SET name='账号已注销', bio=NULL, skill=NULL, panel_host=NULL, avatar=NULL, apikey=NULL, banned_until='9999-12-31 23:59:59' WHERE id=%s", (uid,))
+                    cur.execute("UPDATE yyt_user SET name='账号已注销', bio=NULL, skill=NULL, panel_host=NULL, avatar=NULL, apikey=NULL, banned_until='9999-12-31 23:59:59', status=%s WHERE id=%s", (STATUS_KICKED, uid))
                     cur.execute("DELETE FROM yyt_session WHERE user_id=%s", (uid,))
             db.commit()
             return {"code": 0, "message": "ok"}
@@ -118,13 +125,14 @@ def handle(request):
         detail_id = args.get('id')
         if detail_id:
             d = _detail(db, detail_id)
-            if not d:
+            if not d or _is_kicked(d['user']):
                 return {"code": 404, "message": "用户不存在"}
             return {"code": 0, "data": d}
         with db.cursor() as cur:
             cur.execute(
-                "SELECT id, email, name, role, level, skill, panel_host, avatar, bio, created_at "
-                "FROM yyt_user ORDER BY level DESC, id ASC"
+                "SELECT id, email, name, role, level, skill, panel_host, avatar, bio, created_at, status "
+                "FROM yyt_user WHERE status != %s ORDER BY level DESC, id ASC",
+                (STATUS_KICKED,)
             )
             rows = cur.fetchall()
         return {"code": 0, "data": rows}

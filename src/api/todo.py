@@ -280,9 +280,9 @@ def handle(request):
                 "SELECT t.id, t.title, t.link, t.content, t.created_at, t.updated_at, t.is_global, t.creator_id, "
                 "t.all_done_at, "
                 "COALESCE(a.is_done, 0) AS is_done, a.done_at AS my_done_at, "
-                "(a.user_id IS NOT NULL) AS is_assigned, u.name AS creator_name, u.avatar AS creator_avatar "
+                "(a.user_id IS NOT NULL) AS is_assigned, u.name AS creator_name, u.avatar AS creator_avatar, u.status AS creator_status "
                 "FROM yyt_todo t "
-                "JOIN yyt_user u ON t.creator_id = u.id "
+                "JOIN yyt_user u ON t.creator_id = u.id AND u.status != 3 "
                 "LEFT JOIN yyt_todo_assign a ON a.todo_id = t.id AND a.user_id = %s "
                 "WHERE t.deleted_at IS NULL AND 1 = 1"
             )
@@ -312,7 +312,7 @@ def handle(request):
                 placeholders = ','.join(['%s'] * len(ids))
                 cur.execute(
                     "SELECT ta.todo_id, u.id, u.name, u.avatar "
-                    "FROM yyt_todo_assign ta JOIN yyt_user u ON ta.user_id = u.id "
+                    "FROM yyt_todo_assign ta JOIN yyt_user u ON ta.user_id = u.id AND u.status != 3 "
                     "WHERE ta.todo_id IN (" + placeholders + ") AND ta.is_done = 1 ORDER BY ta.done_at ASC",
                     ids
                 )
@@ -340,7 +340,7 @@ def handle(request):
                     r['can_delete'] = r['is_creator'] or ((user.get('level') or 0) >= _del_min_lv)
                     r['done_users'] = done_map.get(r['id'], [])
                     r['tags'] = tag_map.get(r['id'], [])
-                    r['creator_deactivated'] = (r.get('creator_name') == '账号已注销')
+                    r['creator_deactivated'] = (r.get('creator_status') == 3)
         return {"code": 0, "data": rows}
     finally:
         db.close()
