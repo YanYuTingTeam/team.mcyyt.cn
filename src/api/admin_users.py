@@ -108,7 +108,7 @@ def handle(request):
                 if 'ban' in data:
                     days = int(data.get('days') or 0)
                     if days <= 0:
-                        cur.execute("UPDATE yyt_user SET banned_until = NULL, status = %s WHERE id = %s", (STATUS_ACTIVE, uid))
+                        cur.execute("UPDATE yyt_user SET status = %s WHERE id = %s", (STATUS_ACTIVE, uid))
                     elif days >= 1000:
                         cur.execute("UPDATE yyt_user SET banned_until = '9999-12-31 23:59:59', status = %s WHERE id = %s", (STATUS_BANNED, uid))
                     else:
@@ -117,7 +117,7 @@ def handle(request):
                             (days, STATUS_BANNED, uid)
                         )
                 if 'kick' in data:
-                    cur.execute("UPDATE yyt_user SET name='账号已注销', bio=NULL, skill=NULL, panel_host=NULL, avatar=NULL, apikey=NULL, banned_until='9999-12-31 23:59:59', status=%s WHERE id=%s", (STATUS_KICKED, uid))
+                    cur.execute("UPDATE yyt_user SET panel_host=NULL, apikey=NULL, status=%s WHERE id=%s", (STATUS_KICKED, uid))
                     cur.execute("DELETE FROM yyt_session WHERE user_id=%s", (uid,))
             db.commit()
             return {"code": 0, "message": "ok"}
