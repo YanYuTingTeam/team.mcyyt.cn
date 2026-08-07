@@ -120,6 +120,8 @@ def handle(request):
             d = _detail(db, detail_id)
             if not d:
                 return {"code": 404, "message": "用户不存在"}
+            if d['user'] and d['user'].get('name') == '账号已注销':
+                return {"code": 404, "message": "用户不存在"}
             return {"code": 0, "data": d}
         with db.cursor() as cur:
             cur.execute(

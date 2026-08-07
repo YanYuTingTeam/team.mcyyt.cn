@@ -1782,7 +1782,7 @@ async function loadTeam() {
         });
         return;
     }
-    ALL_USERS = (ru.data || []).filter(function(u) { return !isBanned(u) && !isDeactivated(u); });
+    ALL_USERS = ru.data || [];
     var ret = await Promise.all([
         getJson('/api/admin_invites'),
         getJson('/api/admin_stats'),
