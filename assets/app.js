@@ -2050,7 +2050,7 @@ async function openMemberDetail(uid) {
             '<div class="ma-name">' + esc(displayName(u)) + ' ' + lvlBadge(u.level || 0) + '</div>' +
             '<div class="ma-mail">' + esc(u.email) + '</div></div></div>';
         var infoHtml = '<div class="md-section"><div class="md-label">基础信息</div>' +
-            '<div class="md-row"><div class="md-k">昵称</div><div class="md-v">' + esc(displayName(u)) + '</div></div>' +
+            '<div class="md-row"><div class="md-k">昵称</div><div class="md-v"><input id="mm_name" value="' + esc(displayName(u)) + '" readonly style="opacity:0.6"></div></div>' +
             '<div class="md-row"><div class="md-k">邮箱</div><div class="md-v">' + esc(u.email) + '</div></div>' +
             '<div class="md-row"><div class="md-k">账号ID</div><div class="md-v">' + esc(u.id) + '</div></div>' +
             '<div class="md-row"><div class="md-k">核心能力</div><div class="md-v"><div class="picker-wrap"><div class="picker" id="mmSkillPicker" onclick="document.getElementById(\'mmSkillInput\').focus()"><input id="mmSkillInput" placeholder="选择核心能力" autocomplete="off" onfocus="skillPickerSearch(this.value,\'mm\')" oninput="skillPickerSearch(this.value,\'mm\')" onkeydown="skillPickerKey(event,\'mm\')"></div><div class="picker-drop hide" id="mmSkillDrop"></div></div></div></div>' +
@@ -2137,12 +2137,21 @@ async function openMemberDetail(uid) {
                     return '<div class="ml"><span class="mp">' + esc(l.path || '--') + '</span><span class="mi">' + esc(l.ip || '') + '</span><span class="mt">' + esc(l.created_at || '--') + '</span></div>';
                 }).join('') + '</div></div>';
         }
+        var banStatusHtml = '';
+        if (isDeactivated(u)) {
+            var bannedUntil = u.banned_until || '--';
+            try { var bd = new Date(bannedUntil); var isPermanent = bd > new Date('2999-12-31'); } catch(e) { var isPermanent = true; }
+            banStatusHtml = '<div class="md-section" style="margin-top:14px"><div class="md-label" style="color:#ef5777">' + (isPermanent ? '永久封禁' : '封禁中') + '</div>' +
+                '<div class="md-row"><div class="md-k">封禁截止</div><div class="md-v" style="color:#ef5777">' + esc(bannedUntil) + '</div></div></div>';
+        }
         var foot = '<button class="act-btn" onclick="closeModal()">关闭</button>' +
             (isDeactivated(u) ? '' : '<button class="add-todo-btn" onclick="btnRun(this, function(btn){ return mmSave(' + u.id + ',btn); })">保存修改</button>') +
             '<button class="act-btn" style="background:#ef5777" onclick="btnRun(this, function(btn){ return mmBanUser(' + u.id + ',btn); })">' + (isDeactivated(u) ? '解除封禁' : '封禁账号') + '</button>' +
             '<button class="act-btn" style="background:#748ffc" onclick="btnRun(this, function(btn){ return mmKickUser(' + u.id + ',btn); })">踢出团队</button>';
         openModal('成员详情 · ' + esc(displayName(u)), avatarHtml + infoHtml + statsHtml + sesHtml + invHtml + pgsHtml + logsHtml + banStatusHtml, foot);
-        setTimeout(function() { initSkillPicker('mm', u.skill || ''); }, 0);
+        setTimeout(function() {
+            try { initSkillPicker('mm', u.skill || ''); } catch(e) { console.error('initSkillPicker error:', e); }
+        }, 50);
     } catch (e) {
         closeModal();
     }
@@ -2243,15 +2252,16 @@ function getSkillPickerValues(ctx) {
     return c ? c.skills.map(function(x) { return x.name; }).join(',') : '';
 }
 async function mmSave(uid, btn) {
+    var nameInput = document.getElementById('mm_name');
     var body = {
         id: uid,
-        name: document.getElementById('mm_name').value.trim(),
+        name: nameInput ? nameInput.value.trim() : '',
         skill: getSkillPickerValues('mm'),
         level: parseInt(document.getElementById('mm_level').value) || 0,
         panel_host: document.getElementById('mm_host').value.trim()
     };
     if (!body.name) {
-        markErr(document.getElementById('mm_name'), '昵称不能为空');
+        if (nameInput) markErr(nameInput, '昵称不能为空');
         return;
     }
     var ret = await postJson('/api/admin_users', body);
