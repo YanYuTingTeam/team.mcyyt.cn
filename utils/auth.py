@@ -6,6 +6,7 @@ from utils.db import get_db
 from config import MCSM_CONFIG
 
 _avatar_col_ensured = False
+_status_col_ensured = False
 _kick_users = set()
 
 def _ensure_avatar_col():
@@ -32,6 +33,26 @@ def _ensure_avatar_col():
         pass
     _avatar_col_ensured = True
 
+def _ensure_status_col():
+    global _status_col_ensured
+    if _status_col_ensured:
+        return
+    try:
+        db = get_db()
+        try:
+            with db.cursor() as cur:
+                cur.execute("SHOW COLUMNS FROM yyt_user LIKE 'status'")
+                if not cur.fetchone():
+                    cur.execute("ALTER TABLE yyt_user ADD COLUMN status TINYINT NOT NULL DEFAULT 1 COMMENT '1=正常 2=封禁 3=已注销' AFTER track_todo_id")
+                    cur.execute("UPDATE yyt_user SET status = 2 WHERE banned_until IS NOT NULL AND (banned_until > NOW() OR banned_until = '9999-12-31 23:59:59')")
+                    cur.execute("UPDATE yyt_user SET status = 3 WHERE name = '账号已注销'")
+                db.commit()
+        finally:
+            db.close()
+    except Exception:
+        pass
+    _status_col_ensured = True
+
 def _load_kicked_users():
     global _kick_users
     try:
@@ -57,6 +78,7 @@ def check_login(request):
     if not token:
         return None
     _ensure_avatar_col()
+    _ensure_status_col()
     db = get_db()
     try:
         with db.cursor() as cur:
@@ -113,6 +135,7 @@ def verify_sign(request, debug=False):
         if debug:
             print('[verify_sign FAIL(sign-mismatch)] ' + reason, flush=True)
         return None, '签名校验失败'
+    _ensure_status_col()
     db = get_db()
     try:
         with db.cursor() as cur:
@@ -168,3 +191,6 @@ def login_success(db, user_id, ip, ua, token):
 
 def logout_by_token(db, token):
     db.execute("DELETE FROM yyt_session WHERE token = %s", (token,))
+
+def make_token():
+    return secrets.token_hex(32)
