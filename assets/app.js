@@ -121,9 +121,9 @@ async function postJson(url, body) {
     });
     return res.json();
 }
-var PAGE_PATH = { home: '/', overview: '/overview', todo: '/todos', notice: '/notice', project: '/projects', apis: '/apis', logs: '/logs', mcsm: '/mcsmanager', team: '/team', addtodo: '/todos/add', tododetail: '/todos', settings: '/settings' };
+var PAGE_PATH = { home: '/', overview: '/overview', todo: '/todos', notice: '/notice', project: '/projects', apis: '/apis', logs: '/logs', mcsm: '/mcsmanager', team: '/team', addtodo: '/todos/add', tododetail: '/todos', settings: '/settings', datatools: '/datatools' };
 var NAV_OF = { home: 'home', overview: 'overview', todo: 'todo', notice: 'notice', project: 'project', apis: 'apis', logs: 'logs', mcsm: 'mcsm', team: 'team', addtodo: 'todo', tododetail: 'todo', settings: 'settings', datatools: 'datatools' };
-var PAGE_LOADER = { home: loadOverview, overview: loadOverview, todo: loadTodo, notice: loadNotice, project: loadProject, apis: loadApis, logs: loadLogs, mcsm: loadMcsm, team: loadTeam, addtodo: resetAddTodo, tododetail: null, settings: loadSettings };
+var PAGE_LOADER = { home: loadOverview, overview: loadOverview, todo: loadTodo, notice: loadNotice, project: loadProject, apis: loadApis, logs: loadLogs, mcsm: loadMcsm, team: loadTeam, addtodo: resetAddTodo, tododetail: null, settings: loadSettings, datatools: loadDataTools };
 var SPIN_SVG = '<svg xmlns="http://www.w3.org/2000/svg" class="spin" style="display:inline-block;width:1em;height:1em;vertical-align:-.125em" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3a9 9 0 1 0 9 9"/></svg>';
 var LEVEL_NAME = { 0: '待定', 1: '志愿者 | 初级', 2: '志愿者 | 中级', 3: '志愿者 | 高级', 4: '管理员', 5: '服主' };
 var LEVEL_COLOR = { 0: '#888', 1: '#4caf7d', 2: '#4dabf7', 3: '#cc5de8', 4: '#f59f00', 5: '#ef5777' };
