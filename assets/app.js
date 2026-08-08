@@ -2710,6 +2710,7 @@ async function submitProject() {
         if (start === 'logs') jobs.push(loadLogs());
         if (start === 'mcsm') jobs.push(loadMcsm());
         if (start === 'team') jobs.push(loadTeam());
+        if (start === 'datatools') jobs.push(loadDataTools());
         await Promise.all(jobs);
         applyNavFilter();
         if (!canAccess(start)) {
@@ -2723,8 +2724,6 @@ async function submitProject() {
     }
     var m = location.pathname.match(/^\/todos\/(\d+)$/);
     if (m) { await loadTodoDetail(m[1]); showPage('tododetail'); }
-    if (location.pathname === '/logs') { showPage('logs'); loadLogs(); }
-    if (location.pathname === '/datatools') { showPage('datatools'); loadDataTools(); }
     requestNotifyPermission();
     startHeartbeatPoll();
 })();
