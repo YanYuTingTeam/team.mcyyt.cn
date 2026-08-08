@@ -19,6 +19,10 @@ def verify_email_code(email, code, purpose):
             if not row:
                 return False, '验证码错误或已过期'
             cur.execute("UPDATE yyt_email_code SET used = 1 WHERE id = %s", (row['id'],))
+            cur.execute(
+                "DELETE FROM yyt_email_code WHERE email = %s AND purpose = %s",
+                (email, purpose)
+            )
         db.commit()
         return True, None
     finally:
