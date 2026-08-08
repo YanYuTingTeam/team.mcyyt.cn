@@ -295,6 +295,49 @@
             <div class="page-mini">DATA TOOLS</div>
             <div class="page-title">数据收集</div>
             <div class="page-sub">创建问卷、收集数据、自定义投票</div>
+            <div class="dt-page-top">
+                <div class="dt-page-top-center">
+                    <div class="dt-search-bar">
+                        <svg class="dt-search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                        <input type="text" id="dtSearchInput" placeholder="搜索文档/表单...">
+                        <button class="dt-search-btn" onclick="dtDoSearch()">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="dt-page-top-right">
+                    <div class="dt-view-toggle">
+                        <button class="tf-btn active" id="dtViewList" onclick="dtSwitchView('list')">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                            列表
+                        </button>
+                        <button class="tf-btn" id="dtViewWaterfall" onclick="dtSwitchView('waterfall')">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
+                            瀑布
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="dt-filter-row">
+                <button class="tf-btn active" data-dt-filter="all" onclick="dtSetFilter('all',this)">全部</button>
+                <button class="tf-btn" data-dt-filter="survey" onclick="dtSetFilter('survey',this)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    问卷
+                </button>
+                <button class="tf-btn" data-dt-filter="quiz" onclick="dtSetFilter('quiz',this)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    测验
+                </button>
+                <button class="tf-btn" data-dt-filter="doc" onclick="dtSetFilter('doc',this)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+                    文档
+                </button>
+                <div class="tf-divider"></div>
+                <span class="filter-label">权限</span>
+                <button class="tf-btn" data-dt-filter="team" onclick="dtSetFilter('team',this)">团队内共享</button>
+                <button class="tf-btn" data-dt-filter="public" onclick="dtSetFilter('public',this)">公开</button>
+                <button class="tf-btn" data-dt-filter="private" onclick="dtSetFilter('private',this)">私有</button>
+            </div>
             <div id="dataToolsBox"></div>
         </div>
         <div class="page hide" id="pageMcsm">

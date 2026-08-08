@@ -31,6 +31,7 @@ import_lock = threading.Lock()
 PUBLIC_PATHS = {
     '/', '/login', '/register', '/space.html', '/login.html',
     '/api/login', '/api/register', '/api/send_email_code', '/api/heartbeat',
+    '/public/datatools',
 }
 
 PROTECTED_ASSETS = {'/assets/space_ui.html', '/assets/app.js'}
@@ -156,6 +157,12 @@ def todo_detail_page(tid):
 def todo_tag_page(tid):
     from utils.page import serve_space
     return serve_space(request)
+
+@app.route('/public/datatools')
+def public_datatools():
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'pages', 'datatools_public.html')
+    with open(path, 'r', encoding='utf-8') as f:
+        return Response(f.read(), mimetype='text/html; charset=utf-8')
 
 @app.route('/', methods=['GET', 'POST'])
 def index():

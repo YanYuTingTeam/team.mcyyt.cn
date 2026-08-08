@@ -1246,3 +1246,66 @@ input.input-error, select.input-error, textarea.input-error { border-color: #ef5
 .setting-row .sr-main { flex: 1; min-width: 0; }
 .form-wrap { padding-top: 6px; }
 .form-actions { display: flex; justify-content: flex-end; margin-top: 20px; gap: 10px; }
+
+/* Data Tools (数据收集) */
+.dt-page-top { display: grid; grid-template-columns: 1fr auto; grid-template-areas: "search toggle"; align-items: center; margin-bottom: 24px; }
+.dt-page-top-center { grid-area: search; display: flex; justify-content: center; }
+.dt-page-top-right { grid-area: toggle; display: flex; align-items: center; gap: 8px; }
+.dt-search-bar { display: flex; align-items: center; background: #0d0d0f; border: 1px solid #2b2b2e; border-radius: 10px; padding: 0 8px 0 14px; width: 420px; height: 42px; transition: border .2s; }
+.dt-search-bar:focus-within { border-color: #ef5777; }
+.dt-search-bar svg.dt-search-icon { color: #666; flex-shrink: 0; width: 17px; height: 17px; }
+.dt-search-bar input { background: none; border: none; outline: none; color: #eee; font-size: 14px; font-family: inherit; flex: 1; height: 100%; }
+.dt-search-bar input::placeholder { color: #666; }
+.dt-search-btn { width: 34px; height: 34px; border-radius: 50%; border: 1px solid #2b2b2e; background: #1d1d20; color: #999; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all .15s; }
+.dt-search-btn:hover { border-color: #ef5777; color: #ef5777; }
+.dt-search-btn svg { width: 15px; height: 15px; }
+.dt-view-toggle { display: flex; border: 1px solid #2b2b2e; border-radius: 6px; overflow: hidden; }
+.dt-view-toggle .tf-btn { border: none; border-radius: 0; padding: 5px 10px; font-size: 12px; }
+.dt-view-toggle .tf-btn svg { width: 12px; height: 12px; }
+.dt-filter-row { display: flex; align-items: center; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+.dt-filter-label { font-size: 12px; color: #666; margin-right: 2px; }
+.dt-tags-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.dt-tag-chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; border: 1px solid #2b2b2e; background: #0d0d0f; color: #999; font-size: 12px; cursor: pointer; transition: all .15s; }
+.dt-tag-chip:hover { border-color: #444; color: #eee; }
+.dt-tag-chip.active { border-color: rgba(239,87,119,.4); background: rgba(239,87,119,.08); color: #ef5777; }
+.dt-tag-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.dt-list { display: flex; flex-direction: column; gap: 8px; }
+.dt-item { display: flex; align-items: center; gap: 12px; background: #121214; border: 1px solid #232326; border-radius: 10px; padding: 12px 14px; transition: border-color .15s; position: relative; }
+.dt-item:hover { border-color: rgba(239,87,119,.3); }
+.dt-item-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+.dt-item-icon.survey { background: rgba(77,171,247,.12); color: #4dabf7; }
+.dt-item-icon.quiz { background: rgba(76,175,125,.12); color: #4caf7d; }
+.dt-item-icon.doc { background: rgba(204,93,232,.12); color: #cc5de8; }
+.dt-item-body { flex: 1; min-width: 0; }
+.dt-item-title { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dt-item-stats { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #666; margin-bottom: 4px; }
+.dt-item-stats span { display: flex; align-items: center; gap: 3px; }
+.dt-item-meta { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #666; flex-wrap: wrap; }
+.dt-avatar { width: 18px; height: 18px; border-radius: 50%; background: #1d1d20; flex-shrink: 0; }
+.dt-chip { display: inline-flex; align-items: center; gap: 3px; padding: 1px 7px; border-radius: 20px; font-size: 11px; }
+.dt-chip.public { color: #4caf7d; background: #0d1f15; border: 1px solid #1e4a32; }
+.dt-chip.team { color: #4dabf7; background: #0a1520; border: 1px solid #1e3050; }
+.dt-chip.private { color: #888; background: #1a1a1c; border: 1px solid #2b2b2e; }
+.dt-more-btn { width: 26px; height: 26px; border-radius: 6px; border: 1px solid #2b2b2e; background: transparent; color: #999; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all .15s; }
+.dt-more-btn:hover { border-color: #ef5777; color: #ef5777; }
+.dt-more-btn svg { width: 13px; height: 13px; }
+.dt-more-menu { position: absolute; right: 40px; top: 50%; transform: translateY(-50%); background: #121214; border: 1px solid #232326; border-radius: 8px; padding: 5px; min-width: 110px; display: none; z-index: 100; box-shadow: 0 8px 32px rgba(0,0,0,.4); }
+.dt-more-menu.show { display: block; }
+.dt-menu-item { display: flex; align-items: center; gap: 7px; padding: 7px 10px; border-radius: 5px; font-size: 13px; color: #ccc; cursor: pointer; transition: background .1s; }
+.dt-menu-item:hover { background: #1d1d20; }
+.dt-menu-item.danger { color: #ef5777; }
+.dt-menu-item svg { width: 13px; height: 13px; flex-shrink: 0; }
+.dt-waterfall { column-count: 3; column-gap: 12px; }
+.dt-waterfall .dt-item { break-inside: avoid; margin-bottom: 12px; display: inline-block; width: 100%; border-radius: 12px; }
+.dt-waterfall .dt-item-body { display: block; }
+.dt-waterfall .dt-item-title { font-size: 13px; margin-bottom: 3px; }
+.dt-waterfall .dt-item-stats { font-size: 11px; margin-bottom: 3px; }
+.dt-waterfall .dt-item-meta { font-size: 11px; }
+.dt-waterfall .dt-more-btn { position: static; margin-top: 6px; width: 100%; justify-content: center; height: 28px; border-radius: 6px; }
+.dt-item-cover { width: 100%; aspect-ratio: 16/10; border-radius: 8px; overflow: hidden; margin-bottom: 10px; position: relative; }
+.dt-item-cover .cover-icon { position: absolute; bottom: 8px; right: 8px; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+.dt-item-cover .cover-icon.survey { background: rgba(77,171,247,.85); color: #fff; }
+.dt-item-cover .cover-icon.quiz { background: rgba(76,175,125,.85); color: #fff; }
+.dt-item-cover .cover-icon.doc { background: rgba(204,93,232,.85); color: #fff; }
+@media (max-width: 1100px) { .dt-waterfall { column-count: 2; } }
+@media (max-width: 720px) { .dt-waterfall { column-count: 1; } }

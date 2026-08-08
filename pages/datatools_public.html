@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数据收集 · 烟雨庭</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--accent:#ef5777;--bg0:#0a0a0b;--bg1:#0d0d0f;--bg2:#121214;--bg3:#1d1d20;--brd:#232326;--brd2:#2b2b2e;--txt:#eee;--txt2:#ccc;--txt3:#999;--txt4:#666}
+body{font-family:'MiSans','微软雅黑',sans-serif;background:var(--bg0);color:var(--txt);min-height:100vh}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:#080809}
+::-webkit-scrollbar-thumb{background:#2a2a2e;border-radius:5px;border:2px solid #080809}
+::-webkit-scrollbar-thumb:hover{background:#3a3a3f}
+.hide{display:none!important}
+a{text-decoration:none;color:inherit}
+
+.page-wrap{max-width:1100px;margin:0 auto;padding:40px 40px 60px}
+
+/* Header */
+.page-header{margin-bottom:24px}
+.page-mini{font-family:'Orbixbeta',sans-serif;font-size:14px;letter-spacing:1px;color:#fff}
+.page-mini::before{content:'/ ';color:var(--accent);font-feature-settings:'ss01' 0}
+.page-title{font-size:34px;font-weight:bold;margin:4px 0 6px}
+.page-sub{color:var(--txt3);font-size:14px;margin-bottom:24px}
+
+/* Top row */
+.page-top{display:grid;grid-template-columns:1fr auto;grid-template-areas:"search toggle";align-items:center;margin-bottom:24px}
+.page-top-center{grid-area:search;display:flex;justify-content:center}
+.page-top-right{grid-area:toggle;display:flex;align-items:center;gap:8px}
+
+/* Search */
+.search-bar{display:flex;align-items:center;background:var(--bg1);border:1px solid var(--brd2);border-radius:10px;padding:0 8px 0 14px;width:400px;height:42px;transition:border .2s}
+.search-bar:focus-within{border-color:var(--accent)}
+.search-bar svg.search-icon{color:var(--txt4);flex-shrink:0;width:17px;height:17px}
+.search-bar input{background:none;border:none;outline:none;color:var(--txt);font-size:14px;font-family:inherit;flex:1;height:100%}
+.search-bar input::placeholder{color:var(--txt4)}
+.search-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--brd2);background:var(--bg3);color:var(--txt3);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.search-btn:hover{border-color:var(--accent);color:var(--accent)}
+.search-btn svg{width:15px;height:15px}
+
+/* View toggle */
+.view-toggle{display:flex;border:1px solid var(--brd2);border-radius:6px;overflow:hidden}
+.view-toggle .tf-btn{border:none;border-radius:0;padding:5px 10px;font-size:12px;background:transparent;color:var(--txt3);cursor:pointer;display:flex;align-items:center;gap:4px;font-family:inherit;transition:all .15s}
+.view-toggle .tf-btn:hover{color:#eee}
+.view-toggle .tf-btn.active{background:var(--accent);color:#fff}
+.view-toggle .tf-btn svg{width:12px;height:12px}
+
+/* Filter row */
+.filter-row{display:flex;align-items:center;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.tf-btn{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:6px;border:1px solid var(--brd2);background:transparent;color:var(--txt3);font-size:13px;font-family:inherit;cursor:pointer;transition:all .15s;white-space:nowrap}
+.tf-btn:hover{border-color:#444;color:#eee}
+.tf-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.tf-divider{width:1px;height:18px;background:var(--brd2);margin:0 4px}
+.filter-label{font-size:12px;color:var(--txt4);margin-right:2px}
+
+/* Tags */
+.tags-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.tag-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;border:1px solid var(--brd2);background:var(--bg1);color:var(--txt3);font-size:12px;cursor:pointer;transition:all .15s}
+.tag-chip:hover{border-color:#444;color:#eee}
+.tag-chip.active{border-color:rgba(239,87,119,.4);background:rgba(239,87,119,.08);color:var(--accent)}
+.tag-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+
+/* List view */
+.dt-list{display:flex;flex-direction:column;gap:8px}
+.dt-item{display:flex;align-items:center;gap:12px;background:var(--bg2);border:1px solid var(--brd);border-radius:10px;padding:12px 14px;transition:border-color .15s;position:relative}
+.dt-item:hover{border-color:rgba(239,87,119,.3)}
+.dt-item-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.dt-item-icon.survey{background:rgba(77,171,247,.12);color:#4dabf7}
+.dt-item-icon.quiz{background:rgba(76,175,125,.12);color:#4caf7d}
+.dt-item-icon.doc{background:rgba(204,93,232,.12);color:#cc5de8}
+.dt-item-body{flex:1;min-width:0}
+.dt-item-title{font-size:14px;font-weight:600;color:#fff;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dt-item-stats{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--txt4);margin-bottom:4px}
+.dt-item-stats span{display:flex;align-items:center;gap:3px}
+.dt-item-meta{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--txt4);flex-wrap:wrap}
+.dt-avatar{width:18px;height:18px;border-radius:50%;background:var(--bg3);flex-shrink:0}
+.dt-chip{display:inline-flex;align-items:center;gap:3px;padding:1px 7px;border-radius:20px;font-size:11px}
+.dt-chip.public{color:#4caf7d;background:#0d1f15;border:1px solid #1e4a32}
+.dt-chip.team{color:#4dabf7;background:#0a1520;border:1px solid #1e3050}
+.dt-chip.private{color:#888;background:#1a1a1c;border:1px solid #2b2b2e}
+.dt-more-btn{width:26px;height:26px;border-radius:6px;border:1px solid var(--brd2);background:transparent;color:var(--txt3);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.dt-more-btn:hover{border-color:var(--accent);color:var(--accent)}
+.dt-more-btn svg{width:13px;height:13px}
+.dt-more-menu{position:absolute;right:40px;top:50%;transform:translateY(-50%);background:var(--bg2);border:1px solid var(--brd);border-radius:8px;padding:5px;min-width:110px;display:none;z-index:100;box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.dt-more-menu.show{display:block}
+.dt-menu-item{display:flex;align-items:center;gap:7px;padding:7px 10px;border-radius:5px;font-size:13px;color:var(--txt2);cursor:pointer;transition:background .1s}
+.dt-menu-item:hover{background:var(--bg3)}
+.dt-menu-item.danger{color:var(--accent)}
+.dt-menu-item svg{width:13px;height:13px;flex-shrink:0}
+.dt-avatars-more{font-size:9px;color:var(--txt4);background:var(--bg3);border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;margin-left:-5px;border:1.5px solid var(--brd)}
+
+/* Waterfall view */
+.dt-waterfall{column-count:3;column-gap:12px}
+.dt-waterfall .dt-item{break-inside:avoid;margin-bottom:12px;display:inline-block;width:100%}
+.dt-waterfall .dt-item-body{display:block}
+@media(max-width:1100px){.dt-waterfall{column-count:2}}
+@media(max-width:720px){.dt-waterfall{column-count:1}}
+.dt-waterfall .dt-item{border-radius:12px}
+.dt-item-cover{width:100%;aspect-ratio:16/10;border-radius:8px;overflow:hidden;margin-bottom:10px;position:relative}
+.dt-item-cover .cover-icon{position:absolute;bottom:8px;right:8px;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center}
+.dt-item-cover .cover-icon.survey{background:rgba(77,171,247,.85);color:#fff}
+.dt-item-cover .cover-icon.quiz{background:rgba(76,175,125,.85);color:#fff}
+.dt-item-cover .cover-icon.doc{background:rgba(204,93,232,.85);color:#fff}
+.dt-waterfall .dt-item-title{font-size:13px;margin-bottom:3px}
+.dt-waterfall .dt-item-stats{font-size:11px;margin-bottom:3px}
+.dt-waterfall .dt-item-meta{font-size:11px}
+.dt-waterfall .dt-more-btn{position:static;margin-top:6px;width:100%;justify-content:center;height:28px;border-radius:6px}
+
+.empty-tip{color:var(--txt4);font-size:13px;padding:40px 0;text-align:center}
+
+.back-link{display:inline-flex;align-items:center;gap:6px;color:var(--txt3);font-size:14px;margin-bottom:20px;cursor:pointer;transition:color .15s}
+.back-link:hover{color:var(--accent)}
+.back-link svg{width:16px;height:16px}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+    <a class="back-link" href="/">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        返回首页
+    </a>
+
+    <div class="page-header">
+        <div class="page-mini">DATA TOOLS</div>
+        <div class="page-title">数据收集</div>
+        <div class="page-sub">创建问卷、收集数据、自定义投票</div>
+    </div>
+
+    <div class="page-top">
+        <div class="page-top-center">
+            <div class="search-bar">
+                <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                <input type="text" id="searchInput" placeholder="搜索文档/表单...">
+                <button class="search-btn" onclick="doSearch()">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                </button>
+            </div>
+        </div>
+        <div class="page-top-right">
+            <div class="view-toggle">
+                <button class="tf-btn active" onclick="switchView('list',this)">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                    列表
+                </button>
+                <button class="tf-btn" onclick="switchView('waterfall',this)">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
+                    瀑布
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="filter-row">
+        <button class="tf-btn active" onclick="setFilter('all',this)">全部</button>
+        <div class="tf-divider"></div>
+        <span class="filter-label">类型</span>
+        <button class="tf-btn" data-type="survey" onclick="setFilter('survey',this)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            问卷
+        </button>
+        <button class="tf-btn" data-type="quiz" onclick="setFilter('quiz',this)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            测验
+        </button>
+        <button class="tf-btn" data-type="doc" onclick="setFilter('doc',this)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+            文档
+        </button>
+    </div>
+
+    <div id="dtContainer"></div>
+</div>
+
+<script>
+(function(){
+    var __allData = [];
+    var __filter = 'all';
+    var __typeFilter = null;
+    var __search = '';
+    var __view = 'list';
+
+    var TYPE_LABELS = {survey:'问卷',quiz:'测验',doc:'文档'};
+    var TYPE_COLORS = {survey:'#4dabf7',quiz:'#4caf7d',doc:'#cc5de8'};
+    var PUBLIC_LABELS = {0:'私有',1:'团队内共享',2:'公开'};
+    var PUBLIC_CLASSES = {0:'private',1:'team',2:'public'};
+    var PUBLIC_ICONS = {
+        0: '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+        1: '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+        2: '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>'
+    };
+
+    function esc(s) {
+        var d = document.createElement('div');
+        d.textContent = s == null ? '' : String(s);
+        return d.innerHTML;
+    }
+
+    function avatarHtml(uid) {
+        var palette = ['#ef5777','#4dabf7','#4caf7d','#cc5de8','#f59f00','#ff6b6b','#748ffc','#098b78','#f06595','#7048e8'];
+        var hash = 0;
+        for (var i = 0; i < String(uid).length; i++) hash = String(uid).charCodeAt(i) + ((hash << 5) - hash);
+        var color = palette[Math.abs(hash) % palette.length];
+        var ch = String(uid).charAt(0).toUpperCase();
+        var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="64" height="64" rx="32" fill="' + color + '"/><text x="32" y="34" text-anchor="middle" dominant-baseline="central" font-size="30" fill="#fff" font-family="sans-serif" font-weight="bold">' + esc(ch) + '</text></svg>';
+        return '<img class="dt-avatar" src="data:image/svg+xml,' + encodeURIComponent(svg) + '" alt="">';
+    }
+
+    function getFiltered() {
+        return __allData.filter(function(it) {
+            if (__typeFilter && it.type !== __typeFilter) return false;
+            if (__search) {
+                var q = __search.toLowerCase();
+                if (it.title.toLowerCase().indexOf(q) === -1) return false;
+            }
+            return true;
+        });
+    }
+
+    function renderItem(it) {
+        var pubCls = PUBLIC_CLASSES[it.public] || 'team';
+        var pubLabel = PUBLIC_LABELS[it.public] || '团队内共享';
+        var typeCls = it.type || 'survey';
+        var title = esc(it.title);
+        var desc = it.description ? '<div class="dt-item-title" style="font-size:12px;color:var(--txt3);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(it.description) + '</div>' : '';
+        return '<div class="dt-item">' +
+            '<div class="dt-item-icon ' + typeCls + '">' +
+                (typeCls === 'survey' ? '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>' :
+                 typeCls === 'quiz' ? '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' :
+                 '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>')
+            + '</div>' +
+            '<div class="dt-item-body">' +
+                '<div class="dt-item-title">' + title + '</div>' +
+                desc +
+                '<div class="dt-item-stats"><span>' + (it.submits||0) + ' 提交</span><span>·</span><span>' + (it.views||0) + ' 浏览</span></div>' +
+                '<div class="dt-item-meta">' +
+                    '<span class="dt-chip ' + pubCls + '">' + PUBLIC_ICONS[it.public] + ' ' + pubLabel + '</span>' +
+                    '<span>·</span>' + avatarHtml(it.creator_id) +
+                    '<span>创建者 ' + esc(it.creator_id) + '</span>' +
+                    '<span>·</span><span>更新于 ' + esc(it.updated_at || '--') + '</span>' +
+                '</div>' +
+            '</div>' +
+        '</div>';
+    }
+
+    function renderWaterfallItem(it) {
+        var pubCls = PUBLIC_CLASSES[it.public] || 'team';
+        var pubLabel = PUBLIC_LABELS[it.public] || '团队内共享';
+        var typeCls = it.type || 'survey';
+        var gradMap = {survey:'rgba(77,171,247,.3),rgba(239,87,119,.1)',quiz:'rgba(76,175,125,.3),rgba(245,159,0,.1)',doc:'rgba(204,93,232,.3),rgba(239,87,119,.1)'};
+        var grad = gradMap[typeCls] || gradMap.survey;
+        var iconSvg = typeCls === 'survey' ? '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>' :
+                      typeCls === 'quiz' ? '<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>' :
+                      '<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>';
+        return '<div class="dt-item">' +
+            '<div class="dt-item-cover" style="background:linear-gradient(135deg,' + grad + ');border-radius:8px;">' +
+                '<div class="cover-icon ' + typeCls + '"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">' + iconSvg + '</svg></div>' +
+            '</div>' +
+            '<div class="dt-item-title">' + esc(it.title) + '</div>' +
+            '<div class="dt-item-stats"><span>' + (it.submits||0) + ' 提交</span><span>·</span><span>' + (it.views||0) + ' 浏览</span></div>' +
+            '<div class="dt-item-meta">' +
+                '<span class="dt-chip ' + pubCls + '">' + pubLabel + '</span>' +
+                '<span>·</span>' + avatarHtml(it.creator_id) +
+                '<span>更新于 ' + esc(it.updated_at || '--') + '</span>' +
+            '</div>' +
+        '</div>';
+    }
+
+    function render() {
+        var container = document.getElementById('dtContainer');
+        var filtered = getFiltered();
+        if (!filtered.length) {
+            container.innerHTML = '<div class="empty-tip">暂无公开数据收集内容</div>';
+            return;
+        }
+        if (__view === 'list') {
+            container.className = 'dt-list';
+            container.innerHTML = filtered.map(renderItem).join('');
+        } else {
+            container.className = 'dt-waterfall';
+            container.innerHTML = filtered.map(renderWaterfallItem).join('');
+        }
+    }
+
+    window.switchView = function(mode, btn) {
+        __view = mode;
+        document.querySelectorAll('.view-toggle .tf-btn').forEach(function(b){ b.classList.remove('active'); });
+        if (btn) btn.classList.add('active');
+        render();
+    };
+
+    window.setFilter = function(type, btn) {
+        __typeFilter = type === 'all' ? null : type;
+        document.querySelectorAll('.filter-row .tf-btn').forEach(function(b){ b.classList.remove('active'); });
+        if (btn) btn.classList.add('active');
+        render();
+    };
+
+    window.doSearch = function() {
+        __search = document.getElementById('searchInput').value.trim();
+        render();
+    };
+    document.getElementById('searchInput') && document.getElementById('searchInput').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') doSearch();
+    });
+
+    function init() {
+        fetch('/api/public_datacollection').then(function(r){ return r.json(); }).then(function(ret) {
+            __allData = ret.data || [];
+            render();
+        }).catch(function() {
+            document.getElementById('dtContainer').innerHTML = '<div class="empty-tip">加载失败，请稍后重试</div>';
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
+</script>
+</body>
+</html>

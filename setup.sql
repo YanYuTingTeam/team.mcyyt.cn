@@ -15,3 +15,20 @@ CREATE TABLE IF NOT EXISTS yyt_user (
     banned_until DATETIME DEFAULT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS yyt_datacollection (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    dtype VARCHAR(16) NOT NULL DEFAULT 'survey' COMMENT 'survey=问卷  quiz=测验  doc=文档',
+    title VARCHAR(255) NOT NULL,
+    description TEXT DEFAULT NULL,
+    is_public TINYINT NOT NULL DEFAULT 1 COMMENT '0=私有 1=团队内共享 2=公开',
+    view_count INT NOT NULL DEFAULT 0,
+    submit_count INT NOT NULL DEFAULT 0,
+    creator_id INT NOT NULL,
+    updated_by_id INT DEFAULT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY idx_creator (creator_id),
+    KEY idx_public (is_public),
+    KEY idx_updated (updated_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

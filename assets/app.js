@@ -381,6 +381,7 @@ var __todoData = [];
 var __todoFilter = 'all';
 var __todoTagFilter = null;
 var __todoTagMeta = {};
+var __dtData = [];
 async function loadTodoTagMeta() {
     try {
         var ret = await getJson('/api/todo_tag');
@@ -1549,7 +1550,121 @@ async function loadLogs() {
     }).join('');
 }
 async function loadDataTools() {
-    document.getElementById('dataToolsBox').innerHTML = '<div class="empty-tip">功能开发中，敬请期待 ~</div>';
+    var box = document.getElementById('dataToolsBox');
+    box.innerHTML = '<div class="empty-tip">加载中...</div>';
+    __dtData = [];
+    __dtFilter = 'all';
+    __dtTypeFilter = null;
+    __dtPublicFilter = null;
+    __dtSearch = '';
+    __dtView = 'list';
+    var ret = await getJson('/api/datacollection');
+    __dtData = ret.data || [];
+    dtRender();
+}
+function dtSwitchView(mode) {
+    __dtView = mode;
+    document.getElementById('dtViewList').classList.toggle('active', mode === 'list');
+    document.getElementById('dtViewWaterfall').classList.toggle('active', mode === 'waterfall');
+    dtRender();
+}
+function dtSetFilter(f, btn) {
+    if (btn) {
+        document.querySelectorAll('[data-dt-filter]').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+    }
+    if (f === 'all') { __dtFilter = 'all'; __dtTypeFilter = null; __dtPublicFilter = null; }
+    else if (['survey','quiz','doc'].indexOf(f) !== -1) { __dtTypeFilter = f; __dtFilter = 'all'; __dtPublicFilter = null; }
+    else if (['team','public','private'].indexOf(f) !== -1) { __dtPublicFilter = f; __dtFilter = 'all'; __dtTypeFilter = null; }
+    else { __dtFilter = f; __dtTypeFilter = null; __dtPublicFilter = null; }
+    dtRender();
+}
+function dtDoSearch() {
+    __dtSearch = (document.getElementById('dtSearchInput') || {}).value || '';
+    dtRender();
+}
+function dtGetFiltered() {
+    return __dtData.filter(function(it) {
+        if (__dtTypeFilter && it.type !== __dtTypeFilter) return false;
+        if (__dtPublicFilter) {
+            if (__dtPublicFilter === 'public' && it.public !== 2) return false;
+            if (__dtPublicFilter === 'team' && it.public !== 1) return false;
+            if (__dtPublicFilter === 'private' && it.public !== 0) return false;
+        }
+        if (__dtSearch) {
+            var q = __dtSearch.toLowerCase();
+            if (it.title.toLowerCase().indexOf(q) === -1) return false;
+        }
+        return true;
+    });
+}
+function dtChipHtml(p) {
+    var cls = p === 2 ? 'public' : p === 0 ? 'private' : 'team';
+    var label = p === 2 ? '公开' : p === 0 ? '私有' : '团队内共享';
+    return '<span class="dt-chip ' + cls + '">' + label + '</span>';
+}
+function dtItemIcon(type) {
+    if (type === 'quiz') return '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+    if (type === 'doc') return '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>';
+    return '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
+}
+function dtItemCoverIcon(type) {
+    if (type === 'quiz') return '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+    if (type === 'doc') return '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>';
+    return '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
+}
+function dtRender() {
+    var box = document.getElementById('dataToolsBox');
+    var filtered = dtGetFiltered();
+    if (!filtered.length) {
+        box.innerHTML = '<div class="empty-tip">暂无数据</div>';
+        return;
+    }
+    if (__dtView === 'list') {
+        box.innerHTML = '<div class="dt-list">' + filtered.map(dtRenderItem).join('') + '</div>';
+    } else {
+        box.innerHTML = '<div class="dt-waterfall">' + filtered.map(dtRenderWaterfall).join('') + '</div>';
+    }
+    document.getElementById('dtSearchInput') && document.getElementById('dtSearchInput').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') dtDoSearch();
+    });
+}
+function dtRenderItem(it) {
+    var typeCls = it.type || 'survey';
+    var creator = ovData && ovData.user ? ovData.user : null;
+    var isOwner = creator && it.creator_id === creator.id;
+    var descHtml = it.description ? '<div style="font-size:12px;color:#666;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(it.description) + '</div>' : '';
+    return '<div class="dt-item">' +
+        '<div class="dt-item-icon ' + typeCls + '">' + dtItemIcon(typeCls) + '</div>' +
+        '<div class="dt-item-body">' +
+            '<div class="dt-item-title">' + esc(it.title) + '</div>' +
+            descHtml +
+            '<div class="dt-item-stats"><span>' + (it.submits||0) + ' 提交</span><span>·</span><span>' + (it.views||0) + ' 浏览</span></div>' +
+            '<div class="dt-item-meta">' +
+                dtChipHtml(it.public) +
+                '<span>·</span>' +
+                '<span>创建者 #' + esc(it.creator_id) + '</span>' +
+                '<span>·</span><span>更新于 ' + esc(it.updated_at || '--') + '</span>' +
+            '</div>' +
+        '</div>' +
+    '</div>';
+}
+function dtRenderWaterfall(it) {
+    var typeCls = it.type || 'survey';
+    var gradMap = {survey:'rgba(77,171,247,.3),rgba(239,87,119,.1)',quiz:'rgba(76,175,125,.3),rgba(245,159,0,.1)',doc:'rgba(204,93,232,.3),rgba(239,87,119,.1)'};
+    var grad = gradMap[typeCls] || gradMap.survey;
+    return '<div class="dt-item">' +
+        '<div class="dt-item-cover" style="background:linear-gradient(135deg,' + grad + ');border-radius:8px;">' +
+            '<div class="cover-icon ' + typeCls + '">' + dtItemCoverIcon(typeCls) + '</div>' +
+        '</div>' +
+        '<div class="dt-item-title">' + esc(it.title) + '</div>' +
+        '<div class="dt-item-stats"><span>' + (it.submits||0) + ' 提交</span><span>·</span><span>' + (it.views||0) + ' 浏览</span></div>' +
+        '<div class="dt-item-meta">' +
+            dtChipHtml(it.public) +
+            '<span>·</span><span>创建者 #' + esc(it.creator_id) + '</span>' +
+            '<span>·</span><span>更新于 ' + esc(it.updated_at || '--') + '</span>' +
+        '</div>' +
+    '</div>';
 }
 function _add32(a, b) { return (a + b) & 0xFFFFFFFF; }
 function _cmn(q, a, b, x, s, t) { a = _add32(_add32(a, q), _add32(x, t)); return _add32((a << s) | (a >>> (32 - s)), b); }
