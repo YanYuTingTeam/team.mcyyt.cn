@@ -286,7 +286,8 @@ function showPage(name) {
     document.querySelectorAll('.page').forEach(function(p) { p.classList.add('hide'); });
     var pageId = 'page' + name.charAt(0).toUpperCase() + name.slice(1);
     if (name === 'tododetail') pageId = 'pageTodoDetail';
-    document.getElementById(pageId).classList.remove('hide');
+    var el = document.getElementById(pageId);
+    if (el) el.classList.remove('hide');
     window.scrollTo({ top: 0 });
     _schedMasonry();
 }
