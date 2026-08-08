@@ -396,6 +396,8 @@ function setTodoFilter(f, btn) {
     if (f === 'all' || f === 'created' || f === 'assigned') {
         __todoPageScope = f;
         loadTodoPage(f);
+    } else if (f === 'incomplete' || f === 'complete') {
+        loadTodoPage('all');
     } else {
         renderTodoPage();
     }
@@ -435,6 +437,9 @@ async function loadTodoPage(scope) {
     renderTodoPage();
 }
 function renderTodoPage() {
+    document.querySelectorAll('#todoFilters .tf-btn').forEach(function(b) { b.classList.remove('active'); });
+    var activeBtn = document.querySelector('#todoFilters .tf-btn[data-filter="' + __todoFilter + '"]');
+    if (activeBtn) activeBtn.classList.add('active');
     var pageBox = document.getElementById('todoPageList');
     var data = __todoPageData || [];
     if (__todoFilter === 'incomplete') data = data.filter(function(it) { return !it.is_done && (it.is_global || it.is_assigned); });
