@@ -176,7 +176,7 @@ def _load_todo_basic(cur, todo_id):
     cur.execute(
         "SELECT t.id, t.title, t.link, t.content, t.created_at, "
         "u.id AS creator_id, u.name AS creator_name, u.email AS creator_email "
-        "FROM yyt_todo t JOIN yyt_user u ON t.creator_id = u.id WHERE t.id = %s",
+        "FROM yyt_todo t JOIN yyt_user u ON t.creator_id = u.id AND u.status != 3 WHERE t.id = %s",
         (todo_id,)
     )
     t = cur.fetchone()
@@ -264,7 +264,7 @@ def send_done_notify(todo_id, cur=None):
             return
         cur.execute(
             "SELECT a.user_id, a.is_done, a.done_at, u.name, u.avatar, u.email "
-            "FROM yyt_todo_assign a JOIN yyt_user u ON a.user_id = u.id "
+            "FROM yyt_todo_assign a JOIN yyt_user u ON a.user_id = u.id AND u.status != 3 "
             "WHERE a.todo_id = %s ORDER BY a.done_at ASC",
             (todo_id,)
         )

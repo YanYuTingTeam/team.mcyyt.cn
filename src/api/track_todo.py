@@ -43,7 +43,7 @@ def handle(request):
                     track['creator_deactivated'] = (track.get('creator_status') == 3)
                     cur.execute(
                         "SELECT r.tag_id AS id, tg.name, tg.color "
-                        "FROM yyt_todo_tag_rel r JOIN yyt_todo_tag tg ON r.tag_id = tg.id WHERE r.tag_id = r.tag_id AND r.todo_id = %s",
+                        "FROM yyt_todo_tag_rel r JOIN yyt_todo_tag tg ON r.tag_id = tg.id WHERE r.todo_id = %s",
                         (tid,)
                     )
                     track['tags'] = cur.fetchall()
