@@ -23,6 +23,13 @@ def handle(request):
             todo = cur.fetchone()
             if not todo:
                 return {"code": 404, "message": "待办不存在"}
+            if not todo['is_global'] and todo['creator_id'] != user['id']:
+                cur.execute(
+                    "SELECT id FROM yyt_todo_assign WHERE todo_id = %s AND user_id = %s",
+                    (tid, user['id'])
+                )
+                if not cur.fetchone():
+                    return {"code": 403, "message": "无权查看此待办"}
             todo['is_creator'] = (todo['creator_id'] == user['id'])
             todo['all_done'] = bool(todo.get('all_done_at'))
             todo['creator_deactivated'] = (todo.get('creator_status') == 3)

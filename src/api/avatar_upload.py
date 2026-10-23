@@ -1,7 +1,10 @@
 import os
 import tempfile
+from PIL import Image
 from utils.auth import check_login
 from utils.db import get_db
+
+MAX_AVATAR_SIZE = 5 * 1024 * 1024
 
 _col_ensured = False
 def _ensure_col(db):
@@ -27,12 +30,15 @@ def handle(request):
         return {"code": 401, "message": "未登录"}
     if request.method != 'POST':
         return {"code": 405, "message": "method not allowed"}
+    content_length = request.headers.get('Content-Length') or ''
+    if content_length.isdigit() and int(content_length) > MAX_AVATAR_SIZE:
+        return {"code": 413, "message": "文件过大, 最大5MB"}
     f = request.files.get('avatar') or request.files.get('file')
     if not f:
         return {"code": 400, "message": "未收到文件"}
     mime = (f.mimetype or '').lower()
     ext = os.path.splitext(f.filename or '')[1].lower()
-    if mime not in ALLOWED_MIME and ext not in ALLOWED_EXT:
+    if mime not in ALLOWED_MIME or ext not in ALLOWED_EXT:
         return {"code": 400, "message": "仅支持 jpg/png/webp/gif 格式"}
     if not ext:
         ext_map = {'image/jpeg': '.jpg', 'image/png': '.png', 'image/webp': '.webp', 'image/gif': '.gif'}
@@ -40,6 +46,11 @@ def handle(request):
     tmp_fd, tmp_path = tempfile.mkstemp(suffix=ext)
     try:
         f.save(tmp_path)
+        try:
+            with Image.open(tmp_path) as img:
+                img.verify()
+        except Exception:
+            return {"code": 400, "message": "文件不是有效图片"}
         from utils.upload import OSSUploader
         uploader = OSSUploader()
         result = uploader.upload(tmp_path, prefix=f"avatar/{user['id']}", content_type=mime or None)

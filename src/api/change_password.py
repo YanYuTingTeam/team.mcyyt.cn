@@ -34,6 +34,10 @@ def handle(request):
                 return {"code": 403, "message": "原密码错误"}
             new_hash = bcrypt.hashpw(new_pwd.encode(), bcrypt.gensalt()).decode()
             cur.execute("UPDATE yyt_user SET password_hash = %s WHERE id = %s", (new_hash, user['id']))
+            cur.execute(
+                "DELETE FROM yyt_session WHERE user_id = %s AND token != %s",
+                (user['id'], request.cookies.get('yyt_token') or '')
+            )
         db.commit()
         return {"code": 0, "message": "密码修改成功"}
     finally:

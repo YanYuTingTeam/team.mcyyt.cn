@@ -59,6 +59,12 @@ def _clean_user_ids(raw):
             pass
     return list(dict.fromkeys(clean))
 
+def _to_int(v, default=None):
+    try:
+        return int(v)
+    except (ValueError, TypeError):
+        return default
+
 def _refresh_all_done_state(cur, todo_id):
     cur.execute("SELECT is_global FROM yyt_todo WHERE id = %s", (todo_id,))
     t = cur.fetchone()
@@ -94,7 +100,9 @@ def handle(request):
             data = request.get_json(silent=True) or {}
             with db.cursor() as cur:
                 if 'edit_todo_id' in data:
-                    todo_id = int(data['edit_todo_id'])
+                    todo_id = _to_int(data['edit_todo_id'])
+                    if not todo_id:
+                        return {"code": 400, "message": "缺少待办ID"}
                     cur.execute("SELECT creator_id, is_global FROM yyt_todo WHERE id = %s", (todo_id,))
                     t = cur.fetchone()
                     if not t:
@@ -145,7 +153,9 @@ def handle(request):
                     db.commit()
                     return {"code": 0, "message": "ok"}
                 if 'id' in data:
-                    todo_id = int(data['id'])
+                    todo_id = _to_int(data['id'])
+                    if not todo_id:
+                        return {"code": 400, "message": "缺少待办ID"}
                     is_done = 1 if data.get('done') else 0
                     cur.execute("SELECT is_global, deleted_at FROM yyt_todo WHERE id = %s", (todo_id,))
                     tr = cur.fetchone()
@@ -185,7 +195,7 @@ def handle(request):
                     db.commit()
                     return {"code": 0, "message": "ok"}
                 if data.get('action') == 'delete':
-                    todo_id = int(data.get('todo_id') or data.get('id') or 0)
+                    todo_id = _to_int(data.get('todo_id') or data.get('id') or 0)
                     if not todo_id:
                         return {"code": 400, "message": "缺少待办ID"}
                     cur.execute("SELECT min_level FROM yyt_page_access WHERE page_key = 'delete_todo'")
@@ -302,8 +312,11 @@ def handle(request):
                 sql += " AND (t.is_global = 1 OR a.user_id = %s)"
                 params.append(user['id'])
             if tag_filter:
+                tag_id = _to_int(tag_filter)
+                if tag_id is None:
+                    return {"code": 400, "message": "标签参数错误"}
                 sql += " AND EXISTS (SELECT 1 FROM yyt_todo_tag_rel r WHERE r.todo_id = t.id AND r.tag_id = %s)"
-                params.append(int(tag_filter))
+                params.append(tag_id)
             sql += " ORDER BY t.id DESC"
             cur.execute(sql, params)
             rows = cur.fetchall()

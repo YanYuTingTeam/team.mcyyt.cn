@@ -1,4 +1,5 @@
 import bcrypt
+from datetime import datetime
 from flask import jsonify
 from utils.db import get_db
 from utils.auth import make_token, get_client_info
@@ -7,6 +8,8 @@ from utils.security import (
     get_client_ip, ip_segment
 )
 from utils.email_verify import verify_email_code
+
+DUMMY_HASH = bcrypt.hashpw(b'yyt-dummy-password', bcrypt.gensalt()).decode()
 
 def _need_device_verify(db, user_id, cur_ip_seg, cur_ua):
     """检测异地且异设备登录: 存在已有会话的 IP段不同 且 UA也不同"""
@@ -42,7 +45,8 @@ def handle(request):
         with db.cursor() as cur:
             cur.execute("SELECT * FROM yyt_user WHERE email = %s", (email,))
             user = cur.fetchone()
-            ok = bool(user and bcrypt.checkpw(password.encode(), user['password_hash'].encode()))
+            pw_hash = user['password_hash'] if user else DUMMY_HASH
+            ok = bool(user and bcrypt.checkpw(password.encode(), pw_hash.encode()))
             _, banned_now = login_attempt_incr(request, ok)
             if banned_now:
                 return {"code": 429, "message": "badly request"}
@@ -50,6 +54,9 @@ def handle(request):
                 return {"code": 401, "message": f"邮箱或密码错误"}
             if user.get('status') == 3:
                 return {"code": 403, "message": "账号已注销"}
+            if user.get('status') == 2 and user.get('banned_until'):
+                if str(user['banned_until']) >= '9999-12-31' or user['banned_until'] > datetime.now():
+                    return {"code": 403, "message": "账号已被封禁"}
             # 检测异地异设备
             cur_ip, cur_ua = get_client_info(request)
             cur_seg = ip_segment(cur_ip)
@@ -69,5 +76,5 @@ def handle(request):
     finally:
         db.close()
     resp = jsonify({"code": 0, "message": "ok"})
-    resp.set_cookie('yyt_token', token, max_age=7 * 24 * 3600, httponly=True, samesite='Lax')
+    resp.set_cookie('yyt_token', token, max_age=7 * 24 * 3600, httponly=True, samesite='Lax', secure=True)
     return resp

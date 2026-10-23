@@ -62,10 +62,21 @@ def handle(request):
                 (email, pw_hash, name)
             )
             user_id = cur.lastrowid
-            cur.execute(
-                "UPDATE yyt_invite SET used_by = %s, used_at = NOW() WHERE code = %s",
-                (user_id, invite_code)
-            )
+            if has_disabled:
+                cur.execute(
+                    "UPDATE yyt_invite SET used_by = %s, used_at = NOW() "
+                    "WHERE code = %s AND used_by IS NULL AND (disabled IS NULL OR disabled = 0)",
+                    (user_id, invite_code)
+                )
+            else:
+                cur.execute(
+                    "UPDATE yyt_invite SET used_by = %s, used_at = NOW() "
+                    "WHERE code = %s AND used_by IS NULL",
+                    (user_id, invite_code)
+                )
+            if cur.rowcount != 1:
+                db.rollback()
+                return {"code": 403, "message": f"邀请码无效或已被使用"}
             token = make_token()
             ip, ua = get_client_info(request)
             cur.execute(
@@ -76,5 +87,5 @@ def handle(request):
     finally:
         db.close()
     resp = jsonify({"code": 0, "message": "ok"})
-    resp.set_cookie('yyt_token', token, max_age=7 * 24 * 3600, httponly=True, samesite='Lax')
+    resp.set_cookie('yyt_token', token, max_age=7 * 24 * 3600, httponly=True, samesite='Lax', secure=True)
     return resp

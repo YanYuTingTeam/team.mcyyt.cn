@@ -19,6 +19,7 @@ def handle(request):
             return _handle_update(db, user, request)
         if request.method == 'DELETE':
             return _handle_delete(db, user, request)
+        return {"code": 405, "message": "method not allow"}
     finally:
         db.close()
 
@@ -57,7 +58,11 @@ def _row_to_dict(row, current_id):
 
 def _handle_list(db, user):
     with db.cursor() as cur:
-        cur.execute("SELECT * FROM yyt_datacollection ORDER BY updated_at DESC")
+        cur.execute(
+            "SELECT * FROM yyt_datacollection WHERE is_public >= 1 OR creator_id = %s "
+            "ORDER BY updated_at DESC",
+            (user['id'],)
+        )
         rows = cur.fetchall()
     return {"code": 0, "data": [_row_to_dict(r, user['id']) for r in rows]}
 

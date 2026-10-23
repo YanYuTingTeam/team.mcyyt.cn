@@ -43,8 +43,8 @@ def handle(request):
             ip = session.get('ip') or '未知IP'
             content = '已将 ' + ip + ' (' + device + ') 登出'
             cur.execute(
-                "INSERT INTO yyt_notice (title, content, created_by) VALUES (%s, %s, %s)",
-                (title, content, user['id'])
+                "INSERT INTO yyt_notice (user_id, title, content, created_by) VALUES (%s, %s, %s, %s)",
+                (user['id'], title, content, user['id'])
             )
         db.commit()
         return {"code": 0, "message": "ok"}

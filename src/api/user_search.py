@@ -6,6 +6,8 @@ def handle(request):
     if not user:
         return {"code": 401, "message": "未登录"}
     q = (request.args.get('q') or '').strip()
+    if q:
+        q = q.replace('\\', '\\\\').replace('%', '\\%').replace('_', '\\_')
     db = get_db()
     try:
         with db.cursor() as cur:

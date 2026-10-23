@@ -13,6 +13,22 @@ def _one(cur, sql, args=None):
 def _is_kicked(u):
     return u and u.get('status') == STATUS_KICKED
 
+def _clear_panel_access(cur, uid):
+    cur.execute("SELECT apikey, panel_host FROM yyt_user WHERE id = %s", (uid,))
+    u = cur.fetchone() or {}
+    if u.get('apikey'):
+        try:
+            from src.api.mcsm_info import _ensure_table
+            _ensure_table()
+            cur.execute("DELETE FROM yyt_mcsm_token WHERE apikey = %s", (u['apikey'],))
+        except Exception:
+            pass
+    if u.get('panel_host'):
+        from utils.mcsm import PANEL_SESSIONS
+        # mcsm面板内存会话以入口host前缀绑定, 按host清除该用户的代理会话
+        for sid in [k for k, v in PANEL_SESSIONS.items() if v[1] == u['panel_host']]:
+            PANEL_SESSIONS.pop(sid, None)
+
 def _detail(db, uid):
     with db.cursor() as cur:
         cur.execute(
@@ -23,7 +39,7 @@ def _detail(db, uid):
         if not user:
             return None
         sessions = cur.execute(
-            "SELECT s1.id, s1.token, s1.ip, s1.ua, s1.expire_time, s1.created_at, "
+            "SELECT s1.id, s1.ip, s1.ua, s1.expire_time, s1.created_at, "
             "(SELECT MIN(created_at) FROM yyt_session s2 WHERE s2.user_id = %s AND s2.ip = s1.ip) AS first_seen "
             "FROM yyt_session s1 WHERE s1.user_id = %s AND s1.expire_time > NOW() ORDER BY s1.id DESC LIMIT 20",
             (uid, uid)
@@ -111,12 +127,15 @@ def handle(request):
                         cur.execute("UPDATE yyt_user SET status = %s WHERE id = %s", (STATUS_ACTIVE, uid))
                     elif days >= 1000:
                         cur.execute("UPDATE yyt_user SET banned_until = '9999-12-31 23:59:59', status = %s WHERE id = %s", (STATUS_BANNED, uid))
+                        _clear_panel_access(cur, uid)
                     else:
                         cur.execute(
                             "UPDATE yyt_user SET banned_until = DATE_ADD(NOW(), INTERVAL %s DAY), status = %s WHERE id = %s",
                             (days, STATUS_BANNED, uid)
                         )
+                        _clear_panel_access(cur, uid)
                 if 'kick' in data:
+                    _clear_panel_access(cur, uid)
                     cur.execute("UPDATE yyt_user SET panel_host=NULL, apikey=NULL, status=%s WHERE id=%s", (STATUS_KICKED, uid))
                     cur.execute("DELETE FROM yyt_session WHERE user_id=%s", (uid,))
             db.commit()
