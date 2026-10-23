@@ -125,7 +125,7 @@ def _reset_counter(key):
 
 # ===== 未登录限流: 1小时内超过 N 次请求 → 封禁 1 小时 =====
 RATE_LIMIT_MAX = 3       # 1小时窗口内最大请求数
-RATE_LIMIT_WINDOW = 2   # w秒 = 1小时
+RATE_LIMIT_WINDOW = 3600   # w秒 = 1小时
 RATE_BAN_HOURS = 1         # 触发后封禁1小时
 
 
@@ -137,7 +137,7 @@ def rate_tick(request):
     key = f"rl:{ip}"
     cnt, over = _incr_counter(key, RATE_LIMIT_WINDOW, RATE_LIMIT_MAX)
     if over:
-        add_ban(seg, 'rate', RATE_BAN_HOURS)
+        add_ban(ip, 'rate', RATE_BAN_HOURS)
         _reset_counter(key)
         return True, 'rate', datetime.now() + timedelta(hours=RATE_BAN_HOURS)
     return False, None, None

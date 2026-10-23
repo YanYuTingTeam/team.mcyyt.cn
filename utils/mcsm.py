@@ -6,7 +6,7 @@ import urllib.error
 from urllib.parse import parse_qsl, urlencode
 from flask import Response
 from config import MCSM_CONFIG
-from utils.auth import verify_sign, log_api_call, is_kicked_user
+from utils.auth import verify_sign, log_api_call
 
 PANEL_SESSIONS = {}
 SESSION_TTL = 6 * 3600
@@ -22,8 +22,23 @@ def _deny(msg):
 
 def _clean_sessions():
     now = time.time()
-    for sid in [k for k, v in PANEL_SESSIONS.items() if v < now]:
+    for sid in [k for k, v in PANEL_SESSIONS.items() if v[0] < now]:
         PANEL_SESSIONS.pop(sid, None)
+
+def _host_prefix(request):
+    return (request.host or '').split(':')[0].split('.')[0]
+
+def _session_ok(request):
+    sid = request.cookies.get('mcsm_sid')
+    sess = PANEL_SESSIONS.get(sid) if sid else None
+    if not sess or sess[0] <= time.time():
+        return False
+    return _host_prefix(request) == sess[1]
+
+def _new_session(request):
+    new_sid = secrets.token_hex(16)
+    PANEL_SESSIONS[new_sid] = [time.time() + SESSION_TTL, _host_prefix(request)]
+    return 'mcsm_sid=' + new_sid + '; Path=/; Max-Age=' + str(SESSION_TTL) + '; HttpOnly; SameSite=Lax; Secure'
 
 def _forward(request, subpath, extra_set_cookie=None):
     base = MCSM_CONFIG['base'].rstrip('/')
@@ -76,7 +91,7 @@ def proxy_api(request, subpath):
     _clean_sessions()
     print(f"[proxy_api] host={request.host} path={request.path} method={request.method} subpath={subpath} sid={request.cookies.get('mcsm_sid') is not None} sec={bool(request.args.get('sec'))} has_X_API_Key={bool(request.headers.get('X-API-Key') or request.args.get('apikey'))}", flush=True)
     sid = request.cookies.get('mcsm_sid')
-    if sid and PANEL_SESSIONS.get(sid, 0) > time.time():
+    if sid and _session_ok(request):
         print(f"[proxy_api] auth=session sid={sid[:8]}... OK", flush=True)
         return _forward(request, subpath)
     sec = request.args.get('sec')
@@ -85,9 +100,7 @@ def proxy_api(request, subpath):
         data = consume_token(sec)
         print(f"[MCSM] api sec={sec} db_hit={bool(data)}", flush=True)
         if data:
-            new_sid = secrets.token_hex(16)
-            PANEL_SESSIONS[new_sid] = time.time() + SESSION_TTL
-            cookie = 'mcsm_sid=' + new_sid + '; Path=/; Max-Age=' + str(SESSION_TTL) + '; HttpOnly; SameSite=Lax; Secure'
+            cookie = _new_session(request)
             return _forward(request, subpath, extra_set_cookie=cookie)
     user, reason = verify_sign(request, debug=True)
     if not user:
@@ -103,7 +116,7 @@ def proxy_api(request, subpath):
 def proxy_panel(request, subpath):
     _clean_sessions()
     sid = request.cookies.get('mcsm_sid')
-    if sid and PANEL_SESSIONS.get(sid, 0) > time.time():
+    if sid and _session_ok(request):
         return _forward(request, subpath)
     sec = request.args.get('sec')
     if sec:
@@ -112,26 +125,22 @@ def proxy_panel(request, subpath):
         print(f"[MCSM] sec={sec} db_hit={bool(data)}", flush=True)
         if not data:
             return _deny("令牌无效或已过期")
-        host_prefix = (request.host or '').split(':')[0].split('.')[0]
+        host_prefix = _host_prefix(request)
         if not data['panel_host'] or host_prefix != data['panel_host']:
             print(f"[MCSM] host_mismatch req={host_prefix} sec_host={data['panel_host']}", flush=True)
             return _deny("该入口不属于此令牌")
         print(f"[MCSM] auth_ok host={data['panel_host']}", flush=True)
-        new_sid = secrets.token_hex(16)
-        PANEL_SESSIONS[new_sid] = time.time() + SESSION_TTL
-        cookie = 'mcsm_sid=' + new_sid + '; Path=/; Max-Age=' + str(SESSION_TTL) + '; HttpOnly; SameSite=Lax; Secure'
+        cookie = _new_session(request)
         return _forward(request, subpath, extra_set_cookie=cookie)
     user, reason = verify_sign(request)
     if not user:
         if reason == 'kick':
             return _deny("该账号已被踢出，数据已清除")
         return _deny("认证失败")
-    host_prefix = (request.host or '').split(':')[0].split('.')[0]
+    host_prefix = _host_prefix(request)
     if not user.get('panel_host') or host_prefix != user['panel_host']:
         return _deny("认证失败")
-    new_sid = secrets.token_hex(16)
-    PANEL_SESSIONS[new_sid] = time.time() + SESSION_TTL
-    cookie = 'mcsm_sid=' + new_sid + '; Path=/; Max-Age=' + str(SESSION_TTL) + '; HttpOnly; SameSite=Lax; Secure'
+    cookie = _new_session(request)
     return _forward(request, subpath, extra_set_cookie=cookie)
 
 def proxy(request, subpath):

@@ -2,7 +2,9 @@ import secrets
 import hmac
 import hashlib
 import time
+from datetime import datetime
 from utils.db import get_db
+from utils.security import get_client_ip
 from config import MCSM_CONFIG
 
 _avatar_col_ensured = False
@@ -27,11 +29,11 @@ def _ensure_avatar_col():
                 if not cur.fetchone():
                     cur.execute("ALTER TABLE yyt_notice ADD COLUMN created_by INT DEFAULT NULL AFTER content")
                 db.commit()
+            _avatar_col_ensured = True
         finally:
             db.close()
-    except Exception:
-        pass
-    _avatar_col_ensured = True
+    except Exception as e:
+        print(f"[auth] ensure avatar col fail: {e}", flush=True)
 
 def _ensure_status_col():
     global _status_col_ensured
@@ -47,11 +49,11 @@ def _ensure_status_col():
                     cur.execute("UPDATE yyt_user SET status = 2 WHERE banned_until IS NOT NULL AND (banned_until > NOW() OR banned_until = '9999-12-31 23:59:59')")
                     cur.execute("UPDATE yyt_user SET status = 3 WHERE name = '账号已注销'")
                 db.commit()
+            _status_col_ensured = True
         finally:
             db.close()
-    except Exception:
-        pass
-    _status_col_ensured = True
+    except Exception as e:
+        print(f"[auth] ensure status col fail: {e}", flush=True)
 
 def _load_kicked_users():
     global _kick_users
@@ -93,6 +95,9 @@ def check_login(request):
                 if user.get('status') == 3:
                     user['_kick_reason'] = True
                     return None
+                if user.get('status') == 2 and user.get('banned_until'):
+                    if str(user['banned_until']) >= '9999-12-31' or user['banned_until'] > datetime.now():
+                        return None
             return user
     finally:
         db.close()
@@ -118,7 +123,8 @@ def verify_sign(request, debug=False):
             'a-not-digit' if a and not a.isdigit() else ''
         ]).strip(',')
         if debug:
-            print(f'[verify_sign FAIL({reason})] host={request.host} path={request.path} method={request.method} apikey={apikey[:8] + "...(" + str(len(apikey)) + ")" if apikey else "empty"} a={a} b={'len='+str(len(b)) if b else 'empty'}', flush=True)
+            b_desc = ('len=' + str(len(b))) if b else 'empty'
+            print(f'[verify_sign FAIL({reason})] host={request.host} path={request.path} method={request.method} apikey={apikey[:8] + "...(" + str(len(apikey)) + ")" if apikey else "empty"} a={a} b={b_desc}', flush=True)
         return None, reason
     now = int(time.time() * 1000)
     window = MCSM_CONFIG.get('sign_window', 300) * 1000
@@ -175,11 +181,7 @@ def log_api_call(request, user):
         db.close()
 
 def get_client_info(request):
-    forward = request.headers.get('X-Forwarded-For', '')
-    if forward:
-        ip = forward.split(',')[0].strip()
-    else:
-        ip = request.headers.get('X-Real-IP', request.remote_addr or '')
+    ip = get_client_ip(request)
     return ip, request.headers.get('User-Agent', '')[:500]
 
 def login_success(db, user_id, ip, ua, token):

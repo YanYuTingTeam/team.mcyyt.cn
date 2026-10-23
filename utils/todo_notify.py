@@ -44,6 +44,7 @@ def _init_table(cur):
     global _notify_inited
     if _notify_inited:
         return
+    _ok = True
     try:
         cur.execute("""
             CREATE TABLE IF NOT EXISTS yyt_notify_setting (
@@ -54,17 +55,20 @@ def _init_table(cur):
                 invite_used TINYINT DEFAULT 1
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
         """)
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"[todo_notify] init notify table fail: {e}", flush=True)
+        _ok = False
     try:
         cur.execute("SHOW COLUMNS FROM yyt_user LIKE 'track_todo_id'")
         if not cur.fetchone():
             cur.execute("ALTER TABLE yyt_user ADD COLUMN track_todo_id INT DEFAULT NULL")
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"[todo_notify] ensure track_todo_id fail: {e}", flush=True)
+        _ok = False
     _ensure_notice_cols(cur)
     _ensure_invite_cols(cur)
-    _notify_inited = True
+    if _ok:
+        _notify_inited = True
 
 def _done_notify_poller():
     while True:

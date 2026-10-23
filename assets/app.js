@@ -373,9 +373,14 @@ function chipHtml(done, exempt) {
 function isInnerTodo(href) {
     return /^\/todos\/\d+$/.test(href || '');
 }
+function safeLink(link) {
+    var s = String(link || '');
+    if (/^https?:\/\//i.test(s) || /^\/todos\/\d+/.test(s)) return s;
+    return '#';
+}
 function todoLinkHtml(it) {
     var inner = isInnerTodo(it.link);
-    return '<a class="todo-link" href="' + esc(it.link) + '"' + (inner ? '' : ' target="_blank"') +
+    return '<a class="todo-link" href="' + esc(safeLink(it.link)) + '"' + (inner ? '' : ' target="_blank"') +
         ' onclick="return todoLinkClick(event, this)">' + '#' + esc(it.id) + ' | ' + esc(it.title) + LINK_SVG + '</a>';
 }
 var __todoData = [];
@@ -1854,7 +1859,7 @@ async function loadProject() {
         return;
     }
     var render = function(it) {
-        var nm = it.link ? '<a href="' + esc(it.link) + '" target="_blank">' + esc(it.name) + '</a>' : esc(it.name);
+        var nm = it.link ? '<a href="' + esc(safeLink(it.link)) + '" target="_blank">' + esc(it.name) + '</a>' : esc(it.name);
         return '<div class="project-item"><div class="proj-name">' + nm + '</div>' +
             (it.info ? '<div class="proj-info">' + esc(it.info) + '</div>' : '') +
             (it.members ? '<div class="proj-mem">成员: ' + esc(it.members) + '</div>' : '') + '</div>';

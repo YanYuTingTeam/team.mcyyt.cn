@@ -120,17 +120,19 @@ def handle_exception(e):
 @app.route('/amusource/img/<uuid>/<filename>')
 def serve_image(uuid, filename):
     param = request.args.get('param')
+    if os.path.basename(filename) != filename or '..' in filename or '\\' in filename:
+        return json_response("404 page not found", 404)
     file_path = os.path.join(STORAGE_PATH, 'img', f"{uuid}_{filename}")
-    
+
     if not os.path.exists(file_path):
         return json_response("404 page not found", 404)
 
     if param and 'y' in param:
         try:
             w, h = map(int, param.split('y'))
-            # 限制最大宽高，防止资源耗尽攻击 (DoS)
-            w = min(w, 4096)
-            h = min(h, 4096)
+            # 限制宽高范围，防止资源耗尽攻击 (DoS)
+            w = max(1, min(w, 2048))
+            h = max(1, min(h, 2048))
             img = Image.open(file_path)
             img = img.resize((w, h), Image.Resampling.LANCZOS)
             img_io = BytesIO()
