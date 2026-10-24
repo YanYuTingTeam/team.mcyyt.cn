@@ -1,34 +1,33 @@
 import os
 
-# 密钥一律从环境变量读取, 需配置: YYT_DB_PASSWORD / YYT_MCSM_APIKEY / YYT_MCSM_SALT / YYT_SMTP_PASSWORD / YYT_CCW_TOKEN
 DB_CONFIG = {
-    "host": "localhost",
-    "user": "",
-    "password": os.environ.get('YYT_DB_PASSWORD', ''),
-    "database": "",
-    "charset": "utf8mb4"
+    "host": os.environ.get('DB_HOST', 'localhost'),
+    "user": os.environ.get('DB_USERNAME', ''),
+    "password": os.environ.get('DB_PASSWORD', ''),
+    "database": os.environ.get('DB_DATABASE', ''),
+    "charset": os.environ.get('DB_CHARSET', 'utf8mb4')
 }
 
 MCSM_CONFIG = {
-    "base": "http://localhost:23333",
-    "apikey": os.environ.get('YYT_MCSM_APIKEY', ''),
-    "proxy_port": 8185,
-    "salt": os.environ.get('YYT_MCSM_SALT', ''),
-    "panel_suffix": "mcsm.mcyyt.cn",
+    "base": os.environ.get('MCSM_BASE', 'http://localhost:23333'),
+    "apikey": os.environ.get('MCSM_APIKEY', ''),
+    "proxy_port": os.environ.get('MCSM_PROXY_PORT', '8185'),
+    "salt": os.environ.get('MCSM_SALT', ''),
+    "panel_suffix": os.environ.get('MCSM_PANEL_BASEURL', 'mcsm.mcyyt.cn'),
     "sign_window": 300
 }
 
 SMTP_CONFIG = {
-    "host": "smtp.feishu.cn",
-    "port": 465,
-    "user": "team@mcyyt.cn",
-    "password": os.environ.get('YYT_SMTP_PASSWORD', ''),
-    "from_name": "@team / YanYuTing",
-    "from_addr": "team@mcyyt.cn"
+    "host": os.environ.get('SMTP_HOST', 'smtp.feishu.cn'),
+    "port": os.environ.get('SMTP_PORT', 465),
+    "user": os.environ.get('SMTP_USER', ''),
+    "password": os.environ.get('SMTP_PASSWORD', ''),
+    "from_name": os.environ.get('SMTP_FROM_NAME', '@team'),
+    "from_addr": os.environ.get('SMTP_FROM_ADDR', '')
 }
 
 CCW_CONFIG = {
-    "token": os.environ.get('YYT_CCW_TOKEN', ''),
-    "user_id": "",
-    "default_prefix": "uploads"
+    "token": os.environ.get('CCW_TOKEN', ''),
+    "user_id": os.environ.get('CCW_USER_ID', ''),
+    "default_prefix": os.environ.get('CCW_DEFAULT_PREFIX', 'uploads')
 }

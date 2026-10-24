@@ -10,4 +10,4 @@ build/
 *.*~
 *.pyc
 __pycache__/
-Documentation-main/
+.env
